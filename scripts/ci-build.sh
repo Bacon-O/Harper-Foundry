@@ -80,6 +80,7 @@ echo "🏗 Compiling Harper-Kernel ($TARGET_ARCH)..."
 make ARCH="$TARGET_ARCH" \
      $CC_TOOLCHAIN \
      "$CROSS_CMD" \
+     KCFLAGS="$USER_KCFLAGS" \
      KDEB_SOURCENAME="$KDEB_NAME" \
      -j"$FINAL_JOBS" bindeb-pkg
 
