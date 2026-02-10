@@ -6,7 +6,7 @@ IMAGE_NAME="debian-harper-worker"
 # Paths on the OCI Host
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKERFILE="${REPO_ROOT}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
-BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper"
+BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper/storage" # Added /storage to keep root clean
 BUILD_ID=$(date +%Y%m%d_%H%M)
 DIST_OUT="${REPO_ROOT}/dist/build_${BUILD_ID}"
 
@@ -22,7 +22,7 @@ mkdir -p "${DIST_OUT}"
 echo "--- 🛠 Building Docker Image: ${IMAGE_NAME} ---"
 docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE}" "${REPO_ROOT}"
 
-echo "--- 🚀 Starting Build for User ${USER_UID}:${USER_GID} ---"
+echo "--- 🚀 Starting Full Build for User ${USER_UID}:${USER_GID} ---"
 
 # Launch Foundry
 docker run -i \
@@ -35,6 +35,6 @@ docker run -i \
     -v "${DIST_OUT}:/opt/factory/dist" \
     -w "/build" \
     "${IMAGE_NAME}" \
-    bash /opt/factory/scripts/ci-build_slim.sh
+    bash /opt/factory/scripts/ci-build_full.sh # Pointed to the 'full' script
 
 echo "✅ Foundry process complete. Artifacts in: ${DIST_OUT}"
