@@ -15,4 +15,4 @@ jobs:
         run: bash ./start_build.sh
 
       - name: Proving Ground (Test)
-        run: bash ./smoke_test.sh
+        run: bash ./scripts/smoke_test.sh
