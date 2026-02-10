@@ -18,7 +18,7 @@ RUN dpkg --add-architecture amd64 && \
     # Targets: Headers & Libs for BTF/SCX/NTSYNC
     libelf-dev:amd64 libssl-dev:amd64 libncurses-dev:amd64 \
     debhelper:amd64 libc6-dev-i386:amd64 libcap-dev:amd64 \
-    libdw-dev:amd64 libdw-dev:arm64 \
+    libdw-dev:amd64 libdw-dev:arm64 libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64 \
     # Hosts: Critical for menuconfig and header build fixes
     libelf-dev:arm64 libssl-dev:arm64 libcap-dev:arm64 \
     libncurses-dev:arm64 \
@@ -26,7 +26,8 @@ RUN dpkg --add-architecture amd64 && \
     qtbase5-dev  schedtool  wget \
     pahole dwarves zstd lz4 libbpf-dev && \
     apt-get clean
-RUN sudo apt-get install -y --no-install-recommends libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64
+#RUN sudo apt-get install -y --no-install-recommends libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64
+
 # 3. Toolchain Symlinks
 RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
     ln -sf /usr/bin/ld.lld-19 /usr/bin/ld.lld && \
