@@ -1,0 +1,16 @@
+name: Harper Kernel Factory
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows you to trigger it manually from the "Actions" tab
+
+jobs:
+  build-kernel:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Foundry Build
+        # This calls your script that we just perfected
+        run: bash ./start_build.sh
