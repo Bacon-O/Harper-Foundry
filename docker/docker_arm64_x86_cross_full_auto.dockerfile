@@ -15,19 +15,17 @@ RUN dpkg --add-architecture amd64 && \
     dpkg-dev flex bison bc rsync kmod cpio fakeroot lsb-release \
     gcc-x86-64-linux-gnu g++-x86-64-linux-gnu binutils-x86-64-linux-gnu \
     clang-19 lld-19 llvm-19 libclang-19-dev \
-    # Targets: Headers & Libs for BTF/SCX/NTSYNC
+    # Targets: Headers & Libs for BTF/SCX/NTSYNC (x86_64)
     libelf-dev:amd64 libssl-dev:amd64 libncurses-dev:amd64 \
     debhelper:amd64 libc6-dev-i386:amd64 libcap-dev:amd64 \
-    libdw-dev:amd64 libdw-dev:arm64 libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64 \
-    # Hosts: Critical for menuconfig and header build fixes
+    libdw-dev:amd64 libdw-dev:arm64 \
+    # Hosts: Critical for menuconfig and header build fixes (ARM64)
     libelf-dev:arm64 libssl-dev:arm64 libcap-dev:arm64 \
     libncurses-dev:arm64 \
-    ccache  clang  libncurses-dev  lld  llvm  \
-    qtbase5-dev  schedtool  wget \
+    ccache qtbase5-dev \
+    schedtool wget \
     pahole dwarves zstd lz4 libbpf-dev && \
     apt-get clean
-
-#RUN sudo apt-get install -y --no-install-recommends libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64
 
 # 3. Toolchain Symlinks
 RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
@@ -35,14 +33,11 @@ RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
     ln -sf /usr/bin/llvm-ar-19 /usr/bin/llvm-ar
 
 # 4. Pro-Level Environment
+# REMOVED: HOSTCFLAGS, HOSTLDFLAGS, LD_LIBRARY_PATH (Fixes cross-compile pollution)
 ENV ARCH=x86_64 \
     CROSS_COMPILE=x86_64-linux-gnu- \
     LLVM=-19 \
     KCFLAGS="-O2 -march=x86-64-v3 -pipe -DNO_FLOAT128" \
-    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu -DNO_FLOAT128" \
-    HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu -lelf" \
-    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/amd64-linux-gnu:$LD_LIBRARY_PATH" \
-    LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L/usr/lib/amd64-linux-gnu" \
     WINE_NTSYNC=1 \
     SCX_BPF_CPU=v4 \
     RUSTUP_HOME=/usr/local/rustup \
@@ -61,7 +56,6 @@ RUN set -eux; \
 RUN pip3 install --break-system-packages buildbot-worker twisted
 
 WORKDIR /home/buildbot-worker/storage
-#CMD ["/bin/bash"]
 
 # Copy the script to a standard location
 COPY scripts/ci-build_full.sh /usr/local/bin/ci-build_full.sh
