@@ -9,8 +9,8 @@ fi
 # 2. Set the Trap now that $HOST_UID and $CURRENT_DIST_DIR are known
 cleanup_permissions() {
     echo "⚖️ Reclaiming artifact ownership for host user ($HOST_UID)..."
-    # Ensure the directory exists before trying to chown it
     if [ -d "$CURRENT_DIST_DIR" ]; then
+        # This is our safety net if the internal container trap fails
         sudo chown -R "$HOST_UID:$HOST_GID" "$CURRENT_DIST_DIR" 2>/dev/null || true
     fi
 }
@@ -32,14 +32,16 @@ fi
 # 4. Dynamic Execution
 echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
 
+# Note: We pass CONTAINER_OUTPUT_DIR explicitly so ci-build.sh sees it
 docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
     -e HOST_GID="$HOST_GID" \
+    -e CONTAINER_OUTPUT_DIR="/opt/factory/output" \
     -v "${BLOCK_VOL_PATH}:/build" \
     -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
     -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
     -v "${REPO_ROOT}/params:/opt/factory/params:ro" \
-    -v "${CURRENT_DIST_DIR}:${CONTAINER_OUTPUT_DIR}" \
+    -v "${CURRENT_DIST_DIR}:/opt/factory/output" \
     -w "/build" \
     "$IMAGE_NAME" \
     bash "${CONTAINER_SCRIPTS_DIR}/${FOUNDRY_EXEC}" "$@"

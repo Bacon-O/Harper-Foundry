@@ -2,11 +2,13 @@
 set -e
 
 # 1. Load Fuel (Handles params + identity)
+# Sourcing this inside the container ensures we have CONTAINER_OUTPUT_DIR and HOST_UID
 source /opt/factory/scripts/env_setup.sh
 
 # --- The "Hand-off" Trap ---
 cleanup_internal() {
     echo "⚖️ Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
+    # Reclaim everything in the build root AND the output dir
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
 }
@@ -20,7 +22,7 @@ cd "$CONTAINER_BUILD_ROOT"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/
 
-# 3. Dynamic Configuration Strategy
+# 3. Base Configuration Strategy
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
     echo "🐣 Applying base: $BASE_CONFIG"
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" "$BASE_CONFIG"
@@ -30,7 +32,7 @@ else
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 fi
 
-# 4. Layer Performance Tweaks
+# 4. Layer Performance Tweaks (RT + NTSYNC + Tunes)
 echo "💉 Merging Tuning: $TUNING_CONFIG"
 ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
 
@@ -40,29 +42,40 @@ echo "🧹 Stripping Keys and Finalizing Config..."
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
 
-# --- THE FIX ---
-# This resolves all new dependencies from step 4 non-interactively.
-# It also fixes the 'invalid symbol' errors by re-validating the .config
+# REQUIRED: Seal the config to resolve new dependencies non-interactively.
+# This fixes the "Error in reading or end of file" loop.
 make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
-# ----------------
 
 echo "🏗 Compiling Harper-Kernel ($TARGET_ARCH)..."
-# Note: Added ARCH and CC to bindeb-pkg to satisfy dpkg-architecture
 make ARCH="$TARGET_ARCH" \
      "$CC_TOOLCHAIN" \
      "$CROSS_CMD" \
      KDEB_SOURCENAME="$KDEB_NAME" \
      -j"$FINAL_JOBS" bindeb-pkg
 
-# 6. Artifact Collection
+# 6. Artifact Collection (The Directory Fix)
+# Ensure the internal mount point exists
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 
-# Move artifacts from the build root to the output volume
-mv /build/*.deb /build/*.changes /build/*.buildinfo "$CONTAINER_OUTPUT_DIR/" 2>/dev/null || true
+echo "📦 Exporting artifacts to host volume: $CONTAINER_OUTPUT_DIR"
 
-# Collect the specific kernel binary and config
+# Move the Debian packages. Note: bindeb-pkg places them in the parent of the source tree.
+# We look in CONTAINER_BUILD_ROOT (which is /build)
+mv "$CONTAINER_BUILD_ROOT"/*.deb \
+   "$CONTAINER_BUILD_ROOT"/*.changes \
+   "$CONTAINER_BUILD_ROOT"/*.buildinfo \
+   "$CONTAINER_OUTPUT_DIR/" 2>/dev/null || true
+
+# Collect the specific kernel binary
 BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
-[ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+if [ -f "$BZ_PATH" ]; then
+    cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+    echo "🎯 bzImage captured."
+else
+    echo "⚠️ bzImage not found!"
+fi
+
+# Save the final config for the Analysis Audit
 cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
 echo "✅ Smelt Complete."
