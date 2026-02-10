@@ -1,58 +1,83 @@
 #!/bin/bash
 set -e
 
-# 1. Load Fuel
-source /opt/factory/scripts/env_setup.sh
+# ==============================================================================
+#  HARPER-KERNEL FOUNDRY: MAIN SMELTING SCRIPT
+#  "The heat of the forge reveals the strength of the steel."
+# ==============================================================================
+
+# 1. Load Fuel (Environment Variables)
+#    Checks for the setup script, defaults to local vars if missing for testing.
+if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
+    source /opt/factory/scripts/env_setup.sh
+else
+    echo "⚠️  Warning: env_setup.sh not found. Using local defaults."
+    # Fallback defaults for testing without the full pipeline
+    HOST_UID=${HOST_UID:-1000}
+    HOST_GID=${HOST_GID:-1000}
+    CONTAINER_BUILD_ROOT="/build"
+    CONTAINER_OUTPUT_DIR="/opt/factory/dist"
+    CONTAINER_CONFIG_DIR="/opt/factory/configs"
+    KERNEL_SOURCE="linux-source"
+    TARGET_ARCH="x86_64"
+    FINAL_JOBS=$(nproc)
+fi
 
 # --- Cleanup Trap ---
+#    Ensures files created by root (Docker) are owned by the host user (You)
 cleanup_internal() {
-    echo "⚖️ Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
+    echo "⚖️  Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
 }
 trap cleanup_internal EXIT
 
-# --- Auto-Detect Architecture & Pkg-Config ---
-HOST_ARCH=$(uname -m)  # <--- WAS MISSING
-
-if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-    echo "🔧 Cross-Compiling Detected: Using x86_64 wrapper for pkg-config"
-    PKG_CONFIG_TOOL="x86_64-linux-gnu-pkg-config"
-else
-    echo "🔧 Native Build Detected: Using standard pkg-config"
-    PKG_CONFIG_TOOL="pkg-config"
-fi
-
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
-echo "🔧 Verifying packaging tools..."
-apt-get update && apt-get install -y rsync llvm
+# --- Auto-Detect Architecture & Pkg-Config ---
+#    Detects if we are cross-compiling (ARM -> x86) and adjusts tools accordingly.
+HOST_ARCH=$(uname -m)
+
+if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
+    echo "🔧 Cross-Compiling Detected ($HOST_ARCH -> $TARGET_ARCH)"
+    echo "   Using x86_64 wrapper for pkg-config"
+    # Important: Uses the wrapper to prevent pulling ARM64 flags for x86 builds
+    PKG_CONFIG_TOOL="x86_64-linux-gnu-pkg-config"
+else
+    echo "🔧 Native Build Detected ($HOST_ARCH)"
+    PKG_CONFIG_TOOL="pkg-config"
+fi
 
 # 2. Prepare Source
+echo "🔧 Verifying packaging tools..."
+# Ensure we have the tools to patch and link
+apt-get update && apt-get install -y rsync llvm curl patch
+
+mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
+
 echo "📥 Fetching Source: $KERNEL_SOURCE"
+# Pulls the source code defined in your env (e.g., linux/trixie-backports)
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 
 # --- 2.5. Inject Patches (BORE Scheduler) ---
-echo "💉 Injecting BORE Scheduler..."
-# Default label if patching fails or is skipped
-SCHEDULER_LABEL="eevdf"
+echo "💉 Injecting Custom Scheduler..."
+SCHEDULER_LABEL="eevdf" # Default fallback
 
 if [ -n "$BORE_PATCH_URL" ]; then
     echo "   Fetching patch from: $BORE_PATCH_URL"
     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
+        # Try applying patch with fuzzy matching (-F 3)
         if patch -p1 -F 3 < bore.patch; then
             echo "   ✅ Patch applied successfully."
-            SCHEDULER_LABEL="bore"  # <--- Label Updated on Success
+            SCHEDULER_LABEL="bore"
         else
-            echo "   ❌ ERROR: Patch application failed! (Falling back to EEVDF)"
-            # Note: We don't exit 1 here, we let it fall back as per your strategy
+            echo "   ⚠️  Patch failed! Falling back to standard EEVDF scheduler."
         fi
     else
-        echo "   ❌ ERROR: Download failed."
-        exit 1
+        echo "   ❌ ERROR: Download failed. Skipping patch."
     fi
 else
     echo "⏩ No patch URL defined. Skipping injection."
@@ -60,17 +85,26 @@ fi
 
 # 3. Base Configuration
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
-    echo "🐣 Applying base: $BASE_CONFIG"
+    echo "🐣 Applying standard base: $BASE_CONFIG"
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" "$BASE_CONFIG"
 else
     echo "📄 Applying custom base: $BASE_CONFIG"
-    cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
-    make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
+    if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
+        cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
+        make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
+    else
+        echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
+        exit 1
+    fi
 fi
 
 # 4. Tuning
-echo "🧪 Merging Tuning: $TUNING_CONFIG"
-./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
+if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+    ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+else
+    echo "⚠️  Warning: Tuning file not found. Skipping merge."
+fi
 
 # 5. Sanitization
 echo "🧹 Stripping Keys and Finalizing Config..."
@@ -80,7 +114,7 @@ echo "🧹 Stripping Keys and Finalizing Config..."
 make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 
 # --- 6. Versioning Strategy (The Harper Offset) ---
-# 200 = BORE (Preferred) | 100 = EEVDF (Fallback)
+#    Calculates priority: 200 for BORE (Custom), 100 for EEVDF (Standard)
 if [ "$SCHEDULER_LABEL" == "bore" ]; then
     SCHED_PRIORITY="200"
 else
@@ -89,14 +123,21 @@ fi
 
 OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
 TIMESTAMP=$(date +%Y%m%d)
-# Syntax: <DebianVer> +harper. <Priority> . <Label>
+# Syntax: <DebianVer> +harper. <Priority> . <Label> . <Date>
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
 
 echo "🏷️  Harper Identity: $PKG_VERSION"
-echo "    (Base: $OFFICIAL_VER | Priority: $SCHED_PRIORITY)"
 
-# --- 7. Compile ---
-echo "🏗 Compiling Harper-Kernel ($TARGET_ARCH)..."
+# --- 7. Compile (The Critical Fix) ---
+echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
+
+# !!! CRITICAL FIX FOR CROSS-COMPILATION !!!
+# We unset these flags so the x86 linker doesn't try to link against ARM64 host libs.
+# This prevents the "skipping incompatible /usr/lib/aarch64-linux-gnu/libc.so" error.
+unset HOSTCFLAGS
+unset HOSTLDFLAGS
+
+# Fire the Forge
 make ARCH="$TARGET_ARCH" \
      $CC_TOOLCHAIN \
      "$CROSS_CMD" \
@@ -106,19 +147,23 @@ make ARCH="$TARGET_ARCH" \
      KDEB_PKGVERSION="$PKG_VERSION" \
      -j"$FINAL_JOBS" bindeb-pkg
 
-# --- 8. Artifacts ---
+# --- 8. Artifact Collection ---
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
-mv -f "$CONTAINER_BUILD_ROOT"/*.deb \
-      "$CONTAINER_BUILD_ROOT"/*.changes \
-      "$CONTAINER_BUILD_ROOT"/*.buildinfo \
+# Move .deb packages and build info
+mv -f "$CONTAINER_BUILD_ROOT"/../*.deb \
+      "$CONTAINER_BUILD_ROOT"/../*.changes \
+      "$CONTAINER_BUILD_ROOT"/../*.buildinfo \
       "$CONTAINER_OUTPUT_DIR/" 2>/dev/null || true
 
+# Capture the bzImage (Kernel Binary) for Smoke Testing
 BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
 if [ -f "$BZ_PATH" ]; then
     cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+    echo "   🎯 Captured bzImage"
 fi
 
+# Capture the Config for Audit
 cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 echo "✅ Smelt Complete."
