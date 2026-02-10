@@ -18,6 +18,11 @@ jobs:
     outputs:
       args: ${{ steps.set-args.outputs.args }}
     steps:
+      - name: Who am I?
+        run: |
+          echo "User: $(whoami)"
+          echo "UID: $(id -u)"
+          ls -ld
       - name: Checkout Repository
         uses: actions/checkout@v4
       
