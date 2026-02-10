@@ -13,7 +13,7 @@ CC_TOOLCHAIN="LLVM=1 KCFLAGS=\"-march=x86-64-v3 -mtune=x86-64-v3\""
 CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper"
 
-BORE_PATCH_URL="https://github.com/firelzrd/bore-scheduler/blob/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
+BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/refs/heads/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
 
 # --- Kernel Source ---
 KERNEL_SOURCE="linux/trixie-backports"
