@@ -10,6 +10,11 @@ IMAGE_NAME="debian-harper-worker"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKERFILE_PATH="${SCRIPT_DIR}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
 
+# Define the host path to mount
+HOST_BUILD_DATA_PATH="/mnt/build-data/Debian-Harper/worker"
+# Define the container path to mount to
+CONTAINER_BUILD_PATH="/build"
+
 # Check if Dockerfile exists
 if [ ! -f "${DOCKERFILE_PATH}" ]; then
     echo "Error: Dockerfile not found at ${DOCKERFILE_PATH}"
@@ -21,11 +26,6 @@ echo "--- Building Docker image: ${IMAGE_NAME} ---"
 docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
 
 echo "--- Docker image built successfully. ---"
-
-# Define the host path to mount
-HOST_BUILD_DATA_PATH="/mnt/build-data/Debian-Harper/worker"
-# Define the container path to mount to
-CONTAINER_BUILD_PATH="/build"
 
 # Ensure the host build data directory exists
 echo "Ensuring host build directory '${HOST_BUILD_DATA_PATH}' exists..."

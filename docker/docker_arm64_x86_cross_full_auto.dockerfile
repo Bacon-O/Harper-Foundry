@@ -59,10 +59,9 @@ RUN pip3 install --break-system-packages buildbot-worker twisted
 WORKDIR /home/buildbot-worker/storage
 #CMD ["/bin/bash"]
 
-# Inside your Dockerfile
-# Assuming your WORKDIR is /app and you've already cloned the repo
-COPY scripts/ci-build_slim.sh /usr/local/bin/ci-build.sh
-RUN chmod +x /usr/local/bin/ci-build.sh
+# Copy the script to a standard location
+COPY scripts/ci-build_slim.sh /usr/local/bin/ci-build_slim.sh
+RUN chmod +x /usr/local/bin/ci-build_slim.sh
 
-# Use the absolute path for the CMD
-CMD ["/usr/local/bin/ci-build_slim.sh"]
+# Default to bash
+CMD ["/bin/bash"]
