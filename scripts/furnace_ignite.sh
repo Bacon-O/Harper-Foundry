@@ -37,6 +37,7 @@ docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
     -e HOST_GID="$HOST_GID" \
     -e CONTAINER_OUTPUT_DIR="/opt/factory/output" \
+    -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
     -v "${BLOCK_VOL_PATH}:/build" \
     -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
     -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
