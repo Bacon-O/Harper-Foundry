@@ -38,8 +38,8 @@ RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
 ENV ARCH=x86_64 \
     CROSS_COMPILE=x86_64-linux-gnu- \
     LLVM=-19 \
-    KCFLAGS="-O2 -march=x86-64-v3 -pipe" \
-    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu" \
+    KCFLAGS="-O2 -march=x86-64-v3 -pipe -DNO_FLOAT128" \
+    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu -DNO_FLOAT128" \
     HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu -lelf" \
     LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/amd64-linux-gnu:$LD_LIBRARY_PATH" \
     LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L/usr/lib/amd64-linux-gnu" \
