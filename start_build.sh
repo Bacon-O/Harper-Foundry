@@ -19,15 +19,23 @@ mkdir -p "${HOST_BUILD_DATA_PATH}"
 echo "--- Starting Build in Background ---"
 
 # We mount your repo folders to /opt/factory so they are easy to find
-CONTAINER_ID=$(docker run -d \
-    --rm \
-    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
-    -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
-    -v "$(pwd)/configs:/opt/factory/configs:ro" \
-    -w "${CONTAINER_BUILD_PATH}" \
-    "${IMAGE_NAME}" \
-    bash #"/opt/factory/scripts/ci-build_slim.sh"
-    )
+#CONTAINER_ID=$(docker run -d \
+#    --rm \
+#    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
+#    -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
+#    -v "$(pwd)/configs:/opt/factory/configs:ro" \
+#    -w "${CONTAINER_BUILD_PATH}" \
+#    "${IMAGE_NAME}" \
+#    bash #"/opt/factory/scripts/ci-build_slim.sh"
+#    )
+
+
+docker run -it --rm \
+    -v "$(pwd)/scripts:/opt/scripts" \
+    -v "$(pwd)/configs:/opt/configs" \
+    -v "/mnt/build-data/Debian-Harper/worker:/build" \
+    -w /build \
+    debian-harper-worker /bin/bash
 
 echo "🚀 Build started! Container ID: ${CONTAINER_ID}"
 echo "📝 Run: docker logs -f ${CONTAINER_ID}"
