@@ -30,19 +30,25 @@ cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 echo "💉 Injecting BORE Scheduler..."
 
 # Define the Patch URL (Verify this version matches your kernel version!)
-BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/linux-6.18/0001-bore.patch"
+echo "   Fetching patch from: $BORE_PATCH_URL"
 
-if curl -fLo bore.patch "$BORE_PATCH_URL"; then
-    echo "   ✅ Patch downloaded."
-    if patch -p1 < bore.patch; then
-        echo "   ✅ Patch applied successfully."
+# --- 2.5. Inject Patches ---
+if [ -n "$BORE_PATCH_URL" ]; then
+    echo "💉 Injecting Patch: $BORE_PATCH_URL"
+    if curl -fLo bore.patch "$BORE_PATCH_URL"; then
+        # Apply with fuzz factor 3 to handle minor offsets
+        if patch -p1 -F 3 < bore.patch; then
+            echo "   ✅ Patch applied successfully."
+        else
+            echo "   ❌ ERROR: Patch application failed!"
+            exit 1
+        fi
     else
-        echo "   ❌ ERROR: Patch application failed!"
+        echo "   ❌ ERROR: Download failed."
         exit 1
     fi
 else
-    echo "   ❌ ERROR: Failed to download BORE patch from $BORE_PATCH_URL"
-    exit 1
+    echo "⏩ No patch URL defined. Skipping injection."
 fi
 
 # 3. Base Configuration Strategy
