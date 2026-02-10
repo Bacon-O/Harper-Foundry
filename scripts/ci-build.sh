@@ -78,7 +78,7 @@ make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 echo "🏗 Compiling Harper-Kernel ($TARGET_ARCH)..."
 # We inject KDEB_SOURCENAME to ensure the .deb files have your custom name
 make ARCH="$TARGET_ARCH" \
-     "$CC_TOOLCHAIN" \
+     $CC_TOOLCHAIN \
      "$CROSS_CMD" \
      KDEB_SOURCENAME="$KDEB_NAME" \
      -j"$FINAL_JOBS" bindeb-pkg
