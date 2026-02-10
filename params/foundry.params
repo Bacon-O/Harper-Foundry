@@ -1,0 +1,3 @@
+IMAGE_NAME="debian-harper-worker"
+DOCKERFILE="${REPO_ROOT}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
+BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper"

@@ -1,8 +1,9 @@
 name: Harper Kernel Factory
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: # Allows you to trigger it manually from the "Actions" tab
+    branches:
+      - main  # Automatic trigger whenever you push to main
+  workflow_dispatch: # Allows manual trigger on ANY branch via the UI
 
 jobs:
   kernel-pipeline:
