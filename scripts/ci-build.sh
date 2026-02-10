@@ -17,6 +17,10 @@ trap cleanup_internal EXIT
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
+echo "🔧 Verifying packaging tools..."
+apt-get update && apt-get install -y rsync
+apt-get update && apt-get install -y rsync llvm
+
 # 2. Prepare Source
 cd "$CONTAINER_BUILD_ROOT"
 echo "📥 Fetching Source: $KERNEL_SOURCE"
