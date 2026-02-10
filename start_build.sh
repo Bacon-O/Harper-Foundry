@@ -6,20 +6,26 @@ set -e
 # Define image name
 IMAGE_NAME="debian-harper-worker"
 
-# Get the directory where the script is located
+# Get the directory where the script is located, and define the relative and full paths to the Dockerfile
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKERFILE_PATH="${SCRIPT_DIR}/docker/docker_arm64_x86_cross.dockerfile"
+DOCKERFILE_RELATIVE_PATH="docker/docker_arm64_x86_cross.dockerfile"
+DOCKERFILE_FULL_PATH="${SCRIPT_DIR}/${DOCKERFILE_RELATIVE_PATH}"
 
 # Check if Dockerfile exists
-if [ ! -f "${DOCKERFILE_PATH}" ]; then
-    echo "Error: Dockerfile not found at ${DOCKERFILE_PATH}"
+if [ ! -f "${DOCKERFILE_FULL_PATH}" ]; then
+    echo "Error: Dockerfile not found at ${DOCKERFILE_FULL_PATH}"
     echo "Please create a Dockerfile in the same directory as this script."
     exit 1
 fi
 
 echo "--- Building Docker image: ${IMAGE_NAME} ---"
-# Build the Docker image. The context for the build is the script's directory (${SCRIPT_DIR}).
-docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
+# To ensure the Dockerfile is found correctly and the build context is set,
+# we'll change directory to the SCRIPT_DIR and then run the build command in a subshell.
+(
+    cd "${SCRIPT_DIR}" || exit 1 # Change to script directory, exit if failed
+    # Build the Docker image. The context is '.' (current directory), and -f specifies the Dockerfile relative to it.
+    docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_RELATIVE_PATH}" .
+)
 
 echo "--- Docker image built successfully. ---"
 
