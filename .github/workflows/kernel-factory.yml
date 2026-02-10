@@ -1,19 +1,81 @@
 name: Harper Kernel Factory
 on:
   push:
-    branches:
-      - main  # Automatic trigger whenever you push to main
-  workflow_dispatch: # Allows manual trigger on ANY branch via the UI
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      config_file:
+        description: 'Blueprint to use'
+        default: 'params/foundry.params'
+      test_run:
+        description: 'Toggle Tinyconfig Test'
+        type: boolean
+        default: false
 
 jobs:
-  kernel-pipeline:
+  preheat:
+    runs-on: self-hosted
+    outputs:
+      args: ${{ steps.set-args.outputs.args }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure Arguments
+        id: set-args
+        run: |
+          ARGS="--config-file ${{ github.event.inputs.config_file || 'params/foundry.params' }}"
+          [[ "${{ github.event.inputs.test_run }}" == "true" ]] && ARGS="$ARGS --test-run"
+          echo "args=$ARGS" >> $GITHUB_OUTPUT
+      
+      - name: Charge Audit
+        run: bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
+
+  smelt:
+    needs: preheat
     runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      
+      - name: Ignition
+        run: bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
 
-      - name: Foundry (Build)
-        run: bash ./start_build.sh
+      # - name: Archive Build Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: kernel-build-${{ github.run_id }}
+      #     path: |
+      #       dist/build_*/bzImage
+      #       dist/build_*/kernel.config
+      #       dist/build_*/*.deb
 
-      - name: Proving Ground (Test)
-        run: bash ./scripts/smoke_test.sh
+  analysis:
+    needs: [preheat, smelt]
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Material QA
+        run: |
+          # Source env_setup to check for BYPASS_QA logic
+          source ./scripts/env_setup.sh ${{ needs.preheat.outputs.args }}
+          if [ "$BYPASS_QA" == "true" ]; then
+            echo "🛡️ QA Bypassed via Configuration"
+          else
+            bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
+          fi
+
+      # - name: Upload QA Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: qa-report-${{ github.run_id }}
+      #     path: dist/build_*/analysis.log
+
+  cleanup:
+    needs: [preheat, analysis]
+    if: always() 
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Purge Slag
+        run: bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}

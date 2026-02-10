@@ -1,46 +1,20 @@
 #!/bin/bash
 set -e
 
-# === CONFIGURATION ===
-# Paths on the OCI Host
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 1. Fueling
+source ./scripts/env_setup.sh "$@"
 
-# Load external parameters
-if [ -f "${REPO_ROOT}/params/foundry.params" ]; then
-    source "${REPO_ROOT}/params/foundry.params"
+# 2. Preheat
+bash ./scripts/furnace_preheat.sh "$@"
+
+# 3. Ignition
+bash ./scripts/furnace_ignite.sh "$@"
+
+# 4. Material Analysis (Conditional)
+if [ "$BYPASS_QA" == "true" ]; then
+    echo "⏩ Skipping Material Analysis (Bypass Active)."
 else
-    echo "❌ Error: params/foundry.params not found."
-    exit 1
+    bash ./scripts/material_analysis.sh "$@"
 fi
 
-BUILD_ID=$(date +%Y%m%d_%H%M)
-DIST_OUT="${REPO_ROOT}/dist/build_${BUILD_ID}"
-
-# Identity Injection (Dynamic)
-USER_UID=$(id -u)
-USER_GID=$(id -g)
-# =====================
-
-# Ensure directories exist
-mkdir -p "${BLOCK_VOL_PATH}"
-mkdir -p "${DIST_OUT}"
-
-echo "--- 🛠 Building Docker Image: ${IMAGE_NAME} ---"
-docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE}" "${REPO_ROOT}"
-
-echo "--- 🚀 Starting Build for User ${USER_UID}:${USER_GID} ---"
-
-# Launch Foundry
-docker run -i \
-    --rm \
-    -e HOST_UID="$USER_UID" \
-    -e HOST_GID="$USER_GID" \
-    -v "${BLOCK_VOL_PATH}:/build" \
-    -v "${REPO_ROOT}/scripts:/opt/factory/scripts:ro" \
-    -v "${REPO_ROOT}/configs:/opt/factory/configs:ro" \
-    -v "${DIST_OUT}:/opt/factory/dist" \
-    -w "/build" \
-    "${IMAGE_NAME}" \
-    bash /opt/factory/scripts/ci-build_slim.sh
-
-echo "✅ Foundry process complete. Artifacts in: ${DIST_OUT}"
+echo "✨ Foundry cycle complete."

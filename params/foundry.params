@@ -1,3 +1,67 @@
+# ==============================================================================
+# HARPER KERNEL FOUNDRY: BLUEPRINT CONFIGURATION
+# ==============================================================================
+
+# --- Foundry Execution Logic ---
+# The script inside your scripts/ folder that Docker will execute.
+# Default: "ci-build.sh" (Kernel) | Example: "scx-build.sh" (Schedulers)
+FOUNDRY_EXEC="ci-build.sh"
+
+# --- Target Specifications ---
+TARGET_ARCH="x86_64"
+CC_TOOLCHAIN="LLVM=1"
+CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
+KDEB_NAME="linux-upstream-harper"
+
+# --- Kernel Source ---
+KERNEL_SOURCE="linux/trixie-backports"
+
+# --- Performance & Parallelism ---
+# Number of CPU cores for the smelt. 
+# Leave empty ("") to use all available cores (nproc default).
+FOUNDRY_NPROC=""
+
+# --- Build Strategy ---
+# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+BASE_CONFIG="defconfig"
+TUNING_CONFIG="harper_tunes.config"
+
+# --- Quality Assurance (QA) ---
+# Set to "true" to skip the material_analysis.sh stage entirely
+BYPASS_QA="false"
+
+# Set to "false" to skip QEMU boot testing
+ENABLE_QEMU_TESTS="false"
+
+# Chemical Audit: Exact internal Kconfig names to verify
+CHECK_LIST=(
+    "CONFIG_WINE_NTSYNC=y"
+    "CONFIG_MZEN3=y"
+    "CONFIG_PREEMPT_RT=y"
+)
+
+# VM Proving Ground Specs
+VM_MEM="1G"
+VM_CORES="4"
+VM_TIMEOUT="30s"
+
+# --- Pathing & Identity ---
+# This matches the mount point on your OCI ARM instance
+BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+HOST_DIST_BASE="${HOST_REPO_ROOT}/dist"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Image Configuration ---
+# Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
+FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_full_auto.dockerfile"
 IMAGE_NAME="debian-harper-worker"
-DOCKERFILE="${REPO_ROOT}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
-BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper"
+
+# --- Container Internal Paths (Do not change unless Dockerfile changes) ---
+CONTAINER_BUILD_ROOT="/build"
+CONTAINER_OUTPUT_DIR="/opt/factory/output"
+CONTAINER_CONFIG_DIR="/opt/factory/configs"
+CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
