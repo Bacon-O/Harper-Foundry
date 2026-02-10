@@ -22,7 +22,7 @@ echo "--- Starting Build in Background ---"
 
 # 1. Remove the '#' so the script actually executes
 # 2. Use 'bash /opt/factory/scripts/ci-build_slim.sh' as the command
-CONTAINER_ID=$(docker run -d \
+CONTAINER_ID=$(docker run -i \
     --rm \
     -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
     -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
