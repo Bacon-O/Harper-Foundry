@@ -3,10 +3,11 @@
 # Base path where the Foundry drops the 'dist' folder
 BASE_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper/dist"
 
-# Audit Requirements: What MUST be in the .config for a "Pass"
+# Audit Requirements: Exact internal Kconfig names
+# If these are MISSING, ensure your harper_tunes.config has the right 'infrastructure' flags.
 CHECK_LIST=(
     "CONFIG_WINE_NTSYNC=y"
-    "CONFIG_ZEN3=y"
+    "CONFIG_MZEN3=y"
     "CONFIG_PREEMPT_RT=y"
 )
 
@@ -15,7 +16,7 @@ VM_MEM="1G"
 VM_CORES="4"
 TIMEOUT_VAL="30s"
 
-# Derived Variables (Internal Logic)
+# Derived Variables (Find the most recent build folder)
 LATEST_BUILD=$(ls -td "${BASE_PATH}"/build_*/ 2>/dev/null | head -n 1 | sed 's/\/*$//')
 # ==========================
 
@@ -27,7 +28,7 @@ fi
 
 # Set specific file paths
 LOG_OUT="${LATEST_BUILD}/smoke_test_$(date +%Y%m%d_%H%M).log"
-KERNEL_IMAGE=$(find "${LATEST_BUILD}" -name "bzImage" -o -name "vmlinuz*" | head -n 1)
+KERNEL_IMAGE=$(find "${LATEST_BUILD}" -name "bzImage" | head -n 1)
 CONFIG_FILE="${LATEST_BUILD}/kernel.config"
 
 echo "--- 🕵️ Harper Proving Ground: Smoke Test ---"
@@ -53,11 +54,40 @@ fi
 # --- STAGE 2: BOOT TEST ---
 echo "🚀 Stage 2: Spawning x86_64 Virtual Machine..."
 if [ ! -f "$KERNEL_IMAGE" ]; then
-    echo "❌ ERROR: No bootable kernel image found at $KERNEL_IMAGE"
+    echo "❌ ERROR: No bzImage found at $KERNEL_IMAGE"
     exit 1
 fi
 
-[Image of a diagram showing the hierarchy of a host OS, Docker container, and an emulated QEMU virtual machine for cross-architecture testing]
 
-# Execution via Host QEMU
-timeout --foreground "$TIMEOUT_VAL" qemu-system-
+
+# Clean Execution: 'tr' filters out binary/ANSI garbage for a clean log
+timeout --foreground "$TIMEOUT_VAL" qemu-system-x86_64 \
+    -kernel "$KERNEL_IMAGE" \
+    -m "$VM_MEM" \
+    -smp "$VM_CORES" \
+    -nographic \
+    -serial mon:stdio \
+    -no-reboot \
+    -append "console=ttyS0,115200 earlyprintk=serial,ttyS0,115200 loglevel=7 panic=-1" \
+    | tr -cd '\11\12\15\40-\176' | tee "$LOG_OUT" || true
+
+# --- STAGE 3: ANALYSIS ---
+echo "------------------------------------------"
+# Check for the Linux Banner
+if grep -q "Linux version" "$LOG_OUT"; then
+    echo "✅ BOOT: SUCCESS"
+else
+    echo "❌ BOOT: FAILED (No kernel banner found in logs)"
+    exit 1
+fi
+
+# Check for NTSYNC Initialization
+if grep -iq "ntsync: initialized" "$LOG_OUT"; then
+    echo "🍷 NTSYNC: DRIVER READY"
+else
+    echo "🚨 NTSYNC: NOT FOUND IN DMESG"
+    exit 1
+fi
+
+echo "✅ FINAL STATUS: HARPER-CERTIFIED BUILD."
+echo "------------------------------------------"
