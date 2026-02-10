@@ -1,14 +1,23 @@
 #!/bin/bash
 set -e
 
-# 1. Ensure Environment is loaded
+# 1. MUST Load Environment First to define variables
 if [ -z "$IMAGE_NAME" ]; then
     source "$(dirname "$0")/env_setup.sh" "$@"
 fi
 
-echo "🔥 Igniting the Furnace..."
+# 2. Set the Trap now that $HOST_UID and $CURRENT_DIST_DIR are known
+cleanup_permissions() {
+    echo "⚖️ Reclaiming artifact ownership for host user ($HOST_UID)..."
+    # Ensure the directory exists before trying to chown it
+    if [ -d "$CURRENT_DIST_DIR" ]; then
+        sudo chown -R "$HOST_UID:$HOST_GID" "$CURRENT_DIST_DIR" 2>/dev/null || true
+    fi
+}
+trap cleanup_permissions EXIT
 
-# 2. Image Preparation
+# 3. Image Preparation
+echo "🔥 Igniting the Furnace..."
 if [ "$FOUNDRY_IMAGE_TYPE" == "build" ]; then
     BUILD_ARGS=""
     [ "$DOCKER_REBUILD" == "true" ] && BUILD_ARGS="--no-cache"
@@ -20,10 +29,9 @@ else
     docker tag "$REMOTE_IMAGE_REF" "$IMAGE_NAME"
 fi
 
+# 4. Dynamic Execution
 echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
 
-# 3. Dynamic Execution
-# Ensure the params folder is mounted so the container can re-source env_setup.sh
 docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
     -e HOST_GID="$HOST_GID" \
