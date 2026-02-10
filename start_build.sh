@@ -18,8 +18,7 @@ if [ ! -f "${DOCKERFILE_PATH}" ]; then
 fi
 
 echo "--- Building Docker image: ${IMAGE_NAME} ---"
-cd "${SCRIPT_DIR}"
-docker build -t "${IMAGE_NAME}" -f docker/docker_arm64_x86_cross.dockerfile .
+docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
 
 echo "--- Docker image built successfully. ---"
 
