@@ -1,17 +1,34 @@
-# --- Core Architecture ---
+# ==============================================================================
+# HARPER FOUNDRY: TINYCONFIG INJECTION LAYER
+# ==============================================================================
+
+# --- 1. Core Identity (Keep it x86_64) ---
+# tinyconfig tries to kill everything; we must force it to remain 64-bit.
 CONFIG_64BIT=y
 CONFIG_X86_64=y
 CONFIG_X86=y
+
+# --- 2. Dependency Gatekeepers (The "Keys") ---
+# HAS_IOMEM: Required for hardware mapping (Prereq for NTSYNC)
 CONFIG_HAS_IOMEM=y
 
-# --- Audit Requirements ---
-# NT Sync Support
+# MISC_DEVICES: The "Door" to the drivers/misc folder. 
+# If this is 'n', NTSYNC is invisible.
+CONFIG_MISC_DEVICES=y
+
+# EXPERT: Unlocks advanced options like PREEMPT_RT
+CONFIG_EXPERT=y
+
+# --- 3. The NTSYNC Stack (Audit Target) ---
+# The primitive driver itself
 CONFIG_NTSYNC=y
+# The Wine compatibility interface (This is what material_analysis checks)
 CONFIG_WINE_NTSYNC=y
 
-# Processor Optimization
+# --- 4. Processor Optimization (Audit Target) ---
+# Optimizes the binary for Zen 3 architecture
 CONFIG_MZEN3=y
 
-# Real-Time Preemption
-CONFIG_EXPERT=y
+# --- 5. Real-Time Preemption (Audit Target) ---
+# Forces the kernel into fully preemptible mode
 CONFIG_PREEMPT_RT=y
