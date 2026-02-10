@@ -8,7 +8,7 @@ IMAGE_NAME="debian-harper-worker"
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKERFILE_PATH="${SCRIPT_DIR}/docker/docker_arm64_x86_cross.dockerfile"
+DOCKERFILE_PATH="${SCRIPT_DIR}docker/docker_arm64_x86_cross.dockerfile"
 
 # Check if Dockerfile exists
 if [ ! -f "${DOCKERFILE_PATH}" ]; then
