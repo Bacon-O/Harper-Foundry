@@ -58,8 +58,8 @@ RUN pip3 install --break-system-packages buildbot-worker twisted
 WORKDIR /home/buildbot-worker/storage
 
 # Copy the script to a standard location
-COPY scripts/ci-build_full.sh /usr/local/bin/ci-build_full.sh
-RUN chmod +x /usr/local/bin/ci-build_full.sh
+COPY scripts/ci-build_slim.sh /usr/local/bin/ci-build_slim.sh
+RUN chmod +x /usr/local/bin/ci-build_slim.sh
 
 # Default to bash
 CMD ["/bin/bash"]
