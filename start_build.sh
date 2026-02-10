@@ -8,24 +8,17 @@ IMAGE_NAME="debian-harper-worker"
 
 # Get the directory where the script is located, and define the relative and full paths to the Dockerfile
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKERFILE_RELATIVE_PATH="docker/docker_arm64_x86_cross.dockerfile"
-DOCKERFILE_FULL_PATH="${SCRIPT_DIR}/${DOCKERFILE_RELATIVE_PATH}"
+DOCKERFILE_PATH="${SCRIPT_DIR}/docker/docker_arm64_x86_cross.dockerfile"
 
 # Check if Dockerfile exists
-if [ ! -f "${DOCKERFILE_FULL_PATH}" ]; then
-    echo "Error: Dockerfile not found at ${DOCKERFILE_FULL_PATH}"
-    echo "Please create a Dockerfile in the same directory as this script."
+if [ ! -f "${DOCKERFILE_PATH}" ]; then
+    echo "Error: Dockerfile not found at ${DOCKERFILE_PATH}"
+    echo "Please ensure the Dockerfile exists at the specified path."
     exit 1
 fi
 
 echo "--- Building Docker image: ${IMAGE_NAME} ---"
-# To ensure the Dockerfile is found correctly and the build context is set,
-# we'll change directory to the SCRIPT_DIR and then run the build command in a subshell.
-(
-    cd "${SCRIPT_DIR}" || exit 1 # Change to script directory, exit if failed
-    # Build the Docker image. The context is '.' (current directory), and -f specifies the Dockerfile relative to it.
-    docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_RELATIVE_PATH}" .
-)
+docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
 
 echo "--- Docker image built successfully. ---"
 
@@ -33,13 +26,6 @@ echo "--- Docker image built successfully. ---"
 HOST_BUILD_DATA_PATH="/mnt/build-data/Debian-Harper/worker"
 # Define the container path to mount to
 CONTAINER_BUILD_PATH="/build"
-
-# Check if the host mount path exists
-if [ ! -d "${HOST_BUILD_DATA_PATH}" ]; then
-    echo "Warning: Host mount path '${HOST_BUILD_DATA_PATH}' does not exist."
-    echo "The Docker container might not find the expected data."
-    # Optionally, you could exit here if the path is critical.
-fi
 
 # Ensure the host build data directory exists
 echo "Ensuring host build directory '${HOST_BUILD_DATA_PATH}' exists..."
@@ -52,6 +38,6 @@ echo "Mounting host path '${HOST_BUILD_DATA_PATH}' to container path '${CONTAINE
 # -it: Interactive and pseudo-TTY allocation (for a shell)
 # --rm: Automatically remove the container when it exits
 # -v: Mount a volume
-docker run -it --rm -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" "${IMAGE_NAME}" bash
+docker run -it --rm -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" -w "${CONTAINER_BUILD_PATH}" "${IMAGE_NAME}" bash
 
 echo "--- Docker container exited. ---"
