@@ -26,7 +26,7 @@ RUN dpkg --add-architecture amd64 && \
     qtbase5-dev  schedtool  wget \
     pahole dwarves zstd lz4 libbpf-dev && \
     apt-get clean
-
+RUN sudo apt-get install -y --no-install-recommends libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64
 # 3. Toolchain Symlinks
 RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
     ln -sf /usr/bin/ld.lld-19 /usr/bin/ld.lld && \
