@@ -78,8 +78,15 @@ if [ -f "$PARAMS_FILE" ]; then
     export DOCKER_REBUILD="$DOCKER_REBUILD"
 
     # 6. Identity Logic
-    export HOST_UID=${FOUNDRY_UID:-$(id -u)}
-    export HOST_GID=${FOUNDRY_GID:-$(id -g)}
+    # Only calculate if not already provided by the host environment
+    export HOST_UID=${HOST_UID:-$(id -u)}
+    export HOST_GID=${HOST_GID:-$(id -g)}
+
+    # (Optional) If you want to use params-file overrides as a fallback:
+    [ -n "$FOUNDRY_UID" ] && export HOST_UID="$FOUNDRY_UID"
+    [ -n "$FOUNDRY_GID" ] && export HOST_GID="$FOUNDRY_GID"
+
+echo "👤 Identity: $HOST_UID:$HOST_GID"
     
     # 7. Image Source Detection
     if [[ -f "${REPO_ROOT}/${FOUNDRY_IMAGE}" ]]; then
@@ -93,10 +100,17 @@ if [ -f "$PARAMS_FILE" ]; then
         export REMOTE_IMAGE_REF="$FOUNDRY_IMAGE"
     fi
 
-    # 8. Metadata
-    export BUILD_ID=$(date +%Y%m%d_%H%M)
+    # 8. Metadata (Anchor the BUILD_ID to the GitHub Run)
+    if [ -n "$GITHUB_RUN_ID" ]; then
+        export BUILD_ID="gh_${GITHUB_RUN_ID}"
+    else
+        export BUILD_ID=$(date +%Y%m%d_%H%M)
+    fi
+
     export CURRENT_DIST_DIR="${HOST_DIST_BASE}/build_${BUILD_ID}"
+    mkdir -p "$CURRENT_DIST_DIR"
     
+    echo "📂 Artifact Target: $CURRENT_DIST_DIR"    
     echo "✅ Environment fueled for $TARGET_ARCH build."
 else
     echo "❌ Error: $PARAMS_FILE not found!"
