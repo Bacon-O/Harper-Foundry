@@ -16,26 +16,20 @@ docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
 
 mkdir -p "${HOST_BUILD_DATA_PATH}"
 
+# ... (rest of your setup above stays the same)
+
 echo "--- Starting Build in Background ---"
 
-# We mount your repo folders to /opt/factory so they are easy to find
-#CONTAINER_ID=$(docker run -d \
-#    --rm \
-#    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
-#    -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
-#    -v "$(pwd)/configs:/opt/factory/configs:ro" \
-#    -w "${CONTAINER_BUILD_PATH}" \
-#    "${IMAGE_NAME}" \
-#    bash #"/opt/factory/scripts/ci-build_slim.sh"
-#    )
-
-
-docker run -it --rm \
-    -v "$(pwd)/scripts:/opt/scripts" \
-    -v "$(pwd)/configs:/opt/configs" \
-    -v "/mnt/build-data/Debian-Harper/worker:/build" \
-    -w /build \
-    debian-harper-worker /bin/bash
+# 1. Remove the '#' so the script actually executes
+# 2. Use 'bash /opt/factory/scripts/ci-build_slim.sh' as the command
+CONTAINER_ID=$(docker run -d \
+    --rm \
+    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
+    -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
+    -v "$(pwd)/configs:/opt/factory/configs:ro" \
+    -w "${CONTAINER_BUILD_PATH}" \
+    "${IMAGE_NAME}" \
+    bash /opt/factory/scripts/ci-build_slim.sh)
 
 echo "🚀 Build started! Container ID: ${CONTAINER_ID}"
 echo "📝 Run: docker logs -f ${CONTAINER_ID}"
