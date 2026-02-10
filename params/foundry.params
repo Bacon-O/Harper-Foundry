@@ -9,7 +9,7 @@ FOUNDRY_EXEC="ci-build.sh"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
-CC_TOOLCHAIN="LLVM=1"
+CC_TOOLCHAIN="LLVM=1 KCFLAGS=\"-march=x86-64-v3 -mtune=x86-64-v3\""
 CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper"
 
@@ -36,7 +36,8 @@ ENABLE_QEMU_TESTS="false"
 # Chemical Audit: Exact internal Kconfig names to verify
 CHECK_LIST=(
     "CONFIG_WINE_NTSYNC=y"
-    "CONFIG_MZEN3=y"
+    "CONFIG_SCHED_BORE=y"
+    "CONFIG_MCORE2=y"
     "CONFIG_PREEMPT_RT=y"
 )
 
