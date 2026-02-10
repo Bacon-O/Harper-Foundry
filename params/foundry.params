@@ -11,7 +11,7 @@ FOUNDRY_EXEC="ci-build.sh"
 TTARGET_ARCH="x86_64"
 # 1. The Switch (Selects Clang)
 CC_TOOLCHAIN="LLVM=1"
-export KCFLAGS="-march=x86-64-v3 -mtune=x86-64-v3"
+KCFLAGS="-march=x86-64-v3 -mtune=x86-64-v3"
 CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper"
 
