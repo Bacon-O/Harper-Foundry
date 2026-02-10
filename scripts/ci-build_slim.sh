@@ -2,12 +2,9 @@
 set -e
 
 # === CONFIGURATION ===
-# Internal Container Paths
 TUNING_FILE="/opt/factory/configs/harper_tunes.config"
 BUILD_ROOT="/build"
 DIST_DIR="/opt/factory/dist"
-
-# Build Parameters
 KERNEL_SOURCE="linux/trixie-backports"
 ARCH_TARGET="x86_64"
 CC_TOOLCHAIN="LLVM=1"
@@ -25,44 +22,37 @@ cd "$BUILD_ROOT"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/
 
-# 2. Baseline
-echo "🐣 Generating fresh tiny baseline..."
+# 2. Baseline & Layer Tweaks
+echo "🐣 Generating tiny baseline & merging tweaks..."
 make ARCH="$ARCH_TARGET" "$CC_TOOLCHAIN" tinyconfig
-
-# 3. Layer Tweaks
-echo "🔥 Merging Harper Tuning tweaks (NTSYNC/Zen3)..."
 ./scripts/kconfig/merge_config.sh -m .config "$TUNING_FILE"
 
-# 4. Signing Cleanup
+# 3. Signing Cleanup
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
 
-# 5. Compile
+# 4. Compile
 echo "🏗 Compiling Harper-Kernel ($ARCH_TARGET Cross-Build)..."
 make ARCH="$ARCH_TARGET" "$CC_TOOLCHAIN" olddefconfig
-make ARCH="$ARCH_TARGET" \
-     "$CC_TOOLCHAIN" \
-     "$CROSS_CMD" \
-     -j$(nproc) bindeb-pkg
+make ARCH="$ARCH_TARGET" "$CC_TOOLCHAIN" "$CROSS_CMD" -j$(nproc) bindeb-pkg
 
-# 6. Artifact Collection
+# 5. Artifact Collection
 echo "📦 Collecting artifacts..."
 mkdir -p "$DIST_DIR"
 
-if ls /build/*.deb 1> /dev/null 2>&1; then
-    find /build -maxdepth 1 \( -name "*.deb" -o -name "*.changes" -o -name "*.buildinfo" \) -exec mv {} "$DIST_DIR/" \;
-    
-    # Apply dynamic permissions
-    chown -R "$FINAL_UID:$FINAL_GID" "$DIST_DIR"
-    echo "📦 Artifacts secured in $DIST_DIR"
+# --- NEW: Rescue the bzImage before cleanup ---
+# We look inside the newly built source tree for the bootable image
+BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
+if [ -f "$BZ_PATH" ]; then
+    cp "$BZ_PATH" /build/bzImage
+    echo "🎯 Captured bzImage for smoke testing."
 else
-    echo "❌ ERROR: No .deb files found in /build!"
-    exit 1
+    echo "⚠️ Warning: bzImage not found in arch/x86/boot/"
 fi
 
-# 7. Cleanup
-echo "🧹 Cleaning up source tree..."
-rm -rf "$BUILD_ROOT/linux-"*/
+# Copy the final .config for the audit script to read
+cp .config /build/kernel.config
 
-echo "✅ Success! Build complete."
+# Move everything from /build to the timestamped dist folder
+if ls /build/*.deb 1> /dev/null 2>&1; then

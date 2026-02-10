@@ -5,12 +5,14 @@ on:
   workflow_dispatch: # Allows you to trigger it manually from the "Actions" tab
 
 jobs:
-  build-kernel:
+  kernel-pipeline:
     runs-on: self-hosted
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Execute Foundry Build
-        # This calls your script that we just perfected
+      - name: Foundry (Build)
         run: bash ./start_build.sh
+
+      - name: Proving Ground (Test)
+        run: bash ./smoke_test.sh
