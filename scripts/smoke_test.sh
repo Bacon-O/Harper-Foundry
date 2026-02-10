@@ -1,8 +1,7 @@
 #!/bin/bash
 # === TEST CONFIGURATION ===
 # Base path where the Foundry drops the 'dist' folder
-BASE_PATH="/mnt/build-data/github_work/Debian-Harper/dist"
-LATEST_BUILD=$(ls -td "${BASE_PATH}"/build_*/ 2>/dev/null | head -n 1)
+BASE_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper/dist"
 
 # Audit Requirements: What MUST be in the .config for a "Pass"
 CHECK_LIST=(
@@ -15,6 +14,9 @@ CHECK_LIST=(
 VM_MEM="1G"
 VM_CORES="4"
 TIMEOUT_VAL="30s"
+
+# Derived Variables (Internal Logic)
+LATEST_BUILD=$(ls -td "${BASE_PATH}"/build_*/ 2>/dev/null | head -n 1 | sed 's/\/*$//')
 # ==========================
 
 # 1. Validation of Build Directory
@@ -23,10 +25,10 @@ if [ -z "$LATEST_BUILD" ]; then
     exit 1
 fi
 
-# Set derived paths
-LOG_OUT="${LATEST_BUILD}smoke_test_$(date +%Y%m%d_%H%M).log"
+# Set specific file paths
+LOG_OUT="${LATEST_BUILD}/smoke_test_$(date +%Y%m%d_%H%M).log"
 KERNEL_IMAGE=$(find "${LATEST_BUILD}" -name "bzImage" -o -name "vmlinuz*" | head -n 1)
-CONFIG_FILE="${LATEST_BUILD}kernel.config"
+CONFIG_FILE="${LATEST_BUILD}/kernel.config"
 
 echo "--- 🕵️ Harper Proving Ground: Smoke Test ---"
 echo "📂 Testing Build: $(basename "$LATEST_BUILD")"
@@ -55,29 +57,7 @@ if [ ! -f "$KERNEL_IMAGE" ]; then
     exit 1
 fi
 
-
+[Image of a diagram showing the hierarchy of a host OS, Docker container, and an emulated QEMU virtual machine for cross-architecture testing]
 
 # Execution via Host QEMU
-timeout --foreground "$TIMEOUT_VAL" qemu-system-x86_64 \
-    -kernel "$KERNEL_IMAGE" \
-    -m "$VM_MEM" \
-    -smp "$VM_CORES" \
-    -nographic \
-    -serial mon:stdio \
-    -no-reboot \
-    -append "console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1" \
-    | tee "$LOG_OUT" || true
-
-# --- STAGE 3: ANALYSIS ---
-echo "------------------------------------------"
-if grep -q "Linux version" "$LOG_OUT"; then
-    echo "✅ BOOT: SUCCESS"
-else
-    echo "❌ BOOT: FAILED (Check $LOG_OUT for kernel panics)"
-    exit 1
-fi
-
-if grep -iq "ntsync: initialized" "$LOG_OUT"; then
-    echo "🍷 NTSYNC: DRIVER READY"
-fi
-echo "------------------------------------------"
+timeout --foreground "$TIMEOUT_VAL" qemu-system-
