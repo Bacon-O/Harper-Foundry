@@ -26,6 +26,7 @@ RUN dpkg --add-architecture amd64 && \
     qtbase5-dev  schedtool  wget \
     pahole dwarves zstd lz4 libbpf-dev && \
     apt-get clean
+
 #RUN sudo apt-get install -y --no-install-recommends libelf-dev:amd64 libssl-dev:amd64 libc6-dev:amd64
 
 # 3. Toolchain Symlinks
@@ -38,8 +39,10 @@ ENV ARCH=x86_64 \
     CROSS_COMPILE=x86_64-linux-gnu- \
     LLVM=-19 \
     KCFLAGS="-O2 -march=x86-64-v3 -pipe" \
-    HOSTCFLAGS="-I/usr/include/aarch64-linux-gnu" \
-    HOSTLDFLAGS="-L/usr/lib/aarch64-linux-gnu -lelf" \
+    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu" \
+    HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu -lelf" \
+    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/amd64-linux-gnu:$LD_LIBRARY_PATH" \
+    LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L/usr/lib/amd64-linux-gnu" \
     WINE_NTSYNC=1 \
     SCX_BPF_CPU=v4 \
     RUSTUP_HOME=/usr/local/rustup \
