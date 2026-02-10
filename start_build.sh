@@ -19,7 +19,7 @@ fi
 
 echo "--- Building Docker image: ${IMAGE_NAME} ---"
 # Build the Docker image. The context for the build is the script's directory.
-docker build -t "${IMAGE_NAME}" "${SCRIPT_DIR} -f "${DOCKERFILE_PATH} ."
+docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH} ."
 
 echo "--- Docker image built successfully. ---"
 
