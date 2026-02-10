@@ -18,7 +18,8 @@ jobs:
     outputs:
       args: ${{ steps.set-args.outputs.args }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       
       - name: Configure Arguments
         id: set-args
@@ -39,37 +40,22 @@ jobs:
       - name: Ignition
         run: bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
 
-      # - name: Archive Build Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: kernel-build-${{ github.run_id }}
-      #     path: |
-      #       dist/build_*/bzImage
-      #       dist/build_*/kernel.config
-      #       dist/build_*/*.deb
-
   analysis:
     needs: [preheat, smelt]
+    if: always() # Run even if smelt fails to check logs/configs
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
       
       - name: Material QA
         run: |
-          # Source env_setup to check for BYPASS_QA logic
           source ./scripts/env_setup.sh ${{ needs.preheat.outputs.args }}
           if [ "$BYPASS_QA" == "true" ]; then
             echo "🛡️ QA Bypassed via Configuration"
           else
+            # Analysis will now look at the latest build even if it was a partial failure
             bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
           fi
-
-      # - name: Upload QA Report
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: qa-report-${{ github.run_id }}
-      #     path: dist/build_*/analysis.log
 
   cleanup:
     needs: [preheat, analysis]
@@ -77,5 +63,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+
       - name: Purge Slag
         run: bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}

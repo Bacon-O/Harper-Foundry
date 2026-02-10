@@ -4,27 +4,34 @@ set -e
 # 1. Load Fuel (Handles params + identity)
 source /opt/factory/scripts/env_setup.sh
 
+# --- The "Hand-off" Trap ---
+cleanup_internal() {
+    echo "⚖️ Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
+    # Reclaim everything in the build root AND the output dir
+    # This ensures the GitHub Runner can delete the source code too
+    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
+    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
+}
+trap cleanup_internal EXIT
+
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
-echo "🛠 Strategy: Base ($BASE_CONFIG) + Tuning ($TUNING_CONFIG)"
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
 # 2. Prepare Source
 cd "$CONTAINER_BUILD_ROOT"
+# Use -q for cleaner GitHub logs
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/
 
 # 3. Dynamic Configuration Strategy
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
-    echo "🐣 Using standard Kbuild target: $BASE_CONFIG"
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" "$BASE_CONFIG"
 else
-    echo "📄 Using custom base file: $BASE_CONFIG"
     cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 fi
 
 # 4. Layer Performance Tweaks
-echo "💉 Injecting Harper-Tuning from $TUNING_CONFIG..."
 ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
 
 # 5. Signing Cleanup & Compilation
@@ -32,8 +39,7 @@ echo "💉 Injecting Harper-Tuning from $TUNING_CONFIG..."
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
 
-echo "🏗 Compiling Harper-Kernel ($TARGET_ARCH Cross-Build)..."
-# Using FINAL_JOBS calculated in env_setup
+echo "🏗 Compiling Harper-Kernel..."
 make ARCH="$TARGET_ARCH" \
      "$CC_TOOLCHAIN" \
      "$CROSS_CMD" \
@@ -41,16 +47,15 @@ make ARCH="$TARGET_ARCH" \
      -j"$FINAL_JOBS" bindeb-pkg
 
 # 6. Artifact Collection
-echo "📦 Collecting artifacts into $CONTAINER_OUTPUT_DIR..."
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 
+# Move artifacts from the build root to the output volume
+# Using -f to prevent exit on missing files if some debs didn't build
+mv /build/*.deb /build/*.changes /build/*.buildinfo "$CONTAINER_OUTPUT_DIR/" 2>/dev/null || true
+
+# Collect the specific kernel binary and config
 BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
-[ -f "$BZ_PATH" ] && cp "$BZ_PATH" /build/bzImage
-cp .config /build/kernel.config
+[ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
-# Move artifacts to output volume
-find /build -maxdepth 1 \( -name "*.deb" -o -name "*.changes" -o -name "*.buildinfo" -o -name "kernel.config" -o -name "bzImage" \) -exec mv {} "$CONTAINER_OUTPUT_DIR/" \;
-
-# Final Ownership Fix
-chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR"
-echo "✅ Smelt Complete."
+echo "✅ Smelt Complete. (Trap will now finalize permissions)"
