@@ -1,35 +1,39 @@
 #!/bin/bash
 set -e
 
+# === CONFIGURATION ===
 IMAGE_NAME="debian-harper-worker"
+# Paths on the OCI Host
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKERFILE="${REPO_ROOT}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
+BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper"
+DIST_OUT="${REPO_ROOT}/dist"
 
-# Resolve Paths
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOCKERFILE_PATH="${SCRIPT_DIR}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
+# Identity Injection (Dynamic)
+USER_UID=$(id -u)
+USER_GID=$(id -g)
+# =====================
 
-# This is where the .debs will appear on your OCI host
-HOST_BUILD_DATA_PATH="/mnt/build-data/Debian-Harper/worker"
-CONTAINER_BUILD_PATH="/build"
+# Ensure directories exist
+mkdir -p "${BLOCK_VOL_PATH}"
+mkdir -p "${DIST_OUT}"
 
-echo "--- Building Docker image: ${IMAGE_NAME} ---"
-docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE_PATH}" "${SCRIPT_DIR}"
+echo "--- 🛠 Building Docker Image: ${IMAGE_NAME} ---"
+docker build -t "${IMAGE_NAME}" -f "${DOCKERFILE}" "${REPO_ROOT}"
 
-mkdir -p "${HOST_BUILD_DATA_PATH}"
+echo "--- 🚀 Starting Build for User ${USER_UID}:${USER_GID} ---"
 
-# ... (rest of your setup above stays the same)
-
-echo "--- Starting Build in Background ---"
-
-# 1. Remove the '#' so the script actually executes
-# 2. Use 'bash /opt/factory/scripts/ci-build_slim.sh' as the command
-CONTAINER_ID=$(docker run -i \
+# Launch Foundry
+docker run -i \
     --rm \
-    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
-    -v "$(pwd)/scripts:/opt/factory/scripts:ro" \
-    -v "$(pwd)/configs:/opt/factory/configs:ro" \
-    -w "${CONTAINER_BUILD_PATH}" \
+    -e HOST_UID="$USER_UID" \
+    -e HOST_GID="$USER_GID" \
+    -v "${BLOCK_VOL_PATH}:/build" \
+    -v "${REPO_ROOT}/scripts:/opt/factory/scripts:ro" \
+    -v "${REPO_ROOT}/configs:/opt/factory/configs:ro" \
+    -v "${DIST_OUT}:/opt/factory/dist" \
+    -w "/build" \
     "${IMAGE_NAME}" \
-    bash /opt/factory/scripts/ci-build_slim.sh)
+    bash /opt/factory/scripts/ci-build_slim.sh
 
-echo "🚀 Build started! Container ID: ${CONTAINER_ID}"
-echo "📝 Run: docker logs -f ${CONTAINER_ID}"
+echo "✅ Foundry process complete. Artifacts in: ${DIST_OUT}"
