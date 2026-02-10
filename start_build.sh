@@ -26,7 +26,7 @@ CONTAINER_ID=$(docker run -d \
     -v "$(pwd)/configs:/opt/factory/configs:ro" \
     -w "${CONTAINER_BUILD_PATH}" \
     "${IMAGE_NAME}" \
-    bash "/opt/factory/scripts/ci-build_slim.sh")
-    
+    bash #"/opt/factory/scripts/ci-build_slim.sh")
+
 echo "🚀 Build started! Container ID: ${CONTAINER_ID}"
 echo "📝 Run: docker logs -f ${CONTAINER_ID}"
