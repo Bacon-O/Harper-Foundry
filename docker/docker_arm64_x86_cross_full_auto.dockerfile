@@ -15,7 +15,7 @@ RUN dpkg --add-architecture amd64 && \
     git zip curl file pkg-config ca-certificates python3 python3-pip \
     dpkg-dev flex bison bc rsync kmod cpio fakeroot lsb-release \
     gcc-x86-64-linux-gnu g++-x86-64-linux-gnu binutils-x86-64-linux-gnu \
-    clang-19 lld-19 llvm-19 libclang-19-dev \
+    clang-19 lld-19 llvm-19 libclang-19-dev llvm \
     libelf-dev:amd64 libssl-dev:amd64 libncurses-dev:amd64 \
     debhelper:amd64 libc6-dev-i386:amd64 libcap-dev:amd64 \
     libdw-dev:amd64 libdw-dev:arm64 \
