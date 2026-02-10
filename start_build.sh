@@ -7,7 +7,8 @@ IMAGE_NAME="debian-harper-worker"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKERFILE="${REPO_ROOT}/docker/docker_arm64_x86_cross_full_auto.dockerfile"
 BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper"
-DIST_OUT="${REPO_ROOT}/dist"
+BUILD_ID=$(date +%Y%m%d_%H%M)
+DIST_OUT="${REPO_ROOT}/dist/build_${BUILD_ID}"
 
 # Identity Injection (Dynamic)
 USER_UID=$(id -u)
