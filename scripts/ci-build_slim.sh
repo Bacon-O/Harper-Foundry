@@ -41,8 +41,7 @@ make ARCH="$ARCH_TARGET" "$CC_TOOLCHAIN" "$CROSS_CMD" -j$(nproc) bindeb-pkg
 echo "📦 Collecting artifacts..."
 mkdir -p "$DIST_DIR"
 
-# --- NEW: Rescue the bzImage before cleanup ---
-# We look inside the newly built source tree for the bootable image
+# A. Rescue the bzImage from the source tree before we delete it
 BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
 if [ -f "$BZ_PATH" ]; then
     cp "$BZ_PATH" /build/bzImage
@@ -51,8 +50,29 @@ else
     echo "⚠️ Warning: bzImage not found in arch/x86/boot/"
 fi
 
-# Copy the final .config for the audit script to read
+# B. Capture the final .config for the audit script to read
 cp .config /build/kernel.config
 
-# Move everything from /build to the timestamped dist folder
+# C. Move everything from /build to the timestamped dist folder
 if ls /build/*.deb 1> /dev/null 2>&1; then
+    find /build -maxdepth 1 \( \
+        -name "*.deb" -o \
+        -name "*.changes" -o \
+        -name "*.buildinfo" -o \
+        -name "kernel.config" -o \
+        -name "bzImage" \
+    \) -exec mv {} "$DIST_DIR/" \;
+    
+    # Fix permissions for the OCI host user
+    chown -R "$FINAL_UID:$FINAL_GID" "$DIST_DIR"
+    echo "📦 Artifacts secured in $DIST_DIR"
+else
+    echo "❌ ERROR: No .deb files found!"
+    exit 1
+fi
+
+# 6. Cleanup
+echo "🧹 Cleaning up source tree..."
+rm -rf "$BUILD_ROOT/linux-"*/
+
+echo "✅ Success! Foundry complete."
