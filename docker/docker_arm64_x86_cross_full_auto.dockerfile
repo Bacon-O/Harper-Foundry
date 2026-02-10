@@ -31,7 +31,8 @@ RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
     ln -sf /usr/bin/ld.lld-19 /usr/bin/ld.lld && \
     ln -sf /usr/bin/llvm-ar-19 /usr/bin/llvm-ar && \
     ln -sf /usr/bin/llvm-nm-19 /usr/bin/llvm-nm && \
-    ln -sf /usr/bin/llvm-objcopy-19 /usr/bin/llvm-objcopy
+    ln -sf /usr/bin/llvm-objcopy-19 /usr/bin/llvm-objcopy \
+    ln -sf /usr/bin/llvm-readelf-19 /usr/bin/llvm-readelf
 
 # 4. Environment - Stripped to the Toolchain only
 # We move ARCH and WINE_NTSYNC etc. to params/foundry.params 

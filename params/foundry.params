@@ -49,7 +49,7 @@ VM_TIMEOUT="30s"
 # This matches the mount point on your OCI ARM instance
 BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
 HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-HOST_DIST_BASE="${HOST_REPO_ROOT}/dist"
+HOST_DIST_BASE="/mnt/build-data/dist"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID
 FOUNDRY_UID=""
