@@ -31,13 +31,16 @@ CONTAINER_BUILD_PATH="/build"
 echo "Ensuring host build directory '${HOST_BUILD_DATA_PATH}' exists..."
 mkdir -p "${HOST_BUILD_DATA_PATH}"
 
-echo "--- Starting Docker container '${IMAGE_NAME}' ---"
-echo "Mounting host path '${HOST_BUILD_DATA_PATH}' to container path '${CONTAINER_BUILD_PATH}'"
+echo "--- Starting Build in Background ---"
 
-# Start the Docker container with the mounted volume and bash shell
-# -it: Interactive and pseudo-TTY allocation (for a shell)
-# --rm: Automatically remove the container when it exits
-# -v: Mount a volume
-docker run -it --rm -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" -w "${CONTAINER_BUILD_PATH}" "${IMAGE_NAME}" bash
+# Start the Docker container in detached mode (-d)
+CONTAINER_ID=$(docker run -d \
+    -v "${HOST_BUILD_DATA_PATH}:${CONTAINER_BUILD_PATH}" \
+    -v "${SCRIPT_DIR}/scripts:${CONTAINER_BUILD_PATH}/scripts" \
+    -v "${SCRIPT_DIR}/configs:${CONTAINER_BUILD_PATH}/configs" \
+    -w "${CONTAINER_BUILD_PATH}" \
+    "${IMAGE_NAME}" \
+    bash "${CONTAINER_BUILD_PATH}/scripts/ci-build_slim.sh")
 
-echo "--- Docker container exited. ---"
+echo "Build started! Container ID: ${CONTAINER_ID}"
+echo "To view logs, run: docker logs -f ${CONTAINER_ID}"

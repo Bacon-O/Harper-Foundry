@@ -65,4 +65,4 @@ COPY scripts/ci-build_slim.sh /usr/local/bin/ci-build.sh
 RUN chmod +x /usr/local/bin/ci-build.sh
 
 # Use the absolute path for the CMD
-CMD ["/usr/local/bin/ci-build.sh"]
+CMD ["/usr/local/bin/ci-build_slim.sh"]
