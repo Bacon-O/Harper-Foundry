@@ -41,11 +41,19 @@ BYPASS_QA="false"
 ENABLE_QEMU_TESTS="false"
 
 # Chemical Audit: Exact internal Kconfig names to verify
+# --- Chemical Audit: Critical (Must Pass) ---
+# If any of these are missing, the build is considered BROKEN and will exit with error.
 CHECK_LIST=(
     "CONFIG_WINE_NTSYNC=y"
-    "CONFIG_SCHED_BORE=y"
     "CONFIG_MCORE2=y"
     "CONFIG_PREEMPT_RT=y"
+)
+
+# --- Chemical Audit: Optional (Warn Only) ---
+# If these are missing, we log a warning but ship the kernel anyway.
+# This supports the BORE -> EEVDF fallback strategy.
+WARN_LIST=(
+    "CONFIG_SCHED_BORE=y"
 )
 
 # VM Proving Ground Specs

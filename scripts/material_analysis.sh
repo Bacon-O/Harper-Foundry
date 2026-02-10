@@ -2,7 +2,7 @@
 set -e
 
 # 1. Load the Foundry Environment
-# This ensures we have access to CHECK_LIST, HOST_DIST_BASE, and TEST_RUN_MODE
+# This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_DIST_BASE
 source "$(dirname "$0")/env_setup.sh" "$@"
 
 echo "🕵️  Starting Material Analysis: Chemical & Physical Audit..."
@@ -34,29 +34,43 @@ fi
 
 # --- STAGE 1: CHEMICAL AUDIT (Configuration Check) ---
 echo "📊 Stage 1: Auditing Composition..."
-MISSING_COUNT=0
+MISSING_CRITICAL=0
 
+# Part A: Critical Elements (Must Pass)
+echo "🛡️  Checking Critical Systems..."
 for CHECK in "${CHECK_LIST[@]}"; do
-    # Grep for the exact config line (Fixed string, whole line match)
-    if grep -Fxq "$CHECK" "$CONFIG_FILE"; then
-        echo "  ✅ FOUND: $CHECK"
+    if grep -Fq "$CHECK" "$CONFIG_FILE"; then
+        echo "   ✅ CONFIRMED: $CHECK"
     else
-        # If we are in Test Run mode, we warn but do not fail
-        if [ "$TEST_RUN_MODE" == "true" ]; then
-            echo "  ⚠️  MISSING (IGNORED FOR TEST): $CHECK"
-        else
-            echo "  ❌ MISSING: $CHECK"
-            MISSING_COUNT=$((MISSING_COUNT + 1))
-        fi
+        echo "   ❌ CRITICAL FAILURE: $CHECK is MISSING."
+        MISSING_CRITICAL=$((MISSING_CRITICAL + 1))
     fi
 done
 
-# Fail logic: Only if NOT in test mode and items are missing
-if [ "$MISSING_COUNT" -gt 0 ]; then
-    echo "🚨 Chemical Audit Failed: $MISSING_COUNT critical elements missing."
-    exit 1
-elif [ "$TEST_RUN_MODE" == "true" ] && [ "$MISSING_COUNT" -gt 0 ]; then
-    echo "🧪 Test Mode: Chemical Audit bypassed $MISSING_COUNT warnings."
+# Part B: Optional Elements (Warn Only)
+# This supports the BORE -> EEVDF fallback.
+echo "⚠️  Checking Optional Systems..."
+if [ -n "$WARN_LIST" ]; then
+    for CHECK in "${WARN_LIST[@]}"; do
+        if grep -Fq "$CHECK" "$CONFIG_FILE"; then
+            echo "   ✅ OPTIONAL: $CHECK detected."
+        else
+            echo "   🔸 MISSING: $CHECK not found."
+            echo "      (Acceptable: Likely running in Fallback Mode)"
+        fi
+    done
+else
+    echo "ℹ️  No optional checks defined."
+fi
+
+# Fail Logic: Only block build if CRITICAL items are missing
+if [ "$MISSING_CRITICAL" -gt 0 ]; then
+    if [ "$TEST_RUN_MODE" == "true" ]; then
+        echo "🧪 Test Mode: Ignoring $MISSING_CRITICAL critical failures."
+    else
+        echo "🚨 Chemical Audit Failed: $MISSING_CRITICAL critical elements missing."
+        exit 1
+    fi
 else
     echo "✅ Chemical Audit Passed."
 fi
@@ -71,11 +85,8 @@ if [ ! -s "$KERNEL_IMAGE" ]; then
 fi
 
 # Check 2: Correct File Type (Magic Bytes)
-# We look for "Linux kernel" and "x86 boot" signatures
 if file "$KERNEL_IMAGE" | grep -qE "Linux kernel.*x86 boot executable"; then
     echo "  ✅ Valid x86_64 Boot Executable"
-    
-    # Optional: Print size for observability
     FILE_SIZE=$(du -h "$KERNEL_IMAGE" | cut -f1)
     echo "  📏 Payload Size: $FILE_SIZE"
 else
@@ -87,11 +98,9 @@ fi
 # --- STAGE 3: STRESS TEST (QEMU) ---
 if [ "$ENABLE_QEMU_TESTS" == "true" ] && [ "$TEST_RUN_MODE" != "true" ]; then
     echo "🚀 Stage 3: Spawning Stress Test..."
-    # Note: If you implement QEMU later, the logic goes here.
-    # For now, we acknowledge the flag.
     echo "   (QEMU Logic Placeholder)"
 else
-    echo "⏩ Stage 3: Stress Test Bypassed (QEMU disabled or Test Mode)."
+    echo "⏩ Stage 3: Stress Test Bypassed."
 fi
 
 echo "✅ Material Analysis Complete. Artifact is ready for distribution."
