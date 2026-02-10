@@ -1,34 +1,32 @@
 # ==============================================================================
-# HARPER FOUNDRY: TINYCONFIG INJECTION LAYER
+# HARPER FOUNDRY: ROBUST TINYCONFIG INJECTION
 # ==============================================================================
 
-# --- 1. Core Identity (Keep it x86_64) ---
-# tinyconfig tries to kill everything; we must force it to remain 64-bit.
+# --- 1. Core Architecture ---
 CONFIG_64BIT=y
 CONFIG_X86_64=y
 CONFIG_X86=y
 
-# --- 2. Dependency Gatekeepers (The "Keys") ---
-# HAS_IOMEM: Required for hardware mapping (Prereq for NTSYNC)
-CONFIG_HAS_IOMEM=y
-
-# MISC_DEVICES: The "Door" to the drivers/misc folder. 
-# If this is 'n', NTSYNC is invisible.
+# --- 2. The Missing Plumbing (CRITICAL) ---
+# NTSYNC requires these subsystems to handle file descriptors and locking.
+# tinyconfig disables these by default, killing the driver.
 CONFIG_MISC_DEVICES=y
+CONFIG_FUTEX=y
+CONFIG_EVENTFD=y
+CONFIG_EPOLL=y
+CONFIG_FILE_LOCKING=y
+CONFIG_ANON_INODES=y
+CONFIG_BASE_FULL=y
 
-# EXPERT: Unlocks advanced options like PREEMPT_RT
-CONFIG_EXPERT=y
+# --- 3. Hardware Gates ---
+CONFIG_HAS_IOMEM=y
+CONFIG_PCI=y
 
-# --- 3. The NTSYNC Stack (Audit Target) ---
-# The primitive driver itself
+# --- 4. The Target Features ---
 CONFIG_NTSYNC=y
-# The Wine compatibility interface (This is what material_analysis checks)
 CONFIG_WINE_NTSYNC=y
 
-# --- 4. Processor Optimization (Audit Target) ---
-# Optimizes the binary for Zen 3 architecture
+# --- 5. Audit Requirements ---
 CONFIG_MZEN3=y
-
-# --- 5. Real-Time Preemption (Audit Target) ---
-# Forces the kernel into fully preemptible mode
 CONFIG_PREEMPT_RT=y
+CONFIG_EXPERT=y
