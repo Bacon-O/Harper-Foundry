@@ -2,6 +2,8 @@ name: Harper Kernel Factory
 on:
   push:
     branches: [ main, dev, feature/* ]
+    tags:
+      - 'v*' # Triggers on tags like v1.0, v2.1-beta, etc.
   workflow_dispatch:
     inputs:
       config_file:
@@ -20,17 +22,22 @@ jobs:
       - name: Configure Arguments
         id: set-args
         run: |
-          # The logic is centralized here:
-          # 1. Manual triggers (workflow_dispatch) use the user-provided input.
-          # 2. Main branch pushes use the production foundry.params.
-          # 3. Everything else (dev, features, fixes) uses _testing.foundry.params.
-          
+          # 1. Manual Dispatch: Use the exact file the user selected in the UI
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             FILE="${{ github.event.inputs.config_file }}"
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "🕹️ Manual Dispatch detected."
+          
+          # 2. Production Logic: Must be a Version Tag on the Main branch
+          # This ensures code is "released" intentionally.
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]] && [[ "${{ github.event.base_ref }}" == "refs/heads/main" || "${{ github.ref_name }}" =~ ^v ]]; then
             FILE="params/foundry.params"
+            echo "🏷️ Production Tag detected on Main branch."
+          
+          # 3. Default (Safe Mode): Everything else goes to Testing
+          # This covers all standard pushes to main, dev, or feature branches.
           else
             FILE="params/_testing.foundry.params"
+            echo "🧪 Standard push detected. Routing to Testing."
           fi
           
           echo "🚀 Selected Blueprint: $FILE"
@@ -46,7 +53,6 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Ignition
-        # This script sources env_setup.sh, which in turn sources your selected param file.
         run: bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
 
   analysis:
@@ -57,9 +63,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Material QA
-        run: |
-          # QA will naturally look at /testing or /release because it uses the same param file logic.
-          bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
+        run: bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
 
   cleanup:
     needs: [preheat, analysis]

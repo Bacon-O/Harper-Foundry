@@ -16,7 +16,7 @@ else
     HOST_UID=${HOST_UID:-1000}
     HOST_GID=${HOST_GID:-1000}
     CONTAINER_BUILD_ROOT="/build"
-    CONTAINER_OUTPUT_DIR="/opt/factory/dist"
+    CONTAINER_OUTPUT_DIR="/opt/factory/output"
     CONTAINER_CONFIG_DIR="/opt/factory/configs"
     KERNEL_SOURCE="linux-source"
     TARGET_ARCH="x86_64"
@@ -162,19 +162,19 @@ make ARCH="$TARGET_ARCH" \
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
-# Move .deb packages and build info
-mv -f "$CONTAINER_BUILD_ROOT"/../*.deb \
-      "$CONTAINER_BUILD_ROOT"/../*.changes \
-      "$CONTAINER_BUILD_ROOT"/../*.buildinfo \
-      "$CONTAINER_OUTPUT_DIR/" 2>/dev/null || true
+# 1. Grab the Debian Packages (look in the build root)
+find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 
-# Capture the bzImage (Kernel Binary) for Smoke Testing
-BZ_PATH=$(find arch/x86/boot/ -name bzImage | head -n 1)
+# 2. Grab the bzImage (The "relative" find that worked before)
+BZ_PATH=$(find . -name bzImage | head -n 1)
 if [ -f "$BZ_PATH" ]; then
     cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
-    echo "   🎯 Captured bzImage"
+    echo "   ✅ Captured bzImage"
 fi
 
-# Capture the Config for Audit
-cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
+# 3. Grab the Config
+[ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
+
 echo "✅ Smelt Complete."
