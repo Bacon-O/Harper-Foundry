@@ -36,6 +36,7 @@ echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
 docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
     -e HOST_GID="$HOST_GID" \
+    -e LOCALVERSION="$LOCALVERSION" \    # <--- ADD THIS LINE
     -e CONTAINER_OUTPUT_DIR="/opt/factory/output" \
     -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
     -e INCREMENTAL_BUILD="$INCREMENTAL_BUILD" \

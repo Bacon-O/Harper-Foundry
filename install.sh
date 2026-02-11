@@ -65,16 +65,14 @@ prompt_for_variable() {
     local description="$3"
     local input_value
 
-    echo ""
-    echo "---------------------------------------------------"
-    echo "$description"
-    echo "Current value: '$current_value'"
-    read -rp "Enter new value (or press Enter to keep current): " input_value
+    if [ -n "$description" ]; then
+        echo "" >&2
+        echo "$description" >&2
+    fi
+    read -rp "($var_name) [$current_value]: " input_value
     if [ -z "$input_value" ]; then
-        echo "Keeping default: '$current_value'"
         echo "$current_value" # Return current_value
     else
-        echo "New value set: '$input_value'"
         echo "$input_value" # Return input_value
     fi
 }
@@ -110,9 +108,6 @@ for line in "${param_lines[@]}"; do
         echo "$line"
         continue
     fi
-
-    # Extract variable name from the line
-    var_name=$(echo "$line" | cut -d'=' -f1 | xargs)
 
     if [[ "$line" =~ ^([A-Z_]+)= ]]; then
         var_name="${BASH_REMATCH[1]}"
