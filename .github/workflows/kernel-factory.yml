@@ -7,8 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       config_file:
-        description: 'Blueprint to use'
-        default: 'params/foundry.params'
+        description: 'Forge Profile'
+        type: choice
+        default: 'params/_testing.foundry.params'
+        options:
+          - 'params/_testing.foundry.params'
+          - 'params/foundry.params'
 
 jobs:
   preheat:
@@ -22,22 +26,20 @@ jobs:
       - name: Configure Arguments
         id: set-args
         run: |
-          # 1. Manual Dispatch: Use the exact file the user selected in the UI
+          # 1. Manual Dispatch: Use the dropdown selection
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             FILE="${{ github.event.inputs.config_file }}"
-            echo "🕹️ Manual Dispatch detected."
+            echo "🕹️ Manual Dispatch: $FILE"
           
           # 2. Production Logic: Must be a Version Tag on the Main branch
-          # This ensures code is "released" intentionally.
           elif [[ "${{ github.ref }}" == refs/tags/v* ]] && [[ "${{ github.event.base_ref }}" == "refs/heads/main" || "${{ github.ref_name }}" =~ ^v ]]; then
             FILE="params/foundry.params"
-            echo "🏷️ Production Tag detected on Main branch."
+            echo "🏷️ Production Tag on Main detected."
           
-          # 3. Default (Safe Mode): Everything else goes to Testing
-          # This covers all standard pushes to main, dev, or feature branches.
+          # 3. Default: Everything else goes to Testing
           else
             FILE="params/_testing.foundry.params"
-            echo "🧪 Standard push detected. Routing to Testing."
+            echo "🧪 Standard push: Routing to Testing."
           fi
           
           echo "🚀 Selected Blueprint: $FILE"
