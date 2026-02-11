@@ -1,0 +1,9 @@
+#!/bin/bash
+# 1. Load the Base Forge Specs (The Parent)
+source "$(dirname "$0")/foundry.params"
+
+# 2. Apply Testing Overwrites (The Child)
+# This replaces whatever HOST_DIST_BASE was set in the main file.
+HOST_DIST_BASE="/mnt/build-data/dist/testing"
+
+echo "🧪 Testing Profile Loaded: Diverting output to $HOST_DIST_BASE"

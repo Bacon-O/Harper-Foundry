@@ -8,17 +8,19 @@ source "$(dirname "$0")/env_setup.sh" "$@"
 KEEP=3
 echo "🧹 Cleaning the Slag (Target: $HOST_DIST_BASE)..."
 
-if [ -d "$HOST_DIST_BASE" ]; then
-    # Filter for directories matching the build pattern
-    BUILD_COUNT=$(ls -1d "${HOST_DIST_BASE}"/build_*/ 2>/dev/null | wc -l)
+if [ -d "$HOST_DIST_BASE" ] && [ "$HOST_DIST_BASE" != "/" ]; then
+    # Use 'find' for more robust listing and avoid 'ls' parsing issues
+    BUILDS=$(find "${HOST_DIST_BASE}" -maxdepth 1 -type d -name "build_*" | sort -r)
+    BUILD_COUNT=$(echo "$BUILDS" | grep -c "build_" || echo 0)
     
     if [ "$BUILD_COUNT" -gt "$KEEP" ]; then
         echo "♻️  Found $BUILD_COUNT builds. Keeping the $KEEP most recent."
-        ls -1dt "${HOST_DIST_BASE}"/build_*/ | tail -n +$((KEEP + 1)) | xargs rm -rf
+        # Drop the first $KEEP items, then remove the rest
+        echo "$BUILDS" | sed "1,${KEEP}d" | xargs -r rm -rf
         echo "✅ Routine cleanup complete."
     else
-        echo "✨ Minimal slag detected. No cleanup needed."
+        echo "✨ Minimal slag detected ($BUILD_COUNT/$KEEP). No cleanup needed."
     fi
 else
-    echo "⚠️  Dist directory not found at $HOST_DIST_BASE."
+    echo "⚠️  Valid Dist directory not found at $HOST_DIST_BASE."
 fi

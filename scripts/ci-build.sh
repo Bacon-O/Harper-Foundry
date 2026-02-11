@@ -131,13 +131,23 @@ echo "🏷️  Harper Identity: $PKG_VERSION"
 # --- 7. Compile (The Critical Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
-# !!! CRITICAL FIX FOR CROSS-COMPILATION !!!
-# We unset these flags so the x86 linker doesn't try to link against ARM64 host libs.
-# This prevents the "skipping incompatible /usr/lib/aarch64-linux-gnu/libc.so" error.
-unset HOSTCFLAGS
-unset HOSTLDFLAGS
+# 1. NUKE ALL FLAGS (The "Scorched Earth" Policy)
+#    We unset standard flags too, just in case dpkg set them.
+unset HOSTCFLAGS HOSTLDFLAGS
+unset CFLAGS LDFLAGS CPPFLAGS
+unset KBUILD_HOSTCFLAGS KBUILD_HOSTLDFLAGS
 
-# Fire the Forge
+# 2. FORCE CLEAN (Kill the Zombies)
+#    This deletes the 'poisoned' object files from the previous failed run.
+#    It ensures 'bindeb-pkg' starts the packaging tools from scratch.
+make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" clean
+
+# 3. RESTORE CONFIG
+#    'make clean' might delete the .config, so we ensure it's set.
+#    (Re-running olddefconfig is fast and safe)
+make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
+
+# 4. FIRE THE FORGE (With explicit overrides)
 make ARCH="$TARGET_ARCH" \
      $CC_TOOLCHAIN \
      "$CROSS_CMD" \
@@ -145,6 +155,7 @@ make ARCH="$TARGET_ARCH" \
      KCFLAGS="$USER_KCFLAGS" \
      KDEB_SOURCENAME="$KDEB_NAME" \
      KDEB_PKGVERSION="$PKG_VERSION" \
+     HOSTCFLAGS="" HOSTLDFLAGS="" \
      -j"$FINAL_JOBS" bindeb-pkg
 
 # --- 8. Artifact Collection ---
