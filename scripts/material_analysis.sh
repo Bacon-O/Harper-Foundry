@@ -48,9 +48,8 @@ for CHECK in "${CHECK_LIST[@]}"; do
 done
 
 # Part B: Optional Elements (Warn Only)
-# This supports the BORE -> EEVDF fallback.
 echo "⚠️  Checking Optional Systems..."
-if [ -n "$WARN_LIST" ]; then
+if [ "${#WARN_LIST[@]}" -gt 0 ]; then
     for CHECK in "${WARN_LIST[@]}"; do
         if grep -Fq "$CHECK" "$CONFIG_FILE"; then
             echo "   ✅ OPTIONAL: $CHECK detected."
@@ -78,13 +77,26 @@ fi
 # --- STAGE 2: PHYSICAL AUDIT (Binary Check) ---
 echo "⚖️  Stage 2: Dimensional Audit..."
 
-# Check 1: Non-Zero Size
+# Check 1: Non-Zero Size (bzImage)
 if [ ! -s "$KERNEL_IMAGE" ]; then
     echo "  ❌ ERROR: bzImage is 0 bytes (Empty File)."
     exit 1
 fi
 
-# Check 2: Correct File Type (Magic Bytes)
+# Check 2: Debian Package Validation
+echo "  📦 Checking for Debian Packages..."
+DEB_COUNT=$(find "$LATEST_BUILD_DIR" -maxdepth 1 -name "*.deb" | wc -l)
+
+if [ "$DEB_COUNT" -lt 2 ]; then
+    echo "  ❌ ERROR: Missing Debian packages. Found: $DEB_COUNT (Expected at least 2: Image and Headers)."
+    exit 1
+else
+    echo "  ✅ Found $DEB_COUNT .deb packages."
+    # List them for the logs with sizes
+    ls -lh "$LATEST_BUILD_DIR"/*.deb | awk '{print "     📦 " $9 " (" $5 ")"}'
+fi
+
+# Check 3: Correct File Type (Magic Bytes)
 if file "$KERNEL_IMAGE" | grep -qE "Linux kernel.*x86 boot executable"; then
     echo "  ✅ Valid x86_64 Boot Executable"
     FILE_SIZE=$(du -h "$KERNEL_IMAGE" | cut -f1)

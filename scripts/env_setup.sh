@@ -8,11 +8,26 @@ PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
 TEST_RUN_MODE="false"
 DOCKER_REBUILD="false"
 BYPASS_QA_CLI="false"
+INCREMENTAL_BUILD="false"
 EXEC_OVERRIDE=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --config-file)
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo "  -c, --config-file <path>  Specify a custom params file."
+            echo "  -t, --test-run            Enable test mode (tinyconfig, no QEMU)."
+            echo "  -r, --rebuild             Force Docker image rebuild."
+            echo "  -b, --bypass-qa           Skip Material Analysis."
+            echo "  -i, --incremental         Skip 'make clean' for faster rebuilds."
+            echo "  -e, --exec <script>       Override the container execution script."
+            exit 0
+            ;;
+        -c|--config-file)
+            if [[ -z "$2" ]] || [[ "$2" == -* ]]; then
+                echo "❌ Error: Argument for $1 is missing"
+                exit 1
+            fi
             if [[ -f "$2" ]]; then
                 PARAMS_FILE="$(realpath "$2")"
             elif [[ -f "${REPO_ROOT}/$2" ]]; then
@@ -23,18 +38,30 @@ while [[ "$#" -gt 0 ]]; do
             fi
             shift 
             ;;
-        --test-run)
+        -t|--test-run)
             TEST_RUN_MODE="true"
             ;;
-        --rebuild)
+        -r|--rebuild)
             DOCKER_REBUILD="true"
             ;;
-        --bypass-qa)
+        -b|--bypass-qa)
             BYPASS_QA_CLI="true"
             ;;
-        --exec)
+        -i|--incremental)
+            INCREMENTAL_BUILD="true"
+            ;;
+        -e|--exec)
+            if [[ -z "$2" ]] || [[ "$2" == -* ]]; then
+                echo "❌ Error: Argument for $1 is missing"
+                exit 1
+            fi
             EXEC_OVERRIDE="$2"
             shift
+            ;;
+        *)
+            echo "❌ Error: Unknown option '$1'"
+            echo "Run with --help for a list of available options."
+            exit 1
             ;;
     esac
     shift 
@@ -76,6 +103,7 @@ if [ -f "$PARAMS_FILE" ]; then
     fi
 
     export DOCKER_REBUILD="$DOCKER_REBUILD"
+    export INCREMENTAL_BUILD="$INCREMENTAL_BUILD"
 
     # 6. Identity Logic
     # Only calculate if not already provided by the host environment

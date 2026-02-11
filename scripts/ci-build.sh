@@ -138,9 +138,12 @@ unset CFLAGS LDFLAGS CPPFLAGS
 unset KBUILD_HOSTCFLAGS KBUILD_HOSTLDFLAGS
 
 # 2. FORCE CLEAN (Kill the Zombies)
-#    This deletes the 'poisoned' object files from the previous failed run.
-#    It ensures 'bindeb-pkg' starts the packaging tools from scratch.
-make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" clean
+if [ "$INCREMENTAL_BUILD" == "true" ]; then
+    echo "♻️  Incremental Mode: Skipping 'make clean' to preserve object files."
+else
+    echo "🧹 Fresh Build: Cleaning previous artifacts..."
+    make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" clean
+fi
 
 # 3. RESTORE CONFIG
 #    'make clean' might delete the .config, so we ensure it's set.
