@@ -57,6 +57,12 @@ CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper-v3"
 KERNEL_SOURCE="linux/trixie-backports"
 
+MAKE_DEB_BUILD_ARCH="arm64"
+MAKE_DEB_TARGET_ARCH="amd64"
+MAKE_CC="clang --target=x86_64-linux-gnu"
+MAKE_HOSTLD="x86_64-linux-gnu-ld"
+MAKE_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+MAKE_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
 # ==============================================================================
 # BUILD STRATEGY & FEATURES
 # These parameters control the build process and specific kernel features.

@@ -102,22 +102,28 @@ fi
 # 2. FIRE THE FORGE
 # We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
 make -j$(nproc) \
-    ARCH=x86_64 \
-    CROSS_COMPILE=x86_64-linux-gnu- \
-    KBUILD_BUILD_ARCH=x86_64 \
-    DEB_BUILD_ARCH=arm64 \
-    DEB_TARGET_ARCH=amd64 \
-    CC="clang --target=x86_64-linux-gnu" \
-    HOSTCC="clang --target=x86_64-linux-gnu" \
-    HOSTLD="x86_64-linux-gnu-ld" \
-    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu" \
-    HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu" \
+    ARCH="$TARGET_ARCH" \
+    CROSS_COMPILE="$CROSS_CMD" \
+    KBUILD_BUILD_ARCH="$TARGET_ARCH" \
+    DEB_BUILD_ARCH="$MAKE_DEB_BUILD_ARCH" \
+    DEB_TARGET_ARCH="$MAKE_DEB_TARGET_ARCH" \
+    CC="$MAKE_CC" \
+    HOSTCC="$MAKE_CC" \
+    HOSTLD="$MAKE_HOSTLD" \
+    HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
+    HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
     bindeb-pkg
 
 # --- 9. Artifact Collection ---
+echo "looking for .deb files in $CONTAINER_BUILD_ROOT..."
+ls -lht "$CONTAINER_BUILD_ROOT"
+
+echo "looking for deb files in /build"
+ls -lht /build
+
+echo "============================================================"
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
-
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
