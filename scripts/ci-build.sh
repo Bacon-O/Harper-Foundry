@@ -6,30 +6,30 @@ set -e
 # ==============================================================================
 
 # 1. Load Fuel (Environment Variables)
-if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
-    source /opt/factory/scripts/env_setup.sh
-else
-    echo "⚠️  Warning: env_setup.sh not found. Using local defaults."
-    HOST_UID=${HOST_UID:-1000}
-    HOST_GID=${HOST_GID:-1000}
-    CONTAINER_BUILD_ROOT="/build"
-    CONTAINER_OUTPUT_DIR="/opt/factory/output"
-    CONTAINER_CONFIG_DIR="/opt/factory/configs"
-    KERNEL_SOURCE="linux-source"
-    TARGET_ARCH="x86_64"
-    FINAL_JOBS=$(nproc)
-fi
+# if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
+#     source /opt/factory/scripts/env_setup.sh
+# else
+#     echo "⚠️  Warning: env_setup.sh not found. Using local defaults."
+#     HOST_UID=${HOST_UID:-1000}
+#     HOST_GID=${HOST_GID:-1000}
+#     CONTAINER_BUILD_ROOT="/build"
+#     CONTAINER_OUTPUT_DIR="/opt/factory/output"
+#     CONTAINER_CONFIG_DIR="/opt/factory/configs"
+#     KERNEL_SOURCE="linux-source"
+#     TARGET_ARCH="x86_64"
+#     FINAL_JOBS=$(nproc)
+# fi
 
 # --- Cleanup Trap ---
-cleanup_internal() {
-    echo "⚖️  Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
-}
-trap cleanup_internal EXIT
+# cleanup_internal() {
+#     echo "⚖️  Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
+#     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
+#     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
+# }
+# trap cleanup_internal EXIT
 
-echo "🚀 Starting Harper-Kernel Foundry Smelt..."
-echo "🧵 Parallelism: Using $FINAL_JOBS threads."
+# echo "🚀 Starting Harper-Kernel Foundry Smelt..."
+# echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
 # HOST_ARCH=$(uname -m)
 
@@ -38,11 +38,11 @@ echo "🔧 Verifying packaging tools..."
 # Ensure we have the x86 gcc libs for linking
 # apt-get update && apt-get install -y rsync llvm curl patch libgcc-12-dev:amd64
 
-mkdir -p "$CONTAINER_BUILD_ROOT"
-cd "$CONTAINER_BUILD_ROOT"
+# mkdir -p "$CONTAINER_BUILD_ROOT"
+# cd "$CONTAINER_BUILD_ROOT"
 
-echo "📥 Fetching Source: $KERNEL_SOURCE"
-apt-get source -y "$KERNEL_SOURCE"
+# echo "📥 Fetching Source: $KERNEL_SOURCE"
+# apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 
 # --- 2.5. Inject Patches ---
@@ -73,14 +73,14 @@ cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 # make "${MAKE_ARGS[@]}" olddefconfig
 
 # --- 7. Versioning Strategy ---
-OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
-TIMESTAMP=$(date +%Y%m%d)
-SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
-PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
-echo "🏷️  Harper Identity: $PKG_VERSION"
+# OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+# TIMESTAMP=$(date +%Y%m%d)
+# SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
+# PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
+# echo "🏷️  Harper Identity: $PKG_VERSION"
 
 # --- 8. Compile ---
-echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
+# echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
 # 1. CLEAN
 # if [ "$INCREMENTAL_BUILD" != "true" ]; then
@@ -88,10 +88,10 @@ echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 #     make "${MAKE_ARGS[@]}" clean
 # fi
 
-export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
-make ARCH=x86_64 allnoconfig
-./scripts/config --file .config --enable 64BIT
-make ARCH=x86_64 allnoconfig
+# export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+# make ARCH=x86_64 allnoconfig
+# ./scripts/config --file .config --enable 64BIT
+# make ARCH=x86_64 allnoconfig
 
 # 2. FIRE THE FORGE
 # We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
@@ -109,15 +109,15 @@ make -j$(nproc) \
     bindeb-pkg
 
 # --- 9. Artifact Collection ---
-mkdir -p "$CONTAINER_OUTPUT_DIR"
-echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
+# mkdir -p "$CONTAINER_OUTPUT_DIR"
+# echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
-find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
-find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
-find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+# find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+# find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+# find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 
-BZ_PATH=$(find . -name bzImage | head -n 1)
-[ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
-[ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
+# BZ_PATH=$(find . -name bzImage | head -n 1)
+# [ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+# [ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
 echo "✅ Smelt Complete."
