@@ -159,10 +159,11 @@ make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 #    Added $CROSS_OVERRIDES to ensure scripts/basic/fixdep and objtool 
 #    are built as x86_64 and linked against amd64 libs.
 make ARCH="$TARGET_ARCH" \
-     $CC_TOOLCHAIN \
-     $CROSS_CMD \
-     $CROSS_OVERRIDES \
+     CROSS_COMPILE=x86_64-linux-gnu- \
      LLVM=1 \
+     CC="$CC_OVERRIDE" \
+     HOSTCC="$HOSTCC_OVERRIDE" \
+     $CROSS_OVERRIDES \
      PKG_CONFIG="$PKG_CONFIG_TOOL" \
      KCFLAGS="$USER_KCFLAGS" \
      KDEB_SOURCENAME="$KDEB_NAME" \
