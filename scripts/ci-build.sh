@@ -48,16 +48,16 @@ cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 # --- 2.5. Inject Patches ---
 echo "💉 Injecting Custom Scheduler..."
 SCHEDULER_LABEL="eevdf"
-if [ -n "$BORE_PATCH_URL" ]; then
-    if curl -fLo bore.patch "$BORE_PATCH_URL"; then
-        if patch -p1 -F 3 < bore.patch; then
-            echo "   ✅ Patch applied successfully."
-            SCHEDULER_LABEL="bore"
-        else
-            echo "   ⚠️  Patch failed! Falling back to standard EEVDF."
-        fi
-    fi
-fi
+# if [ -n "$BORE_PATCH_URL" ]; then
+#     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
+#         if patch -p1 -F 3 < bore.patch; then
+#             echo "   ✅ Patch applied successfully."
+#             SCHEDULER_LABEL="bore"
+#         else
+#             echo "   ⚠️  Patch failed! Falling back to standard EEVDF."
+#         fi
+#     fi
+# fi
 
 # 5. Tuning
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
@@ -66,11 +66,11 @@ if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
 fi
 
 # 6. Sanitization
-echo "🧹 Stripping Keys and Finalizing Config..."
-./scripts/config --disable SYSTEM_TRUSTED_KEYS
-./scripts/config --disable SYSTEM_REVOCATION_KEYS
-./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make "${MAKE_ARGS[@]}" olddefconfig
+# echo "🧹 Stripping Keys and Finalizing Config..."
+# ./scripts/config --disable SYSTEM_TRUSTED_KEYS
+# ./scripts/config --disable SYSTEM_REVOCATION_KEYS
+# ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
+# make "${MAKE_ARGS[@]}" olddefconfig
 
 # --- 7. Versioning Strategy ---
 OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
@@ -83,10 +83,10 @@ echo "🏷️  Harper Identity: $PKG_VERSION"
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
 # 1. CLEAN
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Fresh Build: Cleaning artifacts..."
-    make "${MAKE_ARGS[@]}" clean
-fi
+# if [ "$INCREMENTAL_BUILD" != "true" ]; then
+#     echo "🧹 Fresh Build: Cleaning artifacts..."
+#     make "${MAKE_ARGS[@]}" clean
+# fi
 
 export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
 make ARCH=x86_64 allnoconfig
