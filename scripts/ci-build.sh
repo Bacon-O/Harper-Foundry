@@ -3,7 +3,6 @@ set -e
 
 # ==============================================================================
 #  HARPER-KERNEL FOUNDRY: MAIN SMELTING SCRIPT
-#  "The heat of the forge reveals the strength of the steel."
 # ==============================================================================
 
 # 1. Load Fuel (Environment Variables)
@@ -36,7 +35,8 @@ HOST_ARCH=$(uname -m)
 
 # 2. Prepare Source
 echo "🔧 Verifying packaging tools..."
-apt-get update && apt-get install -y rsync llvm curl patch
+# Ensure we have the x86 gcc libs for linking
+apt-get update && apt-get install -y rsync llvm curl patch libgcc-12-dev:amd64
 
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
@@ -45,7 +45,7 @@ echo "📥 Fetching Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 
-# --- 2.5. Inject Patches (BORE Scheduler) ---
+# --- 2.5. Inject Patches ---
 echo "💉 Injecting Custom Scheduler..."
 SCHEDULER_LABEL="eevdf"
 if [ -n "$BORE_PATCH_URL" ]; then
@@ -59,9 +59,9 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
-# --- 3. DEFINE BUILD ARGUMENTS (GLOBAL) ---
-# We define these ONCE and use them for EVERY make command.
-# This ensures 'olddefconfig' sees the Clang overrides and doesn't look for GCC.
+# --- 3. DEFINE GLOBAL BUILD ARGUMENTS ---
+# We use a bash array to handle spaces correctly.
+# These args are applied to EVERY make command (config, clean, build).
 MAKE_ARGS=(
     ARCH="$TARGET_ARCH"
     CROSS_COMPILE=x86_64-linux-gnu-
@@ -69,22 +69,28 @@ MAKE_ARGS=(
     DEB_BUILD_ARCH=arm64
     DEB_TARGET_ARCH=amd64
     KCFLAGS="$USER_KCFLAGS"
-    # Basic Clang Overrides (Matches your manual command)
-    CC="clang --target=x86_64-linux-gnu"
-    HOSTCC="clang --target=x86_64-linux-gnu"
+    # Force use of LLD linker for everything
     HOSTLD="ld.lld"
+    LD="ld.lld"
 )
 
-# Inject Host-Specific Paths if Cross-Compiling
+# Inject Host-Specific Paths & Flags
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
+    echo "🔗 Injecting Cross-Build Overrides..."
     MAKE_ARGS+=(
+        # -fuse-ld=lld tells Clang to use LLD instead of the system /usr/bin/ld
+        "CC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
+        "HOSTCC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
         "TOOLS_LIBC_INCLUDE=/usr/include/x86_64-linux-gnu"
         "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
-        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu"
+        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu -fuse-ld=lld"
     )
+else
+    MAKE_ARGS+=( "CC=clang" "HOSTCC=clang" )
 fi
 
 # 4. Base Configuration
+# We apply MAKE_ARGS here so it finds the cross-compiler
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
     echo "🐣 Applying standard base: $BASE_CONFIG"
     make "${MAKE_ARGS[@]}" "$BASE_CONFIG"
@@ -110,7 +116,6 @@ echo "🧹 Stripping Keys and Finalizing Config..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-# APPLY ARGS HERE TOO
 make "${MAKE_ARGS[@]}" olddefconfig
 
 # --- 7. Versioning Strategy ---
@@ -130,13 +135,19 @@ if [ "$INCREMENTAL_BUILD" != "true" ]; then
 fi
 
 # 2. FIRE THE FORGE
-# We add the bindeb-pkg specific args to our base args
-make "${MAKE_ARGS[@]}" \
-     KDEB_SOURCENAME="$KDEB_NAME" \
-     KDEB_PKGVERSION="$PKG_VERSION" \
-     KDEB_CHANGELOG_DIST="trixie" \
-     -j"$FINAL_JOBS" \
-     bindeb-pkg
+# We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
+make -j$(nproc) \
+    ARCH=x86_64 \
+    CROSS_COMPILE=x86_64-linux-gnu- \
+    KBUILD_BUILD_ARCH=x86_64 \
+    DEB_BUILD_ARCH=arm64 \
+    DEB_TARGET_ARCH=amd64 \
+    CC="clang --target=x86_64-linux-gnu" \
+    HOSTCC="clang --target=x86_64-linux-gnu" \
+    HOSTLD="x86_64-linux-gnu-ld" \
+    HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu" \
+    HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu" \
+    bindeb-pkg
 
 # --- 9. Artifact Collection ---
 mkdir -p "$CONTAINER_OUTPUT_DIR"
