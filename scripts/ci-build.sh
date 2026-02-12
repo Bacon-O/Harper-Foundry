@@ -33,39 +33,8 @@ echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
 HOST_ARCH=$(uname -m)
-PKG_CONFIG_TOOL="pkg-config"
 
-# --- 2. PREPARE THE BUILD ENV (The Wrapper Fix) ---
-# We create a wrapper script to handle the complex flags.
-# This avoids all shell quoting and 'unrecognized option' errors in Make.
-if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-    echo "🔧 Cross-Compiling Detected ($HOST_ARCH -> $TARGET_ARCH)"
-    PKG_CONFIG_TOOL="x86_64-linux-gnu-pkg-config"
-    
-    # 1. Find where Debian hides the x86 libgcc (solves 'unable to find -lgcc')
-    GCC_LIB_PATH=$(find /usr/lib/gcc/x86_64-linux-gnu -name "libgcc.a" | head -n 1 | xargs dirname)
-    echo "📍 Found GCC Libs at: $GCC_LIB_PATH"
-
-    # 2. Create the Wrapper Script
-    cat <<EOF > /usr/bin/x86-clang
-#!/bin/sh
-# Wrapper to force x86 target and LLD linker
-exec clang --target=x86_64-linux-gnu -fuse-ld=lld -L${GCC_LIB_PATH} "\$@"
-EOF
-    chmod +x /usr/bin/x86-clang
-    
-    # 3. Set our compilers to use the wrapper
-    MY_CC="x86-clang"
-    MY_HOSTCC="x86-clang"
-    MY_HOSTLD="ld.lld"
-else
-    echo "🔧 Native Build Detected ($HOST_ARCH)"
-    MY_CC="clang"
-    MY_HOSTCC="clang"
-    MY_HOSTLD="ld.lld"
-fi
-
-# 3. Prepare Source
+# 2. Prepare Source
 echo "🔧 Verifying packaging tools..."
 apt-get update && apt-get install -y rsync llvm curl patch
 
@@ -92,63 +61,53 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
-# 4. Base Configuration
-# We use our wrapper (MY_CC) or standard clang depending on arch
+# 3. Base Configuration
+# NOTE: Removed LLVM=1 to match your manual command
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
     echo "🐣 Applying standard base: $BASE_CONFIG"
-    make ARCH="$TARGET_ARCH" CC="$MY_CC" LLVM=1 "$BASE_CONFIG"
+    make ARCH="$TARGET_ARCH" "$BASE_CONFIG"
 else
     echo "📄 Applying custom base: $BASE_CONFIG"
     if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
         cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
-        make ARCH="$TARGET_ARCH" CC="$MY_CC" LLVM=1 olddefconfig
+        make ARCH="$TARGET_ARCH" olddefconfig
     else
         echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
         exit 1
     fi
 fi
 
-# 5. Tuning
+# 4. Tuning
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
     ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
 fi
 
-# 6. Sanitization
+# 5. Sanitization
 echo "🧹 Stripping Keys and Finalizing Config..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make ARCH="$TARGET_ARCH" CC="$MY_CC" LLVM=1 olddefconfig
+make ARCH="$TARGET_ARCH" olddefconfig
 
-# --- 7. Versioning Strategy ---
+# --- 6. Versioning Strategy ---
 OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
 TIMESTAMP=$(date +%Y%m%d)
 SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
 echo "🏷️  Harper Identity: $PKG_VERSION"
 
-# --- 8. Compile (The Wrapper Execution) ---
+# --- 7. Compile (The Literal Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
-# 1. CLEAN
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Fresh Build: Cleaning artifacts..."
-    make ARCH="$TARGET_ARCH" CC="$MY_CC" LLVM=1 clean
-fi
-make ARCH="$TARGET_ARCH" CC="$MY_CC" LLVM=1 olddefconfig
-
-# 2. FIRE THE FORGE
-# We use the MAKE_ARGS array to pass the environment-specific compilers.
-# This is safe, clean, and prevents 'unrecognized option' errors.
+# 1. BUILD THE ARGUMENT ARRAY
+# This exactly mirrors your working manual command.
 MAKE_ARGS=(
     ARCH="$TARGET_ARCH"
     CROSS_COMPILE=x86_64-linux-gnu-
-    LLVM=1
-    PKG_CONFIG="$PKG_CONFIG_TOOL"
-    CC="$MY_CC"
-    HOSTCC="$MY_HOSTCC"
-    HOSTLD="$MY_HOSTLD"
+    KBUILD_BUILD_ARCH=x86_64
+    DEB_BUILD_ARCH=arm64
+    DEB_TARGET_ARCH=amd64
     KCFLAGS="$USER_KCFLAGS"
     KDEB_SOURCENAME="$KDEB_NAME"
     KDEB_PKGVERSION="$PKG_VERSION"
@@ -156,17 +115,32 @@ MAKE_ARGS=(
     -j"$FINAL_JOBS"
 )
 
-# Add extra includes for host tools if cross-compiling
+# 2. INJECT HOST OVERRIDES
+# These are the exact overrides you provided.
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-     MAKE_ARGS+=(
+    echo "🔗 Injecting Cross-Build Overrides for Tools..."
+    MAKE_ARGS+=(
+        "CC=clang --target=x86_64-linux-gnu"
+        "HOSTCC=clang --target=x86_64-linux-gnu"
+        "HOSTLD=ld.lld"
+        "TOOLS_LIBC_INCLUDE=/usr/include/x86_64-linux-gnu"
         "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
-        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu -L${GCC_LIB_PATH}"
-     )
+        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu"
+    )
 fi
 
+# 3. CLEAN & SYNC
+if [ "$INCREMENTAL_BUILD" != "true" ]; then
+    echo "🧹 Fresh Build: Cleaning artifacts..."
+    make ARCH="$TARGET_ARCH" clean
+fi
+make ARCH="$TARGET_ARCH" olddefconfig
+
+# 4. FIRE THE FORGE
+# "${MAKE_ARGS[@]}" expands the array safely, preserving the quoted strings.
 make "${MAKE_ARGS[@]}" bindeb-pkg
 
-# --- 9. Artifact Collection ---
+# --- 8. Artifact Collection ---
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
