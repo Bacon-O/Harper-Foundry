@@ -4,3 +4,5 @@ dist/
 # Temporary Configs
 params/*.tmp
 *.config.old
+
+.scratch/

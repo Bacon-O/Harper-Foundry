@@ -26,7 +26,17 @@ RUN apt-get update && apt-get install -y \
     python3 \
     pkg-config \
     curl \
-    patch
+    patch \
+    binutils-x86-64-linux-gnu \
+    build-essential \
+    debhelper \
+    debianutils \
+    gcc-x86-64-linux-gnu \
+    initramfs-tools \
+    kmod \
+    libc6-dev-amd64-cross \
+    libelf-dev \
+    libssl-dev \
 
 # 3. Install x86_64 Target Libraries (the "Satisfiers")
 # These prevent the "cannot find -lelf" and "wrong format" errors
