@@ -107,12 +107,13 @@ make -j$(nproc) \
     KBUILD_BUILD_ARCH="$TARGET_ARCH" \
     DEB_BUILD_ARCH="$MAKE_DEB_BUILD_ARCH" \
     DEB_TARGET_ARCH="$MAKE_DEB_TARGET_ARCH" \
+    KBUILD_DEBARCH="$MAKE_DEB_TARGET_ARCH" \
     CC="$MAKE_CC" \
     HOSTCC="$MAKE_CC" \
     HOSTLD="$MAKE_HOSTLD" \
     HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
     HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
-    bindeb-pkg
+    deb-pkg
 
 # --- 9. Artifact Collection ---
 echo "looking for .deb files in $CONTAINER_BUILD_ROOT..."
