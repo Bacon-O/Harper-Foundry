@@ -50,4 +50,11 @@ for cmd in "${dependencies[@]}"; do
     fi
 done
 
+# Sanity check: ensure the QEMU bridge is accessible inside the container
+if [ "$HOST_ARCH" != "x86_64" ] && [ ! -f "/usr/bin/qemu-x86_64-static" ]; then
+    echo "❌ ERROR: QEMU static binary not found at /usr/bin/qemu-x86_64-static"
+    echo "   Ensure you are mounting it with: -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro"
+    exit 1
+fi
+
 echo "✅ Charge Materials Verified. The environment is heat-ready."

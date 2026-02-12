@@ -29,7 +29,7 @@ FOUNDRY_EXEC="ci-build.sh"
 
 # --- Foundry Image Configuration ---
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
-FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_full_auto.dockerfile"
+FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_v2.dockerfile"
 IMAGE_NAME="debian-harper-worker"
 
 # --- Container Internal Paths (Do not change unless Dockerfile changes) ---
@@ -38,6 +38,9 @@ CONTAINER_BUILD_ROOT="/build"
 CONTAINER_OUTPUT_DIR="/opt/factory/output"
 CONTAINER_CONFIG_DIR="/opt/factory/configs"
 CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
+
+# Set this to "LLVM=1" for native or let env_setup.sh override for cross-compile
+CC_TOOLCHAIN="LLVM=1"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION

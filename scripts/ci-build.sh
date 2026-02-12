@@ -131,34 +131,43 @@ echo "🏷️  Harper Identity: $PKG_VERSION"
 # --- 7. Compile (The Critical Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
-# 1. NUKE ALL FLAGS (The "Scorched Earth" Policy)
-#    We unset standard flags too, just in case dpkg set them.
-unset HOSTCFLAGS HOSTLDFLAGS
-unset CFLAGS LDFLAGS CPPFLAGS
-unset KBUILD_HOSTCFLAGS KBUILD_HOSTLDFLAGS
+# 1. SET ARCH-SPECIFIC TOOLING FLAGS
+#    We need to point the 'Host' tools to the x86_64 headers/libs we installed
+if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
+    echo "🔗 Injecting Cross-Build Overrides for Tools..."
+    CROSS_OVERRIDES="HOSTCC='clang --target=x86_64-linux-gnu' \
+                     HOSTLD='ld.lld' \
+                     HOSTCFLAGS='-I/usr/include/x86_64-linux-gnu' \
+                     HOSTLDFLAGS='-L/usr/lib/x86_64-linux-gnu'"
+else
+    CROSS_OVERRIDES=""
+fi
 
 # 2. FORCE CLEAN (Kill the Zombies)
 if [ "$INCREMENTAL_BUILD" == "true" ]; then
     echo "♻️  Incremental Mode: Skipping 'make clean' to preserve object files."
 else
     echo "🧹 Fresh Build: Cleaning previous artifacts..."
+    # We use ARCH here so it doesn't try to clean using the wrong logic
     make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" clean
 fi
 
-# 3. RESTORE CONFIG
-#    'make clean' might delete the .config, so we ensure it's set.
-#    (Re-running olddefconfig is fast and safe)
+# 3. RESTORE CONFIG & SYNC
 make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
 
-# 4. FIRE THE FORGE (With explicit overrides)
+# 4. FIRE THE FORGE
+#    Added $CROSS_OVERRIDES to ensure scripts/basic/fixdep and objtool 
+#    are built as x86_64 and linked against amd64 libs.
 make ARCH="$TARGET_ARCH" \
      $CC_TOOLCHAIN \
-     "$CROSS_CMD" \
+     $CROSS_CMD \
+     $CROSS_OVERRIDES \
+     LLVM=1 \
      PKG_CONFIG="$PKG_CONFIG_TOOL" \
      KCFLAGS="$USER_KCFLAGS" \
      KDEB_SOURCENAME="$KDEB_NAME" \
      KDEB_PKGVERSION="$PKG_VERSION" \
-     HOSTCFLAGS="" HOSTLDFLAGS="" \
+     KDEB_CHANGELOG_DIST="trixie" \
      -j"$FINAL_JOBS" bindeb-pkg
 
 # --- 8. Artifact Collection ---

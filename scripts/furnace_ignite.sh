@@ -31,7 +31,7 @@ fi
 
 # 4. Dynamic Execution
 echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
-
+echo "Kernel version will be appended with: $LOCALVERSION"
 # Note: We pass CONTAINER_OUTPUT_DIR explicitly so ci-build.sh sees it
 docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
@@ -40,6 +40,13 @@ docker run -i --rm \
     -e CONTAINER_OUTPUT_DIR="/opt/factory/output" \
     -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
     -e INCREMENTAL_BUILD="$INCREMENTAL_BUILD" \
+    # --- ADDED ARCHITECTURE LOGIC ---
+    -e ARCH="x86_64" \
+    -e CROSS_COMPILE="x86_64-linux-gnu-" \
+    -e KBUILD_BUILD_ARCH="x86_64" \
+    -e DEB_TARGET_ARCH="amd64" \
+    -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro \
+    # --------------------------------
     -v "${BLOCK_VOL_PATH}:/build" \
     -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
     -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
