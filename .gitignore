@@ -6,3 +6,4 @@ params/*.tmp
 *.config.old
 
 .scratch/
+.vscode/

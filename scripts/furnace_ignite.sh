@@ -2,7 +2,7 @@
 set -e
 
 # 1. MUST Load Environment First to define variables
-if [ -z "$IMAGE_NAME" ]; then
+if [ -z "$REPO_ROOT" ]; then
     source "$(dirname "$0")/env_setup.sh" "$@"
 fi
 
