@@ -31,12 +31,12 @@ trap cleanup_internal EXIT
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
-HOST_ARCH=$(uname -m)
+# HOST_ARCH=$(uname -m)
 
 # 2. Prepare Source
 echo "🔧 Verifying packaging tools..."
 # Ensure we have the x86 gcc libs for linking
-apt-get update && apt-get install -y rsync llvm curl patch libgcc-12-dev:amd64
+# apt-get update && apt-get install -y rsync llvm curl patch libgcc-12-dev:amd64
 
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
@@ -46,8 +46,8 @@ apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 
 # --- 2.5. Inject Patches ---
-echo "💉 Injecting Custom Scheduler..."
-SCHEDULER_LABEL="eevdf"
+# echo "💉 Injecting Custom Scheduler..."
+# SCHEDULER_LABEL="eevdf"
 # if [ -n "$BORE_PATCH_URL" ]; then
 #     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
 #         if patch -p1 -F 3 < bore.patch; then
@@ -60,10 +60,10 @@ SCHEDULER_LABEL="eevdf"
 # fi
 
 # 5. Tuning
-if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
-    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
-    ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
-fi
+# if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+#     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
+#     ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+# fi
 
 # 6. Sanitization
 # echo "🧹 Stripping Keys and Finalizing Config..."
