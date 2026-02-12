@@ -48,9 +48,7 @@ cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 # --- 2.5. Inject Patches (BORE Scheduler) ---
 echo "💉 Injecting Custom Scheduler..."
 SCHEDULER_LABEL="eevdf"
-
 if [ -n "$BORE_PATCH_URL" ]; then
-    echo "   Fetching patch from: $BORE_PATCH_URL"
     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
         if patch -p1 -F 3 < bore.patch; then
             echo "   ✅ Patch applied successfully."
@@ -61,47 +59,9 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
-# 3. Base Configuration
-# NOTE: Removed LLVM=1 to match your manual command
-if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
-    echo "🐣 Applying standard base: $BASE_CONFIG"
-    make ARCH="$TARGET_ARCH" "$BASE_CONFIG"
-else
-    echo "📄 Applying custom base: $BASE_CONFIG"
-    if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
-        cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
-        make ARCH="$TARGET_ARCH" olddefconfig
-    else
-        echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
-        exit 1
-    fi
-fi
-
-# 4. Tuning
-if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
-    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
-    ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
-fi
-
-# 5. Sanitization
-echo "🧹 Stripping Keys and Finalizing Config..."
-./scripts/config --disable SYSTEM_TRUSTED_KEYS
-./scripts/config --disable SYSTEM_REVOCATION_KEYS
-./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make ARCH="$TARGET_ARCH" olddefconfig
-
-# --- 6. Versioning Strategy ---
-OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
-TIMESTAMP=$(date +%Y%m%d)
-SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
-PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
-echo "🏷️  Harper Identity: $PKG_VERSION"
-
-# --- 7. Compile (The Literal Fix) ---
-echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
-
-# 1. BUILD THE ARGUMENT ARRAY
-# This exactly mirrors your working manual command.
+# --- 3. DEFINE BUILD ARGUMENTS (GLOBAL) ---
+# We define these ONCE and use them for EVERY make command.
+# This ensures 'olddefconfig' sees the Clang overrides and doesn't look for GCC.
 MAKE_ARGS=(
     ARCH="$TARGET_ARCH"
     CROSS_COMPILE=x86_64-linux-gnu-
@@ -109,38 +69,76 @@ MAKE_ARGS=(
     DEB_BUILD_ARCH=arm64
     DEB_TARGET_ARCH=amd64
     KCFLAGS="$USER_KCFLAGS"
-    KDEB_SOURCENAME="$KDEB_NAME"
-    KDEB_PKGVERSION="$PKG_VERSION"
-    KDEB_CHANGELOG_DIST="trixie"
-    -j"$FINAL_JOBS"
+    # Basic Clang Overrides (Matches your manual command)
+    CC="clang --target=x86_64-linux-gnu"
+    HOSTCC="clang --target=x86_64-linux-gnu"
+    HOSTLD="ld.lld"
 )
 
-# 2. INJECT HOST OVERRIDES
-# These are the exact overrides you provided.
+# Inject Host-Specific Paths if Cross-Compiling
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-    echo "🔗 Injecting Cross-Build Overrides for Tools..."
     MAKE_ARGS+=(
-        "CC=clang --target=x86_64-linux-gnu"
-        "HOSTCC=clang --target=x86_64-linux-gnu"
-        "HOSTLD=ld.lld"
         "TOOLS_LIBC_INCLUDE=/usr/include/x86_64-linux-gnu"
         "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
         "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu"
     )
 fi
 
-# 3. CLEAN & SYNC
+# 4. Base Configuration
+if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
+    echo "🐣 Applying standard base: $BASE_CONFIG"
+    make "${MAKE_ARGS[@]}" "$BASE_CONFIG"
+else
+    echo "📄 Applying custom base: $BASE_CONFIG"
+    if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
+        cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
+        make "${MAKE_ARGS[@]}" olddefconfig
+    else
+        echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
+        exit 1
+    fi
+fi
+
+# 5. Tuning
+if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
+    ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+fi
+
+# 6. Sanitization
+echo "🧹 Stripping Keys and Finalizing Config..."
+./scripts/config --disable SYSTEM_TRUSTED_KEYS
+./scripts/config --disable SYSTEM_REVOCATION_KEYS
+./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
+# APPLY ARGS HERE TOO
+make "${MAKE_ARGS[@]}" olddefconfig
+
+# --- 7. Versioning Strategy ---
+OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+TIMESTAMP=$(date +%Y%m%d)
+SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
+PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
+echo "🏷️  Harper Identity: $PKG_VERSION"
+
+# --- 8. Compile ---
+echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
+
+# 1. CLEAN
 if [ "$INCREMENTAL_BUILD" != "true" ]; then
     echo "🧹 Fresh Build: Cleaning artifacts..."
-    make ARCH="$TARGET_ARCH" clean
+    make "${MAKE_ARGS[@]}" clean
 fi
-make ARCH="$TARGET_ARCH" olddefconfig
 
-# 4. FIRE THE FORGE
-# "${MAKE_ARGS[@]}" expands the array safely, preserving the quoted strings.
-make "${MAKE_ARGS[@]}" bindeb-pkg
+# 2. FIRE THE FORGE
+# We add the bindeb-pkg specific args to our base args
+make "${MAKE_ARGS[@]}" \
+     KDEB_SOURCENAME="$KDEB_NAME" \
+     KDEB_PKGVERSION="$PKG_VERSION" \
+     KDEB_CHANGELOG_DIST="trixie" \
+     -j"$FINAL_JOBS" \
+     bindeb-pkg
 
-# --- 8. Artifact Collection ---
+# --- 9. Artifact Collection ---
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
