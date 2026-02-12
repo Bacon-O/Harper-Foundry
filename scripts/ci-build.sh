@@ -134,6 +134,8 @@ if [ "$INCREMENTAL_BUILD" != "true" ]; then
     make "${MAKE_ARGS[@]}" clean
 fi
 
+apt-get update && apt-get install -y libdw-dev:amd64
+
 export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
 make ARCH=x86_64 allnoconfig
 ./scripts/config --file .config --enable 64BIT
