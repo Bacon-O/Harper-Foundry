@@ -113,7 +113,7 @@ make -j$(nproc) \
     HOSTLD="$MAKE_HOSTLD" \
     HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
     HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
-    deb-pkg
+    bindeb-pkg
 
 # --- 9. Artifact Collection ---
 echo "looking for .deb files in $CONTAINER_BUILD_ROOT..."
