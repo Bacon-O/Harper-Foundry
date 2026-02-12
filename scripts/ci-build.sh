@@ -106,16 +106,16 @@ SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
 echo "🏷️  Harper Identity: $PKG_VERSION"
 
-# --- 7. Compile (The Array Fix) ---
+# --- 7. Compile (The Linker Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
 # 1. BUILD THE ARGUMENT ARRAY
-# We use a bash array to store arguments. This prevents the shell from
-# splitting strings with spaces (like "clang --target=...").
+# We use a bash array to safely handle spaces in arguments.
 MAKE_ARGS=(
     ARCH="$TARGET_ARCH"
     CROSS_COMPILE=x86_64-linux-gnu-
     LLVM=1
+    LLVM_IAS=1
     PKG_CONFIG="$PKG_CONFIG_TOOL"
     KCFLAGS="$USER_KCFLAGS"
     KDEB_SOURCENAME="$KDEB_NAME"
@@ -124,17 +124,18 @@ MAKE_ARGS=(
     -j"$FINAL_JOBS"
 )
 
-# 2. INJECT HOST OVERRIDES IF NEEDED
+# 2. INJECT HOST OVERRIDES (The Critical "fuse-ld" Fix)
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
     echo "🔗 Injecting Cross-Build Overrides for Tools..."
-    # By adding these to the array, they are passed as distinct, single arguments
-    # regardless of the spaces inside them.
+    
+    # We add '-fuse-ld=lld' to ensure Clang uses the multi-arch LLVM linker
+    # instead of the single-arch system linker (/usr/bin/ld).
     MAKE_ARGS+=(
-        "HOSTCC=clang --target=x86_64-linux-gnu"
+        "HOSTCC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
         "HOSTLD=ld.lld"
         "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
-        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu"
-        "CC=clang --target=x86_64-linux-gnu"
+        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu -fuse-ld=lld"
+        "CC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
         "LD=ld.lld"
     )
 fi
@@ -147,7 +148,7 @@ fi
 make ARCH="$TARGET_ARCH" LLVM=1 olddefconfig
 
 # 4. FIRE THE FORGE
-# "${MAKE_ARGS[@]}" expands the array safely, preserving quoted strings.
+# "${MAKE_ARGS[@]}" expands the array safely, passing the complex flags correctly.
 make "${MAKE_ARGS[@]}" bindeb-pkg
 
 # --- 8. Artifact Collection ---
