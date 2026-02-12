@@ -134,6 +134,9 @@ if [ "$INCREMENTAL_BUILD" != "true" ]; then
     make "${MAKE_ARGS[@]}" clean
 fi
 
+export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+make ARCH=x86_64 allnoconfig
+./scripts/config --file .config --enable 64BIT
 # 2. FIRE THE FORGE
 # We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
 make -j$(nproc) \
