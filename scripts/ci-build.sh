@@ -59,52 +59,6 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
-# --- 3. DEFINE GLOBAL BUILD ARGUMENTS ---
-# We use a bash array to handle spaces correctly.
-# These args are applied to EVERY make command (config, clean, build).
-MAKE_ARGS=(
-    ARCH="$TARGET_ARCH"
-    CROSS_COMPILE=x86_64-linux-gnu-
-    KBUILD_BUILD_ARCH=x86_64
-    DEB_BUILD_ARCH=arm64
-    DEB_TARGET_ARCH=amd64
-    KCFLAGS="$USER_KCFLAGS"
-    # Force use of LLD linker for everything
-    HOSTLD="ld.lld"
-    LD="ld.lld"
-)
-
-# Inject Host-Specific Paths & Flags
-if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-    echo "🔗 Injecting Cross-Build Overrides..."
-    MAKE_ARGS+=(
-        # -fuse-ld=lld tells Clang to use LLD instead of the system /usr/bin/ld
-        "CC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
-        "HOSTCC=clang --target=x86_64-linux-gnu -fuse-ld=lld"
-        "TOOLS_LIBC_INCLUDE=/usr/include/x86_64-linux-gnu"
-        "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
-        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu -fuse-ld=lld"
-    )
-else
-    MAKE_ARGS+=( "CC=clang" "HOSTCC=clang" )
-fi
-
-# 4. Base Configuration
-# We apply MAKE_ARGS here so it finds the cross-compiler
-if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
-    echo "🐣 Applying standard base: $BASE_CONFIG"
-    make "${MAKE_ARGS[@]}" "$BASE_CONFIG"
-else
-    echo "📄 Applying custom base: $BASE_CONFIG"
-    if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
-        cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
-        make "${MAKE_ARGS[@]}" olddefconfig
-    else
-        echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
-        exit 1
-    fi
-fi
-
 # 5. Tuning
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
@@ -134,11 +88,11 @@ if [ "$INCREMENTAL_BUILD" != "true" ]; then
     make "${MAKE_ARGS[@]}" clean
 fi
 
-apt-get update && apt-get install -y libdw-dev:amd64
-
 export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
 make ARCH=x86_64 allnoconfig
 ./scripts/config --file .config --enable 64BIT
+make ARCH=x86_64 allnoconfig
+
 # 2. FIRE THE FORGE
 # We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
 make -j$(nproc) \
