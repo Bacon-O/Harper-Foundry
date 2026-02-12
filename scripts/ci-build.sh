@@ -85,8 +85,7 @@ echo "🏷️  Harper Identity: $PKG_VERSION"
 # 1. CLEAN
 if [ "$INCREMENTAL_BUILD" != "true" ]; then
     echo "🧹 Fresh Build: Cleaning artifacts..."
-    make clean
-    make mrproper
+    make "${MAKE_ARGS[@]}" clean
 fi
 
 # export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
