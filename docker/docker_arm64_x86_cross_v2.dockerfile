@@ -1,5 +1,10 @@
 FROM debian:trixie-slim
 
+RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian trixie-backports main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian trixie main" >> /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian trixie-backports main" >> /etc/apt/sources.list
+
 # 1. Enable Multiarch so we can install amd64 libraries on an arm64 host
 RUN dpkg --add-architecture amd64
 
@@ -19,7 +24,9 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     debhelper \
     python3 \
-    pkg-config
+    pkg-config \
+    curl \
+    patch
 
 # 3. Install x86_64 Target Libraries (the "Satisfiers")
 # These prevent the "cannot find -lelf" and "wrong format" errors
