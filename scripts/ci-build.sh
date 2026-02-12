@@ -73,7 +73,13 @@ echo "🧹 Stripping Keys and Finalizing Config..."
 make "${MAKE_ARGS[@]}" olddefconfig
 
 # --- 7. Versioning Strategy ---
-OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+#OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+if [ -f "debian/changelog" ]; then
+    OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+else
+    echo "⚠️  debian/changelog not found. Falling back to kernel version."
+    OFFICIAL_VER=$(make -s kernelversion)
+fi
 TIMESTAMP=$(date +%Y%m%d)
 SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
