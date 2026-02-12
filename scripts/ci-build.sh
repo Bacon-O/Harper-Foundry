@@ -71,7 +71,7 @@ if [ -n "$BORE_PATCH_URL" ]; then
 fi
 
 # 3. Base Configuration
-# We use LLVM=1 here because it's standard for all config steps
+# Using standard LLVM=1 flow
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
     echo "🐣 Applying standard base: $BASE_CONFIG"
     make ARCH="$TARGET_ARCH" LLVM=1 "$BASE_CONFIG"
@@ -106,43 +106,49 @@ SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
 echo "🏷️  Harper Identity: $PKG_VERSION"
 
-# --- 7. Compile (The Architecture Poisoning Fix) ---
+# --- 7. Compile (The Array Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
-# 1. EXPORT OVERRIDES TO THE ENVIRONMENT
-# By exporting these, 'make' receives them as variables, not command-line flags.
-# This avoids the "unrecognized option --target" error.
+# 1. BUILD THE ARGUMENT ARRAY
+# We use a bash array to store arguments. This prevents the shell from
+# splitting strings with spaces (like "clang --target=...").
+MAKE_ARGS=(
+    ARCH="$TARGET_ARCH"
+    CROSS_COMPILE=x86_64-linux-gnu-
+    LLVM=1
+    PKG_CONFIG="$PKG_CONFIG_TOOL"
+    KCFLAGS="$USER_KCFLAGS"
+    KDEB_SOURCENAME="$KDEB_NAME"
+    KDEB_PKGVERSION="$PKG_VERSION"
+    KDEB_CHANGELOG_DIST="trixie"
+    -j"$FINAL_JOBS"
+)
+
+# 2. INJECT HOST OVERRIDES IF NEEDED
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
     echo "🔗 Injecting Cross-Build Overrides for Tools..."
-    export HOSTCC="clang --target=x86_64-linux-gnu"
-    export HOSTLD="ld.lld"
-    export HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
-    export HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
-    export CC="clang --target=x86_64-linux-gnu"
-    export LD="ld.lld"
-else
-    export CC="clang"
+    # By adding these to the array, they are passed as distinct, single arguments
+    # regardless of the spaces inside them.
+    MAKE_ARGS+=(
+        "HOSTCC=clang --target=x86_64-linux-gnu"
+        "HOSTLD=ld.lld"
+        "HOSTCFLAGS=-I/usr/include/x86_64-linux-gnu"
+        "HOSTLDFLAGS=-L/usr/lib/x86_64-linux-gnu"
+        "CC=clang --target=x86_64-linux-gnu"
+        "LD=ld.lld"
+    )
 fi
 
-# 2. CLEAN & SYNC
+# 3. CLEAN & SYNC
 if [ "$INCREMENTAL_BUILD" != "true" ]; then
     echo "🧹 Fresh Build: Cleaning artifacts..."
     make ARCH="$TARGET_ARCH" LLVM=1 clean
 fi
 make ARCH="$TARGET_ARCH" LLVM=1 olddefconfig
 
-# 3. FIRE THE FORGE
-# Note: We pass ARCH and CROSS_COMPILE here, but the complex CC/HOSTCC 
-# strings are already in the environment.
-make ARCH="$TARGET_ARCH" \
-     CROSS_COMPILE=x86_64-linux-gnu- \
-     LLVM=1 \
-     PKG_CONFIG="$PKG_CONFIG_TOOL" \
-     KCFLAGS="$USER_KCFLAGS" \
-     KDEB_SOURCENAME="$KDEB_NAME" \
-     KDEB_PKGVERSION="$PKG_VERSION" \
-     KDEB_CHANGELOG_DIST="trixie" \
-     -j"$FINAL_JOBS" bindeb-pkg
+# 4. FIRE THE FORGE
+# "${MAKE_ARGS[@]}" expands the array safely, preserving quoted strings.
+make "${MAKE_ARGS[@]}" bindeb-pkg
 
 # --- 8. Artifact Collection ---
 mkdir -p "$CONTAINER_OUTPUT_DIR"
