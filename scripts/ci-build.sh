@@ -7,12 +7,10 @@ set -e
 # ==============================================================================
 
 # 1. Load Fuel (Environment Variables)
-#    Checks for the setup script, defaults to local vars if missing for testing.
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
     source /opt/factory/scripts/env_setup.sh
 else
     echo "⚠️  Warning: env_setup.sh not found. Using local defaults."
-    # Fallback defaults for testing without the full pipeline
     HOST_UID=${HOST_UID:-1000}
     HOST_GID=${HOST_GID:-1000}
     CONTAINER_BUILD_ROOT="/build"
@@ -24,7 +22,6 @@ else
 fi
 
 # --- Cleanup Trap ---
-#    Ensures files created by root (Docker) are owned by the host user (You)
 cleanup_internal() {
     echo "⚖️  Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
@@ -35,14 +32,11 @@ trap cleanup_internal EXIT
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
-# --- Auto-Detect Architecture & Pkg-Config ---
-#    Detects if we are cross-compiling (ARM -> x86) and adjusts tools accordingly.
 HOST_ARCH=$(uname -m)
 
+# --- Auto-Detect Architecture & Pkg-Config ---
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
     echo "🔧 Cross-Compiling Detected ($HOST_ARCH -> $TARGET_ARCH)"
-    echo "   Using x86_64 wrapper for pkg-config"
-    # Important: Uses the wrapper to prevent pulling ARM64 flags for x86 builds
     PKG_CONFIG_TOOL="x86_64-linux-gnu-pkg-config"
 else
     echo "🔧 Native Build Detected ($HOST_ARCH)"
@@ -51,47 +45,41 @@ fi
 
 # 2. Prepare Source
 echo "🔧 Verifying packaging tools..."
-# Ensure we have the tools to patch and link
 apt-get update && apt-get install -y rsync llvm curl patch
 
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
 echo "📥 Fetching Source: $KERNEL_SOURCE"
-# Pulls the source code defined in your env (e.g., linux/trixie-backports)
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
 
 # --- 2.5. Inject Patches (BORE Scheduler) ---
 echo "💉 Injecting Custom Scheduler..."
-SCHEDULER_LABEL="eevdf" # Default fallback
+SCHEDULER_LABEL="eevdf"
 
 if [ -n "$BORE_PATCH_URL" ]; then
     echo "   Fetching patch from: $BORE_PATCH_URL"
     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
-        # Try applying patch with fuzzy matching (-F 3)
         if patch -p1 -F 3 < bore.patch; then
             echo "   ✅ Patch applied successfully."
             SCHEDULER_LABEL="bore"
         else
-            echo "   ⚠️  Patch failed! Falling back to standard EEVDF scheduler."
+            echo "   ⚠️  Patch failed! Falling back to standard EEVDF."
         fi
-    else
-        echo "   ❌ ERROR: Download failed. Skipping patch."
     fi
-else
-    echo "⏩ No patch URL defined. Skipping injection."
 fi
 
 # 3. Base Configuration
+# We use LLVM=1 here because it's standard for all config steps
 if [[ "$BASE_CONFIG" == "defconfig" || "$BASE_CONFIG" == "tinyconfig" ]]; then
     echo "🐣 Applying standard base: $BASE_CONFIG"
-    make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" "$BASE_CONFIG"
+    make ARCH="$TARGET_ARCH" LLVM=1 "$BASE_CONFIG"
 else
     echo "📄 Applying custom base: $BASE_CONFIG"
     if [ -f "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" ]; then
         cp "${CONTAINER_CONFIG_DIR}/$BASE_CONFIG" .config
-        make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
+        make ARCH="$TARGET_ARCH" LLVM=1 olddefconfig
     else
         echo "❌ ERROR: Custom config $BASE_CONFIG not found!"
         exit 1
@@ -99,11 +87,9 @@ else
 fi
 
 # 4. Tuning
-echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
     ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
-else
-    echo "⚠️  Warning: Tuning file not found. Skipping merge."
 fi
 
 # 5. Sanitization
@@ -111,59 +97,46 @@ echo "🧹 Stripping Keys and Finalizing Config..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
+make ARCH="$TARGET_ARCH" LLVM=1 olddefconfig
 
-# --- 6. Versioning Strategy (The Harper Offset) ---
-#    Calculates priority: 200 for BORE (Custom), 100 for EEVDF (Standard)
-if [ "$SCHEDULER_LABEL" == "bore" ]; then
-    SCHED_PRIORITY="200"
-else
-    SCHED_PRIORITY="100"
-fi
-
+# --- 6. Versioning Strategy ---
 OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
 TIMESTAMP=$(date +%Y%m%d)
-# Syntax: <DebianVer> +harper. <Priority> . <Label> . <Date>
+SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
-
 echo "🏷️  Harper Identity: $PKG_VERSION"
 
-# --- 7. Compile (The Critical Fix) ---
+# --- 7. Compile (The Architecture Poisoning Fix) ---
 echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
 
-# 1. SET ARCH-SPECIFIC TOOLING FLAGS
-#    We need to point the 'Host' tools to the x86_64 headers/libs we installed
+# 1. EXPORT OVERRIDES TO THE ENVIRONMENT
+# By exporting these, 'make' receives them as variables, not command-line flags.
+# This avoids the "unrecognized option --target" error.
 if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
     echo "🔗 Injecting Cross-Build Overrides for Tools..."
-    CROSS_OVERRIDES="HOSTCC='clang --target=x86_64-linux-gnu' \
-                     HOSTLD='ld.lld' \
-                     HOSTCFLAGS='-I/usr/include/x86_64-linux-gnu' \
-                     HOSTLDFLAGS='-L/usr/lib/x86_64-linux-gnu'"
+    export HOSTCC="clang --target=x86_64-linux-gnu"
+    export HOSTLD="ld.lld"
+    export HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+    export HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+    export CC="clang --target=x86_64-linux-gnu"
+    export LD="ld.lld"
 else
-    CROSS_OVERRIDES=""
+    export CC="clang"
 fi
 
-# 2. FORCE CLEAN (Kill the Zombies)
-if [ "$INCREMENTAL_BUILD" == "true" ]; then
-    echo "♻️  Incremental Mode: Skipping 'make clean' to preserve object files."
-else
-    echo "🧹 Fresh Build: Cleaning previous artifacts..."
-    # We use ARCH here so it doesn't try to clean using the wrong logic
-    make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" clean
+# 2. CLEAN & SYNC
+if [ "$INCREMENTAL_BUILD" != "true" ]; then
+    echo "🧹 Fresh Build: Cleaning artifacts..."
+    make ARCH="$TARGET_ARCH" LLVM=1 clean
 fi
+make ARCH="$TARGET_ARCH" LLVM=1 olddefconfig
 
-# 3. RESTORE CONFIG & SYNC
-make ARCH="$TARGET_ARCH" "$CC_TOOLCHAIN" olddefconfig
-
-# 4. FIRE THE FORGE
-#    Added $CROSS_OVERRIDES to ensure scripts/basic/fixdep and objtool 
-#    are built as x86_64 and linked against amd64 libs.
+# 3. FIRE THE FORGE
+# Note: We pass ARCH and CROSS_COMPILE here, but the complex CC/HOSTCC 
+# strings are already in the environment.
 make ARCH="$TARGET_ARCH" \
      CROSS_COMPILE=x86_64-linux-gnu- \
      LLVM=1 \
-     CC="$CC_OVERRIDE" \
-     HOSTCC="$HOSTCC_OVERRIDE" \
-     $CROSS_OVERRIDES \
      PKG_CONFIG="$PKG_CONFIG_TOOL" \
      KCFLAGS="$USER_KCFLAGS" \
      KDEB_SOURCENAME="$KDEB_NAME" \
@@ -175,19 +148,12 @@ make ARCH="$TARGET_ARCH" \
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 
-# 1. Grab the Debian Packages (look in the build root)
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 
-# 2. Grab the bzImage (The "relative" find that worked before)
 BZ_PATH=$(find . -name bzImage | head -n 1)
-if [ -f "$BZ_PATH" ]; then
-    cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
-    echo "   ✅ Captured bzImage"
-fi
-
-# 3. Grab the Config
+[ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
 [ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
 echo "✅ Smelt Complete."
