@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get install -y \
     libelf-dev:amd64 \
     libssl-dev:amd64 \
-    libc6-dev:amd64
+    libc6-dev:amd64 \
 
 # 4. Set up a working directory
 WORKDIR /build
