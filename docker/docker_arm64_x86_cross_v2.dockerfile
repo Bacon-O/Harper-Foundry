@@ -36,8 +36,9 @@ RUN apt-get update && apt-get install -y \
     kmod \
     libc6-dev-amd64-cross \
     libelf-dev \
-    libssl-dev
-
+    libssl-dev \
+    libdw-dev
+    
 # 3. Install x86_64 Target Libraries (the "Satisfiers")
 # These prevent the "cannot find -lelf" and "wrong format" errors
 RUN apt-get install -y \
