@@ -5,5 +5,5 @@ source "$(dirname "${BASH_SOURCE[0]}")/foundry.params"
 # 2. Apply Testing Overwrites (The Child)
 # This replaces whatever HOST_DIST_BASE was set in the main file.
 HOST_DIST_BASE="/mnt/build-data/dist/testing"
-
+TUNING_CONFIG="tinyconfig.config"
 echo "🧪 Testing Profile Loaded: Diverting output to $HOST_DIST_BASE"
