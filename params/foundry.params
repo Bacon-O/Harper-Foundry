@@ -53,7 +53,7 @@ CC_TOOLCHAIN="LLVM=1"
 # "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
 # The compiler accepts this as a concrete CPU model.
 USER_KCFLAGS="-march=haswell -mtune=haswell"
-CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
+CROSS_CMD="x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper-v3"
 KERNEL_SOURCE="linux/trixie-backports"
 
