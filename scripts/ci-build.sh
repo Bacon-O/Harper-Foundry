@@ -59,6 +59,11 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
+#Checking directory contents for debugging
+echo "🔍 Current directory contents:"
+pwd
+ls -lhta
+
 # 5️⃣ Initialize Pristine .config
 echo "🛠 Generating fresh default Debian config..."
 rm -f .config  # ⬅️ Force wipe any stale state from previous runs
