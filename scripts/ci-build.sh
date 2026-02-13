@@ -39,12 +39,6 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
 
-# Guarantee a completely sterile environment before patching or configuring
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Scrubbing source tree to factory-fresh state..."
-    make mrproper
-fi
-
 # 4️⃣ Apply BORE/EEVDF Patch
 SCHEDULER_LABEL="eevdf"
 if [ -n "$BORE_PATCH_URL" ]; then
@@ -140,6 +134,13 @@ mkdir -p "$CONTAINER_OUTPUT_DIR"
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
+
+
+# Guarantee a completely sterile environment before patching or configuring
+if [ "$INCREMENTAL_BUILD" != "true" ]; then
+    echo "🧹 Scrubbing source tree to factory-fresh state..."
+    make mrproper
+fi
 
 BZ_PATH=$(find . -name bzImage | head -n1)
 [ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
