@@ -75,7 +75,7 @@ FOUNDRY_NPROC=""
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
-TUNING_CONFIG="linux-tkg_harper.config"
+TUNING_CONFIG="debian_tune_test_v1.config"
 
 # --- Scheduler Patch ---
 BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
