@@ -2,14 +2,14 @@
 set -e
 
 # ==============================================================================
-#  HARPER-KERNEL FOUNDRY: MAIN SMELTING SCRIPT
+#  HARPER-KERNEL FOUNDRY: CI BUILD SCRIPT
 # ==============================================================================
 
-# 1. Load Fuel (Environment Variables)
+# 1️⃣ Load Environment
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
-    source /opt/factory/scripts/env_setup.sh
+    source /opt/factory/scripts/env_setup.sh "$@"
 else
-    echo "⚠️  Warning: env_setup.sh not found. Using local defaults."
+    echo "⚠️  env_setup.sh not found. Using defaults."
     HOST_UID=${HOST_UID:-1000}
     HOST_GID=${HOST_GID:-1000}
     CONTAINER_BUILD_ROOT="/build"
@@ -20,9 +20,9 @@ else
     FINAL_JOBS=$(nproc)
 fi
 
-# --- Cleanup Trap ---
+# 2️⃣ Cleanup Trap
 cleanup_internal() {
-    echo "⚖️  Internal Fix: Reclaiming ownership for Host UID: $HOST_UID"
+    echo "⚖️ Reclaiming ownership for host user $HOST_UID..."
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
     chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
 }
@@ -31,78 +31,72 @@ trap cleanup_internal EXIT
 echo "🚀 Starting Harper-Kernel Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
-HOST_ARCH=$(uname -m)
-
-# 2. Prepare Source
-echo "🔧 Verifying packaging tools..."
-# Ensure we have the x86 gcc libs for linking
-
-
+# 3️⃣ Prepare Source
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
-# echo "📥 Fetching Source: $KERNEL_SOURCE"
+echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
-cd linux-*/ || { echo "❌ ERROR: Source directory not found!"; exit 1; }
+cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
 
-# --- 2.5. Inject Patches ---
-echo "💉 Injecting Custom Scheduler..."
+# 4️⃣ Apply BORE/EEVDF Patch
 SCHEDULER_LABEL="eevdf"
 if [ -n "$BORE_PATCH_URL" ]; then
+    echo "💉 Applying Scheduler Patch..."
     if curl -fLo bore.patch "$BORE_PATCH_URL"; then
-        if patch -p1 -F 3 < bore.patch; then
-            echo "   ✅ Patch applied successfully."
+        if patch -p1 -F3 < bore.patch; then
+            echo "✅ BORE patch applied."
             SCHEDULER_LABEL="bore"
         else
-            echo "   ⚠️  Patch failed! Falling back to standard EEVDF."
+            echo "⚠️ Patch failed. Using fallback EEVDF scheduler."
         fi
     fi
 fi
 
-# 5. Tuning
-if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
-    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
-    ./scripts/kconfig/merge_config.sh -m .config "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+# 5️⃣ Initialize .config
+if [ ! -f .config ]; then
+    echo "🛠 Initializing default config..."
+    make defconfig
 fi
 
-# 6. Sanitization
-echo "🧹 Stripping Keys and Finalizing Config..."
+# 6️⃣ Merge Tuning Profile
+if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
+    cp "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ./
+    ./scripts/kconfig/merge_config.sh -m .config "$TUNING_CONFIG"
+fi
+
+# Resolve dependencies
+make olddefconfig
+
+# 8️⃣ Sanitization (Keys, Debug)
+echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make "${MAKE_ARGS[@]}" olddefconfig
+make olddefconfig
 
-# --- 7. Versioning Strategy ---
-#OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
+# 9️⃣ Versioning
 if [ -f "debian/changelog" ]; then
     OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
 else
-    echo "⚠️  debian/changelog not found. Falling back to kernel version."
     OFFICIAL_VER=$(make -s kernelversion)
 fi
 TIMESTAMP=$(date +%Y%m%d)
 SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
-echo "🏷️  Harper Identity: $PKG_VERSION"
+echo "🏷️ Harper Kernel Version: $PKG_VERSION"
 
-# --- 8. Compile ---
-# echo "🏗  Compiling Harper-Kernel ($TARGET_ARCH)..."
-
-# 1. CLEAN
+# 🔟 Clean Build Artifacts (if not incremental)
 if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Fresh Build: Cleaning artifacts..."
-    make "${MAKE_ARGS[@]}" clean
+    echo "🧹 Cleaning previous build artifacts..."
+    make clean
 fi
 
-# export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
-# make ARCH=x86_64 allnoconfig
-# ./scripts/config --file .config --enable 64BIT
-# make ARCH=x86_64 allnoconfig
-
-# 2. FIRE THE FORGE
-# We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
+# 1️⃣1️⃣ Compile Kernel with LLVM
+echo "🏗️ Compiling Kernel..."
 make -j$(nproc) \
-    LLVM=1\
+    LLVM=1 \
     ARCH="$TARGET_ARCH" \
     CROSS_COMPILE="$CROSS_CMD" \
     KBUILD_BUILD_ARCH="$TARGET_ARCH" \
@@ -114,24 +108,18 @@ make -j$(nproc) \
     HOSTLD="$MAKE_HOSTLD" \
     HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
     HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
+    USER_KCFLAGS="$USER_KCFLAGS" \
     bindeb-pkg
 
-# --- 9. Artifact Collection ---
-echo "looking for .deb files in $CONTAINER_BUILD_ROOT..."
-ls -lht "$CONTAINER_BUILD_ROOT"
-
-echo "looking for deb files in /build"
-ls -lht /build
-
-echo "============================================================"
+# 1️⃣2️⃣ Collect Artifacts
+echo "📦 Collecting artifacts..."
 mkdir -p "$CONTAINER_OUTPUT_DIR"
-echo "📦 Exporting artifacts to: $CONTAINER_OUTPUT_DIR"
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 
-BZ_PATH=$(find . -name bzImage | head -n 1)
+BZ_PATH=$(find . -name bzImage | head -n1)
 [ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
 [ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
-echo "✅ Smelt Complete."
+echo "✅ Harper Kernel Build Complete."
