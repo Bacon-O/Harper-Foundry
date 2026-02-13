@@ -102,6 +102,7 @@ fi
 # 2. FIRE THE FORGE
 # We use the array expansion "${MAKE_ARGS[@]}" to safely pass all flags
 make -j$(nproc) \
+    LLVM=1\
     ARCH="$TARGET_ARCH" \
     CROSS_COMPILE="$CROSS_CMD" \
     KBUILD_BUILD_ARCH="$TARGET_ARCH" \
