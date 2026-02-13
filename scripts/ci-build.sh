@@ -93,7 +93,11 @@ fi
 echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
-./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
+./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
+./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
+
+# 🔑 The fix for the certs/signing_key.x509 crash
+./scripts/config --set-str MODULE_SIG_KEY ""
 
 # Protect the environment variables during this final dependency check
 make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
