@@ -62,11 +62,22 @@ fi
 # 5️⃣ Initialize Pristine .config
 echo "🛠 Generating fresh default Debian config..."
 rm -f .config  # ⬅️ Force wipe any stale state from previous runs
+env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c debian/rules source
+env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+cp debian/build/build_amd64_none_amd64/.config .config
+
+# # Bypass heavy Debian fragment generation; use the static known-good base
+# if [ -f "${CONTAINER_CONFIG_DIR}/debian_6.18.5.config" ]; then
+#     cp "${CONTAINER_CONFIG_DIR}/debian_6.18.5.config" .config
+# else
+#     echo "❌ ERROR: debian_6.18.5.config missing from configs directory!"
+#     exit 1
+# fi
 
 # Generate the config using Debian's assembled fragments
-debian/rules source
-fakeroot make -f debian/rules.gen setup_amd64_none_amd64
-cp debian/build/build_amd64_none_amd64/.config .config
+# debian/rules source
+# fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+# cp debian/build/build_amd64_none_amd64/.config .config
 
 # 6️⃣ Merge Tuning Profile
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
