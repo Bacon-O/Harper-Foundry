@@ -17,7 +17,8 @@ HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
 # @PROMPT "HOST_DIST_BASE: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 HOST_DIST_BASE="/mnt/build-data/dist/release"
 
-LOCALVERSION="-tkg-harper-amd64v3"
+LOCALVERSION="deb-harper-amd64v3"
+INCREMENTAL_BUILD="false"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
@@ -63,6 +64,7 @@ MAKE_CC="clang --target=x86_64-linux-gnu"
 MAKE_HOSTLD="x86_64-linux-gnu-ld"
 MAKE_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
 MAKE_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+MAKE_LLVM="1"
 # ==============================================================================
 # BUILD STRATEGY & FEATURES
 # These parameters control the build process and specific kernel features.

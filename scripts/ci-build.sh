@@ -39,6 +39,12 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
 
+# Guarantee a completely sterile environment before patching or configuring
+if [ "$INCREMENTAL_BUILD" != "true" ]; then
+    echo "🧹 Scrubbing source tree to factory-fresh state..."
+    make mrproper
+fi
+
 # 4️⃣ Apply BORE/EEVDF Patch
 SCHEDULER_LABEL="eevdf"
 if [ -n "$BORE_PATCH_URL" ]; then
@@ -53,28 +59,34 @@ if [ -n "$BORE_PATCH_URL" ]; then
     fi
 fi
 
-# 5️⃣ Initialize .config
-if [ ! -f .config ]; then
-    echo "🛠 Initializing default config..."
-    make defconfig
-fi
+# 5️⃣ Initialize Pristine .config
+echo "🛠 Generating fresh default Debian config..."
+rm -f .config  # ⬅️ Force wipe any stale state from previous runs
+
+# Generate the config using Debian's assembled fragments
+debian/rules source
+fakeroot make -f debian/rules.gen setup_amd64_none_amd64
+cp debian/build/build_amd64_none_amd64/.config .config
 
 # 6️⃣ Merge Tuning Profile
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
     cp "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ./
-    ./scripts/kconfig/merge_config.sh -m .config "$TUNING_CONFIG"
+    
+    # Executing WITHOUT -m, and explicitly passing LLVM and ARCH 
+    # to protect the toolchain variables during validation
+    LLVM=1 ARCH="$TARGET_ARCH" ./scripts/kconfig/merge_config.sh .config "$TUNING_CONFIG"
 fi
 
-# Resolve dependencies
-make olddefconfig
 
 # 8️⃣ Sanitization (Keys, Debug)
 echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str CONFIG_SYSTEM_TRUSTED_KEYS ""
-make olddefconfig
+
+# Protect the environment variables during this final dependency check
+make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
 # 9️⃣ Versioning
 if [ -f "debian/changelog" ]; then
@@ -87,16 +99,11 @@ SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
 PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
 echo "🏷️ Harper Kernel Version: $PKG_VERSION"
 
-# 🔟 Clean Build Artifacts (if not incremental)
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Cleaning previous build artifacts..."
-    make clean
-fi
 
 # 1️⃣1️⃣ Compile Kernel with LLVM
 echo "🏗️ Compiling Kernel..."
 make -j$(nproc) \
-    LLVM=1 \
+    LLVM="$MAKE_LLVM" \
     ARCH="$TARGET_ARCH" \
     CROSS_COMPILE="$CROSS_CMD" \
     KBUILD_BUILD_ARCH="$TARGET_ARCH" \
