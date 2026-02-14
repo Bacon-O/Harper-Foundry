@@ -1,4 +1,11 @@
 name: Harper Kernel Factory
+
+# Build Strategy:
+# - Production (tags on main): Full production build (params/foundry.params)
+# - Main branch: Full testing build (params/_testing.foundry.params)
+# - Dev/Feature branches: Fast tinyconfig (2-5 min) for quick validation
+# - Manual dispatch: User selects which configuration to use
+
 on:
   push:
     branches: [ main, dev, feature/* ]
@@ -9,8 +16,9 @@ on:
       config_file:
         description: 'Forge Profile'
         type: choice
-        default: 'params/_testing.foundry.params'
+        default: 'params/tinyconfig.foundry.params'
         options:
+          - 'params/tinyconfig.foundry.params'
           - 'params/_testing.foundry.params'
           - 'params/foundry.params'
 
@@ -36,10 +44,25 @@ jobs:
             FILE="params/foundry.params"
             echo "🏷️ Production Tag on Main detected."
           
-          # 3. Default: Everything else goes to Testing
-          else
+          # 3. Feature branches: Use fast tinyconfig for quick validation
+          elif [[ "${{ github.ref }}" == refs/heads/feature/* ]]; then
+            FILE="params/tinyconfig.foundry.params"
+            echo "🧪 Feature branch: Using tinyconfig for fast validation."
+          
+          # 4. Dev branch: Use tinyconfig for speed
+          elif [[ "${{ github.ref }}" == refs/heads/dev ]]; then
+            FILE="params/tinyconfig.foundry.params"
+            echo "🧪 Dev branch: Using tinyconfig for fast testing."
+          
+          # 5. Main branch: Use full testing build
+          elif [[ "${{ github.ref }}" == refs/heads/main ]]; then
             FILE="params/_testing.foundry.params"
-            echo "🧪 Standard push: Routing to Testing."
+            echo "🏗️ Main branch: Using full testing configuration."
+          
+          # 6. Default: Everything else uses tinyconfig for speed
+          else
+            FILE="params/tinyconfig.foundry.params"
+            echo "🧪 Default: Using tinyconfig for fast validation."
           fi
           
           echo "🚀 Selected Blueprint: $FILE"
