@@ -59,8 +59,11 @@ Before contributing, ensure you have:
 
 3. Test your changes:
    ```bash
-   # Run a test build
-   ./start_build.sh --test-run
+   # Run a quick test build (2-5 minutes)
+   ./start_build.sh --config-file params/tinyconfig.foundry.params
+   
+   # Or use make
+   make test
    
    # Validate params
    ./scripts/validate_params.sh

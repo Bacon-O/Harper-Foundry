@@ -62,11 +62,11 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 📂 Project Structure
 
 *   `start_build.sh`: The main entry point for local builds.
-*   `params/`: Configuration files (e.g., `foundry.params`).
+*   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.foundry.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment hydration.
     *   `furnace_ignite.sh`: Docker container launch logic.
-    *   `ci-build.sh`: The internal build script executed inside the container.
+    *   `alloymixtures/`: Build script variants (full, tinyconfig, etc.).
     *   `material_analysis.sh`: Post-build Quality Assurance.
 *   `configs/`: Kernel configuration fragments (base configs and tuning overlays).
 *   `docker/`: Dockerfiles defining the build environment.
@@ -142,9 +142,11 @@ make deep-clean  # Remove all artifacts
 
 ### Examples
 
-**Run a fast test build:**
+**Run a fast test build (tinyconfig):**
 ```bash
-./start_build.sh --test-run
+./start_build.sh --config-file params/tinyconfig.foundry.params
+# Or simply:
+make test
 ```
 
 **Build using a specific configuration file:**
@@ -152,10 +154,42 @@ make deep-clean  # Remove all artifacts
 ./start_build.sh --config-file params/experimental.params
 ```
 
+**Use a specific build mixture:**
+```bash
+./start_build.sh --exec alloymixtures/tinyconfig.sh
+```
+
 **Force rebuild of Docker image:**
 ```bash
 ./start_build.sh --rebuild
 ```
+
+## 🧪 Build Mixtures (Alloy Configurations)
+
+The foundry supports different "alloy mixtures" - build configurations optimized for different purposes:
+
+### Available Mixtures
+
+| Mixture | Build Time | Purpose | Artifacts |
+|---------|------------|---------|-----------|
+| **full.sh** | 30-60+ min | Production builds | Full .deb packages |
+| **tinyconfig.sh** | 2-5 min | Quick testing | bzImage only |
+
+See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detailed information.
+
+### Quick Test vs Full Build
+
+**Tinyconfig Quick Test:**
+- ⚡ 2-5 minute builds
+- 🎯 Validates foundry pipeline
+- 📦 Minimal artifacts (bzImage only)
+- ✅ Perfect for testing changes
+
+**Full Production Build:**
+- 🏗️ 30-60+ minute builds
+- 🎯 Production-ready kernels
+- 📦 Complete .deb packages
+- ✅ Ready for deployment
 
 ### Cleanup
 

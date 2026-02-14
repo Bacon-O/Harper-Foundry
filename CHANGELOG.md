@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Alloy Mixtures System** - Modular build script variants in `scripts/alloymixtures/`
+  - `full.sh` - Complete production builds (moved from `ci-build.sh`)
+  - `tinyconfig.sh` - Fast 2-5 minute test builds for pipeline validation
+  - Comprehensive README documenting each mixture
+- **Tinyconfig Quick Test** - Dedicated fast build configuration
+  - `params/tinyconfig.foundry.params` - Optimized for speed
+  - Minimal QA validation (filesexists only)
+  - Builds bzImage in 2-5 minutes vs 30-60+ for full build
 - **Prerequisites checker** (`scripts/check_prerequisites.sh`) - Validates system requirements before building
 - **Build status viewer** (`scripts/show_builds.sh`) - Display build artifacts and disk usage information
 - **Configuration validator** (`scripts/validate_params.sh`) - Comprehensive validation of foundry.params
@@ -19,6 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration of prerequisite checking in `install.sh`
 - Better error handling and user feedback in `start_build.sh`
 - QA test package structure for `harperbase` test suite
+
+### Changed
+- **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/full.sh`
+  - Created symlink for backward compatibility
+  - Updated `FOUNDRY_EXEC` in `foundry.params`
+- **Makefile `test` target** - Now uses tinyconfig for much faster testing
+- **README structure** - Added alloy mixtures section and comparison table
 
 ### Fixed
 - **Critical bug**: Removed duplicate `CROSS_COMPILE` variable definition in `foundry.params`

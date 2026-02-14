@@ -21,7 +21,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="ci-build.sh"
+FOUNDRY_EXEC="alloymixtures/full.sh"
 INCREMENTAL_BUILD="false"
 
 

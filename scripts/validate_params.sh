@@ -87,6 +87,8 @@ fi
 # Check if foundry script exists
 if [ -f "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
     echo "  ✅ Foundry exec script found: scripts/$FOUNDRY_EXEC"
+elif [ -L "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
+    echo "  ✅ Foundry exec script found (symlink): scripts/$FOUNDRY_EXEC"
 else
     echo "  ❌ ERROR: Foundry exec script not found: scripts/$FOUNDRY_EXEC"
     ((ERRORS++))

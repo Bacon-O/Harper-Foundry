@@ -1,0 +1,122 @@
+# ==============================================================================
+# HARPER KERNEL FOUNDRY: TINYCONFIG QUICK TEST CONFIGURATION
+# ==============================================================================
+# This configuration is designed for FAST pipeline testing, not production use.
+# Build time: 2-5 minutes vs 30-60+ minutes for full builds.
+# Use this to quickly validate changes to the foundry itself.
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine."
+PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts will be stored."
+HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Execution ---
+# Using the tinyconfig quick test build script
+FOUNDRY_EXEC="alloymixtures/tinyconfig.sh"
+INCREMENTAL_BUILD="false"
+
+# --- Foundry Image Configuration ---
+FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_v2.dockerfile"
+IMAGE_NAME="debian-harper-worker"
+
+# --- Container Internal Paths ---
+CONTAINER_BUILD_ROOT="/build"
+CONTAINER_OUTPUT_DIR="/opt/factory/output"
+CONTAINER_CONFIG_DIR="/opt/factory/configs"
+CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# ==============================================================================
+
+# Versioning & Tagging
+ARCH_TAG="x86_64v3"
+PROJECT_TAG="harper-test"
+
+# --- Target Specifications ---
+TARGET_ARCH="x86_64"
+USER_KCFLAGS="-march=haswell -mtune=haswell"
+CROSS_CMD="x86_64-linux-gnu-"
+KDEB_NAME="linux-upstream-harper-test"
+KERNEL_SOURCE="linux/trixie-backports"
+DEB_TARGET_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+
+MAKE_DEB_BUILD_ARCH="arm64"
+MAKE_DEB_TARGET_ARCH="amd64"
+MAKE_CC="clang --target=x86_64-linux-gnu"
+MAKE_HOSTLD="x86_64-linux-gnu-ld"
+MAKE_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+MAKE_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+MAKE_LLVM="1"
+
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Use all available cores for fastest build
+FOUNDRY_NPROC=""
+
+# --- Build Strategy ---
+# Tinyconfig is handled in the script itself, but we set this for clarity
+BASE_CONFIG="tinyconfig"
+# No tuning config for tinyconfig - we want absolute minimum
+TUNING_CONFIG=""
+
+# --- Scheduler Patch ---
+# Skip scheduler patches in quick test mode for speed
+BORE_PATCH_URL=""
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# ==============================================================================
+PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
+TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/"
+TEST_PACKAGE_DIR="$TEST_FUNCTIONS_DIR/testpackages"
+
+# --- QA Flags ---
+# For quick tests, we only do minimal validation
+BYPASS_QA="false"
+ENABLE_QEMU_TESTS="false"
+
+# Use SOFT mode - warn but don't fail on missing nice-to-haves
+QA_MODE="SOFT"
+
+# Only run essential file validation tests
+QA_TESTS=(
+    "filesexists.sh"
+)
+
+# No test packages for quick builds
+QA_TEST_PACKAGE=()
+
+# --- Chemical Audit: Critical (Must Pass) ---
+# For tinyconfig, we only check absolute essentials
+CHECK_LIST=( 
+    "CONFIG_TTY=y"
+    "CONFIG_PRINTK=y"
+)
+
+# --- Chemical Audit: Optional (Warn Only) ---
+# Much shorter list for tinyconfig tests
+WARN_LIST=(
+    "CONFIG_BLK_DEV=y"
+    "CONFIG_EXT4_FS=y"
+    "CONFIG_PROC_FS=y"
+    "CONFIG_SYSFS=y"
+)
+
+# --- VM Proving Ground Specs (Not used for quick tests) ---
+VM_MEM="512M"
+VM_CORES="2"
+VM_TIMEOUT="15s"
