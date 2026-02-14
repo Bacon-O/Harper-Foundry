@@ -3,9 +3,22 @@ set -e
 
 # 1. Load the Foundry Environment
 # This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_OUTPUT_DIR
-source "$(dirname "$0")/env_setup.sh" "$@"
+source "$(dirname "$0")/../../env_setup.sh" "$@"
 
- --- STAGE 1: CHEMICAL AUDIT (Configuration Check) ---
+# 2. Locate Latest Build Directory
+LATEST_BUILD_DIR=$(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" -printf "%T@ %p\n" | sort -n | tail -1 | cut -f2- -d" ")
+
+if [ -z "$LATEST_BUILD_DIR" ]; then
+    echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
+    exit 1
+fi
+
+echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
+
+KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
+CONFIG_FILE="${LATEST_BUILD_DIR}/kernel.config"
+
+# --- STAGE 1: CHEMICAL AUDIT (Configuration Check) ---
 echo "📊 Stage 1: Auditing Composition..."
 MISSING_CRITICAL=0
 

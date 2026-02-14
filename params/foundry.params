@@ -42,6 +42,10 @@ CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 # These parameters define the specific kernel to be built.
 # ==============================================================================
 
+# Versioning & Tagging
+ARCH_TAG="x86_64v3"
+PROJECT_TAG="harper-v3"
+
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
 
@@ -51,6 +55,8 @@ USER_KCFLAGS="-march=haswell -mtune=haswell"
 CROSS_CMD="x86_64-linux-gnu-"
 KDEB_NAME="linux-upstream-harper-v3"
 KERNEL_SOURCE="linux/trixie-backports"
+DEB_TARGET_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
 
 MAKE_DEB_BUILD_ARCH="arm64"
 MAKE_DEB_TARGET_ARCH="amd64"
@@ -102,7 +108,7 @@ QA_TESTS=(
 
 # A list of QA packages to run /plugins/qatests/testpackages
 QA_TEST_PACKAGE=(
-    "haperbase"
+    "harperbase"
 )
 
 # --- Chemical Audit: Critical (Must Pass) ---

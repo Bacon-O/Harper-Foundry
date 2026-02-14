@@ -11,6 +11,26 @@ echo " Harper Kernel Foundry: Interactive Setup"
 echo "==================================================="
 echo ""
 
+# Check prerequisites first
+if [ -f "${REPO_ROOT}/scripts/check_prerequisites.sh" ]; then
+    echo "🔍 Checking system prerequisites..."
+    if "${REPO_ROOT}/scripts/check_prerequisites.sh"; then
+        echo ""
+        echo "✅ Prerequisites check passed!"
+        echo ""
+    else
+        echo ""
+        echo "⚠️  Some prerequisites are missing or suboptimal."
+        read -p "Continue anyway? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installation cancelled."
+            exit 1
+        fi
+        echo ""
+    fi
+fi
+
 if [ ! -f "$PARAMS_FILE" ]; then
     echo "❌ Error: $PARAMS_FILE not found. Please ensure the repository is complete."
     exit 1
@@ -124,5 +144,30 @@ done > "$TEMP_PARAMS_FILE"
 # Replace original file with the new one
 mv "$TEMP_PARAMS_FILE" "$PARAMS_FILE"
 echo "✅ Configuration updated successfully in $PARAMS_FILE."
-echo "You can now run ./start_build.sh to begin the build process."
+
+# Validate the updated configuration
+echo ""
+echo "🔍 Validating configuration..."
+if [ -f "${REPO_ROOT}/scripts/validate_params.sh" ]; then
+    if "${REPO_ROOT}/scripts/validate_params.sh" "$PARAMS_FILE"; then
+        echo ""
+        echo "✅ Configuration is valid!"
+    else
+        echo ""
+        echo "⚠️  Configuration validation found issues."
+        echo "You may want to review and fix them before running a build."
+    fi
+fi
+
+echo ""
+echo "==================================================="
+echo "🎉 Setup Complete!"
+echo "==================================================="
+echo ""
+echo "Next steps:"
+echo "  1. Review the configuration: cat $PARAMS_FILE"
+echo "  2. Start a test build: ./start_build.sh --test-run"
+echo "  3. Start a full build: ./start_build.sh"
+echo ""
+echo "For more information, see README.md"
 echo "==================================================="

@@ -1,9 +1,42 @@
 # Build Artifacts
 dist/
+*.deb
+*.changes
+*.buildinfo
+bzImage
+kernel.config
 
-# Temporary Configs
+# Build Directories
+build_*/
+linux-*/
+
+# Temporary Files
 params/*.tmp
 *.config.old
+*.patch
+*.orig
+*.rej
+*~
+*.swp
+*.swo
 
+# Docker
+.dockerignore
+
+# IDE and Editor Files
 .scratch/
 .vscode/
+.idea/
+*.iml
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local

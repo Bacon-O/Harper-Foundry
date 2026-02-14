@@ -4,7 +4,6 @@ set -e
 # 1. Load the Foundry Environment
 # This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_OUTPUT_DIR
 source "$(dirname "$0")/env_setup.sh" "$@"
-#!/usr/bin/env bash
 
 # --- Visual Foundry Utilities ---
 log_info()  { echo -e "\e[32m[INFO]\e[0m  $1"; }

@@ -36,15 +36,14 @@ echo "Kernel version will be appended with: $LOCALVERSION"
 docker run -i --rm \
     -e HOST_UID="$HOST_UID" \
     -e HOST_GID="$HOST_GID" \
-    -e LOCALVERSION="-${PROJECT}-${ARCH_TAG}" \
-    -e CONTAINER_OUTPUT_DIR="/opt/factory/output" \
+    -e CONTAINER_OUTPUT_DIR="$CONTAINER_OUTPUT_DIR" \
     -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
     -e INCREMENTAL_BUILD="$INCREMENTAL_BUILD" \
-    -e ARCH="x86_64" \
-    -e CROSS_COMPILE="x86_64-linux-gnu-" \
-    -e KBUILD_BUILD_ARCH="x86_64" \
-    -e DEB_TARGET_ARCH="amd64" \
-    -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro \
+    -e ARCH="$TARGET_ARCH" \
+    -e CROSS_COMPILE="$CROSS_COMPILE" \
+    -e KBUILD_BUILD_ARCH="$TARGET_ARCH" \
+    -e DEB_TARGET_ARCH="$DEB_TARGET_ARCH" \
+    -v "${HOST_QEMU_STATIC=}":/usr/bin/qemu-x86_64-static:ro \
     -v "${PROJECT_ROOT}:/build" \
     -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
     -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
