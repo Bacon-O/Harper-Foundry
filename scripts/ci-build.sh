@@ -65,19 +65,6 @@ env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c debian/rules s
 env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c fakeroot make -f debian/rules.gen setup_amd64_none_amd64
 cp debian/build/build_amd64_none_amd64/.config .config
 
-# # Bypass heavy Debian fragment generation; use the static known-good base
-# if [ -f "${CONTAINER_CONFIG_DIR}/debian_6.18.5.config" ]; then
-#     cp "${CONTAINER_CONFIG_DIR}/debian_6.18.5.config" .config
-# else
-#     echo "❌ ERROR: debian_6.18.5.config missing from configs directory!"
-#     exit 1
-# fi
-
-# Generate the config using Debian's assembled fragments
-# debian/rules source
-# fakeroot make -f debian/rules.gen setup_amd64_none_amd64
-# cp debian/build/build_amd64_none_amd64/.config .config
-
 # 6️⃣ Merge Tuning Profile
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
@@ -87,7 +74,6 @@ if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     # to protect the toolchain variables during validation
     LLVM=1 ARCH="$TARGET_ARCH" ./scripts/kconfig/merge_config.sh .config "$TUNING_CONFIG"
 fi
-
 
 # 8️⃣ Sanitization (Keys, Debug)
 echo "🧹 Stripping Keys / Debug Options..."
@@ -103,20 +89,23 @@ echo "🧹 Stripping Keys / Debug Options..."
 make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
 # 9️⃣ Versioning
-if [ -f "debian/changelog" ]; then
-    OFFICIAL_VER=$(dpkg-parsechangelog -S Version)
-else
-    OFFICIAL_VER=$(make -s kernelversion)
-fi
-TIMESTAMP=$(date +%Y%m%d)
-SCHED_PRIORITY=$([ "$SCHEDULER_LABEL" == "bore" ] && echo "200" || echo "100")
-PKG_VERSION="${OFFICIAL_VER}+harper.${SCHED_PRIORITY}.${SCHEDULER_LABEL}.${TIMESTAMP}"
-echo "🏷️ Harper Kernel Version: $PKG_VERSION"
+TIMESTAMP=$(date +%Y%m%d%M)
+KERNEL_VER=$(make -s kernelversion)
 
+if [ "$SCHEDULER_LABEL" == "bore" ]; then
+    SCHED_PRIORITY="2"
+else
+    SCHED_PRIORITY="1"
+fi
+export LOCALVERSION="-${PROJECT}-${ARCH_TAG}-${SCHEDULER_LABEL}"
+export KDEB_PKGVERSION="${KERNEL_VER}-${PROJECT}.${SCHED_PRIORITY}.${TIMESTAMP}"
+
+echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
+echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 
 # 1️⃣1️⃣ Compile Kernel with LLVM
 echo "🏗️ Compiling Kernel..."
-make -j$(nproc) \
+make -j"$FINAL_JOBS" \
     LLVM="$MAKE_LLVM" \
     ARCH="$TARGET_ARCH" \
     CROSS_COMPILE="$CROSS_CMD" \
@@ -130,7 +119,10 @@ make -j$(nproc) \
     HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
     HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
     USER_KCFLAGS="$USER_KCFLAGS" \
+    LOCALVERSION="$LOCALVERSION" \
+    KDEB_PKGVERSION="$KDEB_PKGVERSION" \
     bindeb-pkg
+
 
 # 1️⃣2️⃣ Collect Artifacts
 echo "📦 Collecting artifacts..."
@@ -140,14 +132,14 @@ find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.changes" -exec mv -t "$CONTAIN
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +
 
 
-# Guarantee a completely sterile environment before patching or configuring
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
-    echo "🧹 Scrubbing source tree to factory-fresh state..."
-    make mrproper
-fi
-
 BZ_PATH=$(find . -name bzImage | head -n1)
 [ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
 [ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
 echo "✅ Harper Kernel Build Complete."
+
+# Guarantee a completely sterile environment before patching or configuring
+if [ "$INCREMENTAL_BUILD" != "true" ]; then
+    echo "🧹 Scrubbing source tree to factory-fresh state..."
+    make mrproper
+fi
