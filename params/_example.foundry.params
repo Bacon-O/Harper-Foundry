@@ -10,12 +10,12 @@
 
 # --- Pathing & Identity ---
 # Host paths for build data, repository root, and distribution output.
-# @PROMPT "BLOCK_VOL_PATH: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
+PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
 # @PROMPT "HOST_REPO_ROOT: The absolute path to the root of this repository on your host machine. This is used by host-side scripts."
 HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-# @PROMPT "HOST_DIST_BASE: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-HOST_DIST_BASE="/mnt/build-data/dist/release"
+# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
+HOST_OUTPUT_DIR="/mnt/build-data/dist/release"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""

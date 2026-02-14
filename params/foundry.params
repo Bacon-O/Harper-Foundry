@@ -10,19 +10,10 @@
 
 # --- Pathing & Identity ---
 # Host paths for build data, repository root, and distribution output.
-# @PROMPT "BLOCK_VOL_PATH: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-BLOCK_VOL_PATH="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-# @PROMPT "HOST_REPO_ROOT: The absolute path to the root of this repository on your host machine. This is used by host-side scripts."
-HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-# @PROMPT "HOST_DIST_BASE: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-HOST_DIST_BASE="/mnt/build-data/dist/release"
-
-# @PROMPT 
-PROJECT="harper"
-# @PROMPT 
-ARCH_TAG="amd64v3"
-
-INCREMENTAL_BUILD="false"
+# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
+PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
+HOST_OUTPUT_DIR="/mnt/build-data/dist/release"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
@@ -31,6 +22,8 @@ FOUNDRY_GID=""
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
 FOUNDRY_EXEC="ci-build.sh"
+INCREMENTAL_BUILD="false"
+
 
 # --- Foundry Image Configuration ---
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
@@ -44,9 +37,6 @@ CONTAINER_OUTPUT_DIR="/opt/factory/output"
 CONTAINER_CONFIG_DIR="/opt/factory/configs"
 CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 
-# Set this to "LLVM=1" for native or let env_setup.sh override for cross-compile
-CC_TOOLCHAIN="LLVM=1"
-
 # ==============================================================================
 # TARGET KERNEL DEFINITION
 # These parameters define the specific kernel to be built.
@@ -54,7 +44,7 @@ CC_TOOLCHAIN="LLVM=1"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
-CC_TOOLCHAIN="LLVM=1"
+
 # "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
 # The compiler accepts this as a concrete CPU model.
 USER_KCFLAGS="-march=haswell -mtune=haswell"
@@ -90,6 +80,10 @@ BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/p
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
 # ==============================================================================
+PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
+TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/"
+TEST_PACKAGE_DIR="$TEST_FUNCTIONS_DIR/testpackages"
+
 
 # --- QA Flags ---
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
@@ -97,11 +91,24 @@ BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
 ENABLE_QEMU_TESTS="false"
 
+# QA mode controls the strictness of QA tests. "SOFT" will log warnings but not fail the build, 
+# while "HARD" will fail the build on any QA test failure.
+QA_MODE="SOFT"
+
+# A list of individual QA test scripts to run. 
+# These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
+QA_TESTS=(
+)
+
+# A list of QA packages to run /plugins/qatests/testpackages
+QA_TEST_PACKAGE=(
+    "haperbase"
+)
+
 # --- Chemical Audit: Critical (Must Pass) ---
 # Exact internal Kconfig names to verify. If any are missing, the build is considered BROKEN.
 CHECK_LIST=( 
 )
-
 # --- Chemical Audit: Optional (Warn Only) ---
 # If these are missing, a warning is logged but the kernel is still shipped.
 # This supports fallback strategies (e.g., BORE -> EEVDF).

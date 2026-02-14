@@ -30,8 +30,8 @@ if [[ "$BASE_CONFIG" != "defconfig" && "$BASE_CONFIG" != "tinyconfig" ]]; then
 fi
 
 # 4. Infrastructure Check
-if [ ! -d "$BLOCK_VOL_PATH" ]; then
-    echo "❌ ERROR: The Crucible (Block Volume) is not mounted at $BLOCK_VOL_PATH"
+if [ ! -d "$PROJECT_ROOT" ]; then
+    echo "❌ ERROR: The Crucible (Block Volume) is not mounted at $PROJECT_ROOT"
     exit 1
 fi
 

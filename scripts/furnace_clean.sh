@@ -23,9 +23,9 @@ source "$(dirname "$0")/env_setup.sh" "${ARGS[@]}"
 if [ "$DEEP_CLEAN" == "true" ]; then
     echo "🧼 SCRUBBING THE CRUCIBLE: Deep Decontamination Initiated..."
     # Wipe all Build Artifacts
-    if [ -d "$HOST_DIST_BASE" ]; then
-        echo "🗑️  Removing all artifacts from $HOST_DIST_BASE..."
-        rm -rf "${HOST_DIST_BASE:?}"/build_*
+    if [ -d "$HOST_OUTPUT_DIR" ]; then
+        echo "🗑️  Removing all artifacts from $HOST_OUTPUT_DIR..."
+        rm -rf "${HOST_OUTPUT_DIR:?}"/build_*
     fi
     # Docker Housekeeping
     echo "🐳 Pruning Docker builder cache..."
@@ -35,9 +35,9 @@ if [ "$DEEP_CLEAN" == "true" ]; then
 else
     # 2. Standard Slag Removal Logic
     KEEP=3
-    echo "🧹 Cleaning the Slag (Target: $HOST_DIST_BASE)..."
-    if [ -d "$HOST_DIST_BASE" ] && [ "$HOST_DIST_BASE" != "/" ]; then
-        BUILDS=$(find "${HOST_DIST_BASE}" -maxdepth 1 -type d -name "build_*" | sort -r)
+    echo "🧹 Cleaning the Slag (Target: $HOST_OUTPUT_DIR)..."
+    if [ -d "$HOST_OUTPUT_DIR" ] && [ "$HOST_OUTPUT_DIR" != "/" ]; then
+        BUILDS=$(find "${HOST_OUTPUT_DIR}" -maxdepth 1 -type d -name "build_*" | sort -r)
         BUILD_COUNT=$(echo "$BUILDS" | grep -c "build_" || echo 0)
         if [ "$BUILD_COUNT" -gt "$KEEP" ]; then
             echo "♻️  Found $BUILD_COUNT builds. Keeping the $KEEP most recent."
@@ -47,6 +47,6 @@ else
             echo "✨ Minimal slag detected ($BUILD_COUNT/$KEEP). No cleanup needed."
         fi
     else
-        echo "⚠️  Valid Dist directory not found at $HOST_DIST_BASE."
+        echo "⚠️  Valid Dist directory not found at $HOST_OUTPUT_DIR."
     fi
 fi

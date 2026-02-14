@@ -45,7 +45,7 @@ docker run -i --rm \
     -e KBUILD_BUILD_ARCH="x86_64" \
     -e DEB_TARGET_ARCH="amd64" \
     -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro \
-    -v "${BLOCK_VOL_PATH}:/build" \
+    -v "${PROJECT_ROOT}:/build" \
     -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
     -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
     -v "${REPO_ROOT}/params:/opt/factory/params:ro" \

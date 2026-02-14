@@ -135,7 +135,7 @@ echo "👤 Identity: $HOST_UID:$HOST_GID"
         export BUILD_ID=$(date +%Y%m%d_%H%M)
     fi
 
-    export CURRENT_DIST_DIR="${HOST_DIST_BASE}/build_${BUILD_ID}"
+    export CURRENT_DIST_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
     mkdir -p "$CURRENT_DIST_DIR"
     
     echo "📂 Artifact Target: $CURRENT_DIST_DIR"    
