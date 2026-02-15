@@ -50,11 +50,16 @@ for cmd in "${dependencies[@]}"; do
     fi
 done
 
-# Sanity check: ensure the QEMU bridge is accessible inside the container
-if [ "$HOST_ARCH" != "x86_64" ] && [ ! -f "/usr/bin/qemu-x86_64-static" ]; then
-    echo "❌ ERROR: QEMU static binary not found at /usr/bin/qemu-x86_64-static"
-    echo "   Ensure you are mounting it with: -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro"
-    exit 1
+# Sanity check: ensure the QEMU bridge is accessible inside the container for cross-compilation
+# Only required when host architecture differs from target architecture
+if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
+    if [ ! -f "/usr/bin/qemu-x86_64-static" ]; then
+        echo "❌ ERROR: Cross-compilation detected (HOST: $HOST_ARCH, TARGET: x86_64)"
+        echo "   QEMU static binary required: /usr/bin/qemu-x86_64-static"
+        echo "   Ensure you are mounting it with: -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro"
+        exit 1
+    fi
+    echo "🔗 Cross-compilation detected: Using QEMU x86_64-static for $HOST_ARCH -> x86_64 build."
 fi
 
 echo "✅ Charge Materials Verified. The environment is heat-ready."

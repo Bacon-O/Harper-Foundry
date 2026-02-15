@@ -105,7 +105,11 @@ if [ -f "$PARAMS_FILE" ]; then
     export DOCKER_REBUILD="$DOCKER_REBUILD"
     export INCREMENTAL_BUILD="$INCREMENTAL_BUILD"
 
-    # 6. Identity Logic
+    # 6. Host Architecture Detection
+    # Detect the actual host architecture for cross-compilation checks
+    export HOST_ARCH=$(uname -m)
+    
+    # 7. Identity Logic
     # Only calculate if not already provided by the host environment
     export HOST_UID=${HOST_UID:-$(id -u)}
     export HOST_GID=${HOST_GID:-$(id -g)}
@@ -115,6 +119,7 @@ if [ -f "$PARAMS_FILE" ]; then
     [ -n "$FOUNDRY_GID" ] && export HOST_GID="$FOUNDRY_GID"
 
 echo "👤 Identity: $HOST_UID:$HOST_GID"
+echo "🏗️  Host Architecture: $HOST_ARCH"
     
     # 7. Image Source Detection
     if [[ -f "${REPO_ROOT}/${FOUNDRY_IMAGE}" ]]; then
