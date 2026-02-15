@@ -1,5 +1,5 @@
 # ==============================================================================
-# HARPER KERNEL FOUNDRY: TINYCONFIG QUICK TEST CONFIGURATION
+# HARPER FOUNDRY: TINYCONFIG QUICK TEST CONFIGURATION
 # ==============================================================================
 # This configuration is designed for FAST pipeline testing, not production use.
 # Build time: 2-5 minutes vs 30-60+ minutes for full builds.
@@ -81,8 +81,8 @@ BORE_PATCH_URL=""
 # QUALITY ASSURANCE (QA) & TESTING
 # ==============================================================================
 PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/"
-TEST_PACKAGE_DIR="$TEST_FUNCTIONS_DIR/testpackages"
+TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
+TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 
 # --- QA Flags ---
 # For quick tests, we only do minimal validation

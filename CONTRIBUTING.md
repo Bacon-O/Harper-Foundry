@@ -1,6 +1,6 @@
-# Contributing to Harper Kernel Foundry
+# Contributing to Harper Foundry
 
-Thank you for your interest in contributing to the Harper Kernel Foundry! This document provides guidelines and best practices for contributing to the project.
+Thank you for your interest in contributing to the Harper Foundry! This document provides guidelines and best practices for contributing to the project.
 
 ## Table of Contents
 
@@ -264,4 +264,4 @@ Debian-Harper/
 - Include relevant logs and configuration snippets
 - Be patient and respectful in all interactions
 
-Thank you for contributing to Harper Kernel Foundry! 🚀
+Thank you for contributing to Harper Foundry! 🚀

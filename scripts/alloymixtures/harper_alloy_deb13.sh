@@ -2,16 +2,29 @@
 set -e
 
 # ==============================================================================
-#  HARPER-KERNEL FOUNDRY: CI BUILD SCRIPT
+#  HARPER ALLOY: DEBIAN 13 (TRIXIE) - ENTHUSIAST BUILD
 # ==============================================================================
+# Harper's primary kernel alloy, forged from Debian 13 (Trixie) backports.
+# This is NOT vanilla Debian—it's a custom Harper Forge kernel with:
+#   - BORE scheduler integration (with EEVDF fallback)
+#   - Custom tuning profiles
+#   - Complete .deb packaging
+#
+# ⚠️  EXPERIMENTAL - FOR ENTHUSIAST/HOBBYIST USE ONLY!
+# This is a custom kernel maintained by hobbyists. Use at your own risk.
+# Not recommended for production systems or mission-critical workloads.
+#
+# Build time: 30-60+ minutes
+# Output: Complete .deb packages
+# ==============================================================================
+# Running as non-root 'builder' user inside container for security.
+# Files are created with correct ownership matching the host user.
 
 # 1️⃣ Load Environment
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
-    HOST_UID=${HOST_UID:-1000}
-    HOST_GID=${HOST_GID:-1000}
     CONTAINER_BUILD_ROOT="/build"
     CONTAINER_OUTPUT_DIR="/opt/factory/output"
     CONTAINER_CONFIG_DIR="/opt/factory/configs"
@@ -20,18 +33,10 @@ else
     FINAL_JOBS=$(nproc)
 fi
 
-# 2️⃣ Cleanup Trap
-cleanup_internal() {
-    echo "⚖️ Reclaiming ownership for host user $HOST_UID..."
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
-}
-trap cleanup_internal EXIT
-
-echo "🚀 Starting Harper-Kernel Foundry Smelt..."
+echo "🚀 Starting Harper Foundry Smelt..."
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 
-# 3️⃣ Prepare Source
+# 2️⃣ Prepare Source
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
@@ -39,33 +44,22 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
 
-# 4️⃣ Apply BORE/EEVDF Patch
-SCHEDULER_LABEL="eevdf"
-if [ -n "$BORE_PATCH_URL" ]; then
-    echo "💉 Applying Scheduler Patch..."
-    if curl -fLo bore.patch "$BORE_PATCH_URL"; then
-        if patch -p1 -F3 < bore.patch; then
-            echo "✅ BORE patch applied."
-            SCHEDULER_LABEL="bore"
-        else
-            echo "⚠️ Patch failed. Using fallback EEVDF scheduler."
-        fi
-    fi
-fi
+# 3️⃣ Apply BORE/EEVDF Patch
+source "${PLUGIN_DIR}/patches/bore.sh"
 
 #Checking directory contents for debugging
 echo "🔍 Current directory contents:"
 pwd
 ls -lhta
 
-# 5️⃣ Initialize Pristine .config
+# 4️⃣ Initialize Pristine .config
 echo "🛠 Generating fresh default Debian config..."
 rm -f .config  # ⬅️ Force wipe any stale state from previous runs
 env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c debian/rules source
 env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c fakeroot make -f debian/rules.gen setup_amd64_none_amd64
 cp debian/build/build_amd64_none_amd64/.config .config
 
-# 6️⃣ Merge Tuning Profile
+# 5️⃣ Merge Tuning Profile
 if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
     cp "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ./
@@ -75,7 +69,7 @@ if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
     LLVM=1 ARCH="$TARGET_ARCH" ./scripts/kconfig/merge_config.sh .config "$TUNING_CONFIG"
 fi
 
-# 8️⃣ Sanitization (Keys, Debug)
+# 6️⃣ Sanitization (Keys, Debug)
 echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
@@ -88,22 +82,18 @@ echo "🧹 Stripping Keys / Debug Options..."
 # Protect the environment variables during this final dependency check
 make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
-# 9️⃣ Versioning
+# 7️⃣ Versioning
 TIMESTAMP=$(date +%Y%m%d%M)
 KERNEL_VER=$(make -s kernelversion)
 
-if [ "$SCHEDULER_LABEL" == "bore" ]; then
-    SCHED_PRIORITY="2"
-else
-    SCHED_PRIORITY="1"
-fi
+# SCHED_PRIORITY is now set by the BORE patch plugin
 export LOCALVERSION="-${PROJECT}-${ARCH_TAG}-${SCHEDULER_LABEL}"
 export KDEB_PKGVERSION="${KERNEL_VER}-${PROJECT}.${SCHED_PRIORITY}.${TIMESTAMP}"
 
 echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
 echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 
-# 1️⃣1️⃣ Compile Kernel with LLVM
+# 8️⃣ Compile Kernel with LLVM
 echo "🏗️ Compiling Kernel..."
 make -j"$FINAL_JOBS" \
     LLVM="$MAKE_LLVM" \
@@ -124,7 +114,7 @@ make -j"$FINAL_JOBS" \
     bindeb-pkg
 
 
-# 1️⃣2️⃣ Collect Artifacts
+# 9️⃣ Collect Artifacts
 echo "📦 Collecting artifacts..."
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.deb" -exec mv -t "$CONTAINER_OUTPUT_DIR/" {} +

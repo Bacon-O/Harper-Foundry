@@ -1,1 +1,0 @@
-../../qemuboot.sh

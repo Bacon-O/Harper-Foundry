@@ -1,12 +1,12 @@
 #!/bin/bash
 # ==============================================================================
-# HARPER KERNEL FOUNDRY: SYSTEM PREREQUISITES CHECK
+# HARPER FOUNDRY: SYSTEM PREREQUISITES CHECK
 # ==============================================================================
 # This script checks if your system meets the requirements to run the Foundry.
 
 set -e
 
-echo "🔍 Harper Kernel Foundry - System Prerequisites Check"
+echo "🔍 Harper Foundry - System Prerequisites Check"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 

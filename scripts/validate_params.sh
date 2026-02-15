@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# HARPER KERNEL FOUNDRY: PARAMS VALIDATION SCRIPT
+# HARPER FOUNDRY: PARAMS VALIDATION SCRIPT
 # ==============================================================================
 # This script validates foundry.params files to catch common configuration
 # errors before running a build.
@@ -136,7 +136,7 @@ fi
 # Check if QA test scripts exist
 if [ ${#QA_TESTS[@]} -gt 0 ]; then
     for test in "${QA_TESTS[@]}"; do
-        test_path="${REPO_ROOT}/scripts/plugins/qatests/${test}"
+        test_path="${REPO_ROOT}/scripts/plugins/qatests/tests/${test}"
         if [ -x "$test_path" ]; then
             echo "  ✅ QA test exists: $test"
         else
@@ -149,7 +149,7 @@ fi
 # Check QA test packages
 if [ ${#QA_TEST_PACKAGE[@]} -gt 0 ]; then
     for package in "${QA_TEST_PACKAGE[@]}"; do
-        pkg_path="${REPO_ROOT}/scripts/plugins/qatests/testpackages/${package}"
+        pkg_path="${REPO_ROOT}/scripts/plugins/qatests/packages/${package}"
         if [ -d "$pkg_path" ] || [ -f "$pkg_path" ]; then
             echo "  ✅ QA test package exists: $package"
         else

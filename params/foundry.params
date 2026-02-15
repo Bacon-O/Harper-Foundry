@@ -1,5 +1,5 @@
 # ==============================================================================
-# HARPER KERNEL FOUNDRY: BLUEPRINT CONFIGURATION
+# HARPER FOUNDRY: BLUEPRINT CONFIGURATION
 # ==============================================================================
 
 # ==============================================================================
@@ -21,7 +21,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/full.sh"
+FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
 INCREMENTAL_BUILD="false"
 
 
@@ -87,8 +87,8 @@ BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/p
 # These parameters control post-build validation and testing.
 # ==============================================================================
 PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/"
-TEST_PACKAGE_DIR="$TEST_FUNCTIONS_DIR/testpackages"
+TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
+TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 
 
 # --- QA Flags ---

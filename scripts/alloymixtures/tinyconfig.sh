@@ -2,40 +2,31 @@
 set -e
 
 # ==============================================================================
-#  HARPER-KERNEL FOUNDRY: TINYCONFIG QUICK TEST BUILD
+#  HARPER FOUNDRY: TINYCONFIG QUICK TEST BUILD
 # ==============================================================================
 # This is a minimal, fast build for testing the foundry pipeline.
 # It uses tinyconfig (absolute minimum kernel) for speed.
 # Typical build time: 2-5 minutes vs 30-60+ minutes for full build.
+# Running as non-root 'builder' user inside container for security.
 
 # 1️⃣ Load Environment
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
-    HOST_UID=${HOST_UID:-1000}
-    HOST_GID=${HOST_GID:-1000}
     CONTAINER_BUILD_ROOT="/build"
     CONTAINER_OUTPUT_DIR="/opt/factory/output"
     TARGET_ARCH="x86_64"
     FINAL_JOBS=$(nproc)
 fi
 
-# 2️⃣ Cleanup Trap
-cleanup_internal() {
-    echo "⚖️ Reclaiming ownership for host user $HOST_UID..."
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_BUILD_ROOT" 2>/dev/null || true
-    chown -R "$HOST_UID:$HOST_GID" "$CONTAINER_OUTPUT_DIR" 2>/dev/null || true
-}
-trap cleanup_internal EXIT
-
-echo "🧪 Harper-Kernel Foundry: TINYCONFIG Quick Test"
+echo "🧵 Harper Foundry: TINYCONFIG Quick Test"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "⚡ Fast build mode: Minimal kernel for pipeline testing"
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 echo ""
 
-# 3️⃣ Prepare Source
+# 2️⃣ Prepare Source
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
@@ -43,14 +34,14 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 apt-get source -y "$KERNEL_SOURCE"
 cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
 
-# 4️⃣ Initialize Minimal Config
+# 3️⃣ Initialize Minimal Config
 echo "🛠 Generating tinyconfig (absolute minimum)..."
 rm -f .config
 
 # Use tinyconfig for the fastest possible build
 make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" tinyconfig
 
-# 5️⃣ Essential Tweaks for Bootability (Optional)
+# 4️⃣ Essential Tweaks for Bootability (Optional)
 # Tinyconfig is TOO minimal - add bare essentials for a bootable kernel
 echo "🔧 Enabling minimal bootable features..."
 ./scripts/config --enable TTY
@@ -60,7 +51,7 @@ echo "🔧 Enabling minimal bootable features..."
 ./scripts/config --enable PROC_FS
 ./scripts/config --enable SYSFS
 
-# 6️⃣ Sanitization (Keys)
+# 5️⃣ Sanitization (Keys)
 echo "🧹 Stripping Keys..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
@@ -71,7 +62,7 @@ echo "🧹 Stripping Keys..."
 # Finalize config
 make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
-# 7️⃣ Versioning
+# 6️⃣ Versioning
 TIMESTAMP=$(date +%Y%m%d%H%M)
 KERNEL_VER=$(make -s kernelversion)
 
@@ -82,7 +73,7 @@ echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
 echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 echo ""
 
-# 8️⃣ Compile Kernel (Just bzImage, no modules for speed)
+# 7️⃣ Compile Kernel (Just bzImage, no modules for speed)
 echo "🏗️ Compiling Minimal Kernel..."
 echo "⚡ Building bzImage only (no modules, no packages) for max speed..."
 time make -j"$FINAL_JOBS" \
@@ -101,7 +92,7 @@ echo ""
 echo "✅ bzImage compilation complete!"
 echo ""
 
-# 9️⃣ Collect Artifacts
+# 8️⃣ Collect Artifacts
 echo "📦 Collecting test artifacts..."
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 
@@ -124,7 +115,7 @@ fi
 
 # Create a marker file indicating this was a test build
 cat > "$CONTAINER_OUTPUT_DIR/BUILD_INFO.txt" << EOF
-Harper Kernel Foundry - Tinyconfig Test Build
+Harper Foundry - Tinyconfig Test Build
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Build Type: TINYCONFIG QUICK TEST
 Timestamp: $(date)
@@ -138,14 +129,14 @@ This is a minimal test build to validate the foundry
 pipeline. It contains only the bare minimum kernel
 features and should NOT be used in production.
 
-For a full production build, use the 'full.sh' alloy
-mixture instead.
+For a complete Harper kernel build, use the 'harper_alloy_deb13.sh' alloy
+mixture (still experimental—for enthusiast/hobbyist use).
 EOF
 
 echo "✅ Build info saved"
 echo ""
 
-# 🔟 Summary
+# 9️⃣ Summary
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Tinyconfig Test Build Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -160,7 +151,8 @@ echo "  ✅ Build toolchain"
 echo "  ✅ Compilation process"
 echo "  ✅ Artifact collection"
 echo ""
-echo "For a full production build, use: FOUNDRY_EXEC=alloymixtures/full.sh"
+echo "For a complete Harper kernel, use: FOUNDRY_EXEC=alloymixtures/harper_alloy_deb13.sh"
+echo "(Experimental - enthusiast/hobbyist use only)"
 echo ""
 
 # Cleanup

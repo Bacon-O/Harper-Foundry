@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# HARPER KERNEL FOUNDRY: BUILD STATUS AND ARTIFACT VIEWER
+# HARPER FOUNDRY: BUILD STATUS AND ARTIFACT VIEWER
 # ==============================================================================
 # This script displays information about build artifacts and their status.
 
@@ -19,7 +19,7 @@ else
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Harper Kernel Foundry - Build Status"
+echo "  Harper Foundry - Build Status"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 

@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you diagnose and resolve common issues with the Harper Kernel Foundry.
+This guide helps you diagnose and resolve common issues with the Harper Foundry.
 
 ## Table of Contents
 

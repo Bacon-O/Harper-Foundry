@@ -1,1 +1,0 @@
-../../linuxconfig.sh

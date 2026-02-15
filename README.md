@@ -1,9 +1,9 @@
-# Harper Kernel Foundry
+# Harper Foundry
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.github/workflows/kernel-factory.yml)
 
-The **Harper Kernel Foundry** is a containerized build system for custom Debian Linux kernels. It integrates schedulers (like BORE and EEVDF), applies tuning configurations, and provides automated quality assurance in a reproducible environment.
+The **Harper Foundry** is an extensible containerized build system. While currently configured for custom Debian Linux kernels with scheduler integration (BORE/EEVDF), tuning profiles, and automated QA, the foundry architecture can be extended to compile other programs. *(Note: Currently, only kernel build templates are available.)*
 
 ## ✨ Features
 
@@ -172,7 +172,7 @@ The foundry supports different "alloy mixtures" - build configurations optimized
 
 | Mixture | Build Time | Purpose | Artifacts |
 |---------|------------|---------|-----------|
-| **full.sh** | 30-60+ min | Production builds | Full .deb packages |
+| **harper_alloy_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages |
 | **tinyconfig.sh** | 2-5 min | Quick testing | bzImage only |
 
 See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detailed information.
@@ -185,11 +185,11 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
 - 📦 Minimal artifacts (bzImage only)
 - ✅ Perfect for testing changes
 
-**Full Production Build:**
+**Harper Alloy Deb13 (Full Build):**
 - 🏗️ 30-60+ minute builds
-- 🎯 Production-ready kernels
+- 🎯 Complete Harper kernel for enthusiasts
 - 📦 Complete .deb packages
-- ✅ Ready for deployment
+- ⚠️ Experimental - use at your own risk
 
 ### Cleanup
 
@@ -213,9 +213,11 @@ To remove all build artifacts from the distribution directory and prune the Dock
 
 GitHub Actions workflow (`.github/workflows/kernel-factory.yml`) provides automated builds:
 
-*   **Production Builds:** Triggered by version tags (e.g., `v1.0.0`) on the `main` branch
-*   **Testing Builds:** Triggered by pushes to `dev` and `feature/*` branches
+*   **Release Builds:** Triggered by version tags (e.g., `v1.0.0`) on the `main` branch - uses harper_alloy_deb13
+*   **Testing Builds:** Triggered by pushes to `dev` and `feature/*` branches - uses tinyconfig
 *   **Manual Dispatch:** Run builds on-demand with custom configurations
+
+⚠️ **Note:** All Harper builds are experimental. This is a hobbyist/enthusiast project.
 
 ### Workflow Stages
 
@@ -226,11 +228,26 @@ GitHub Actions workflow (`.github/workflows/kernel-factory.yml`) provides automa
 
 ## 🧪 Quality Assurance
 
-The Foundry includes an extensible QA framework:
+The Foundry includes an extensible QA framework with modular test plugins:
+
+### Plugin System
+
+All QA tests are organized under `scripts/plugins/qatests/`:
+
+```
+qatests/
+├── tests/          # Individual QA test scripts
+│   ├── debpackage.sh
+│   ├── filesexists.sh
+│   ├── linuxconfig.sh
+│   └── qemuboot.sh
+└── packages/       # QA test package bundles
+    └── harperbase/ # Base test package
+```
 
 ### Individual Tests
 
-Located in `scripts/plugins/qatests/`:
+Located in `scripts/plugins/qatests/tests/`:
 - `filesexists.sh` - Verifies required files are present
 - `linuxconfig.sh` - Validates kernel configuration
 - `debpackage.sh` - Checks Debian package integrity
@@ -238,8 +255,10 @@ Located in `scripts/plugins/qatests/`:
 
 ### Test Packages
 
-Collections of related tests in `testpackages/`:
+Collections of related tests in `scripts/plugins/qatests/packages/`:
 - `harperbase` - Core validation suite
+
+For more details, see [QA Tests Documentation](scripts/plugins/qatests/README.md).
 
 ### Configuration
 
@@ -263,6 +282,23 @@ BYPASS_QA="false"       # Set true to skip QA entirely
 ```
 
 ## 🔧 Advanced Usage
+
+### Plugin System
+
+The Foundry uses a modular plugin architecture:
+
+#### Kernel Patches (`scripts/plugins/patches/`)
+
+**BORE Scheduler Plugin**:
+- Applies [BORE scheduler](https://github.com/firelzrd/bore-scheduler) patches for improved responsiveness
+- Automatically falls back to EEVDF if patch fails
+- Configure via `BORE_PATCH_URL` in params file
+
+See [Patches Plugin Documentation](scripts/plugins/patches/README.md) for creating custom patch plugins.
+
+#### QA Test Plugins (`scripts/plugins/qatests/`)
+
+See the [Quality Assurance](#-quality-assurance) section above for QA plugin details.
 
 ### Incremental Builds
 

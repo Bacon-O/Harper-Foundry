@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Harper Kernel Foundry project will be documented in this file.
+All notable changes to the Harper Foundry project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Alloy Mixtures System** - Modular build script variants in `scripts/alloymixtures/`
-  - `full.sh` - Complete production builds (moved from `ci-build.sh`)
+  - `harper_alloy_deb13.sh` - Harper's Debian 13 production builds (moved from `ci-build.sh`)
   - `tinyconfig.sh` - Fast 2-5 minute test builds for pipeline validation
   - Comprehensive README documenting each mixture
 - **Tinyconfig Quick Test** - Dedicated fast build configuration
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QA test package structure for `harperbase` test suite
 
 ### Changed
-- **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/full.sh`
+- **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/harper_alloy_deb13.sh`
   - Created symlink for backward compatibility
   - Updated `FOUNDRY_EXEC` in `foundry.params`
 - **Makefile `test` target** - Now uses tinyconfig for much faster testing

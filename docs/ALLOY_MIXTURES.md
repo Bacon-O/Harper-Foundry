@@ -20,10 +20,10 @@ scripts/
 **After:**
 ```
 scripts/
-├── ci-build.sh          # Symlink → alloymixtures/full.sh (backward compat)
+├── ci-build.sh          # Symlink → alloymixtures/harper_alloy_deb13.sh (backward compat)
 ├── alloymixtures/       # NEW: Build script variants
 │   ├── README.md        # Documentation for all mixtures
-│   ├── full.sh          # Production builds (60+ min)
+│   ├── harper_alloy_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
 │   └── tinyconfig.sh    # Quick tests (2-5 min)
 ├── env_setup.sh
 ├── furnace_ignite.sh
@@ -35,11 +35,11 @@ scripts/
 **New Files:**
 - `params/tinyconfig.foundry.params` - Fast test configuration
 - `scripts/alloymixtures/README.md` - Alloy mixtures documentation
-- `scripts/alloymixtures/full.sh` - Production build script
+- `scripts/alloymixtures/harper_alloy_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
 - `scripts/alloymixtures/tinyconfig.sh` - Quick test script
 
 **Modified Files:**
-- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/full.sh`
+- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_alloy_deb13.sh`
 - `Makefile` - `make test` now uses tinyconfig params
 - `README.md` - Added alloy mixtures section
 - `CONTRIBUTING.md` - Updated test instructions
@@ -47,9 +47,11 @@ scripts/
 
 ## The Two Mixtures
 
-### 1. Full Production Build (`alloymixtures/full.sh`)
+### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_alloy_deb13.sh`)
 
-**Purpose:** Complete, production-ready kernel builds
+**Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists
+
+**Status:** ⚠️ EXPERIMENTAL - Use at your own risk! Not recommended for production systems.
 
 **Characteristics:**
 - Build time: 30-60+ minutes
@@ -141,10 +143,10 @@ make test
   # Or: make test
 ```
 
-**Production builds:**
+**Release builds (tagged versions):**
 ```yaml
 # No changes needed
-- name: Production Build
+- name: Release Build
   run: ./start_build.sh
 ```
 
@@ -182,7 +184,7 @@ make build
 
 ### 3. **Resource Optimization**
 - Test builds use minimal resources
-- Production builds get full resources
+- Release builds (harper_alloy_deb13) get full resources
 - Better CI/CD efficiency
 
 ### 4. **Extensibility**
@@ -201,7 +203,7 @@ make build
 | Disk Space | ~2-3 GB | ~100-200 MB |
 | CPU Usage | 100% sustained | 100% for 2-5 min |
 | Artifacts | 4-6 .deb files | 1 bzImage |
-| Use Case | Production | Testing |
+| Use Case | Enthusiast/Hobbyist ⚠️ | Testing |
 | QA Tests | Full suite | Minimal |
 
 ## Technical Details
@@ -265,11 +267,11 @@ All changes have been validated:
 
 # ✅ Backward compatibility
 ls -la scripts/ci-build.sh
-lrwxrwxrwx ... scripts/ci-build.sh -> alloymixtures/full.sh
+lrwxrwxrwx ... scripts/ci-build.sh -> alloymixtures/harper_alloy_deb13.sh
 
 # ✅ Permissions
 ls -la scripts/alloymixtures/*.sh
--rwxr-xr-x ... alloymixtures/full.sh
+-rwxr-xr-x ... alloymixtures/harper_alloy_deb13.sh
 -rwxr-xr-x ... alloymixtures/tinyconfig.sh
 ```
 
@@ -297,7 +299,7 @@ Updated files:
 # Use tinyconfig for quick validation
 make test
 
-# Use full build for production
+# Use harper_alloy_deb13 for complete builds (experimental)
 make build
 ```
 
@@ -324,4 +326,4 @@ make build
 
 ---
 
-**The alloy mixtures system provides the flexibility to choose the right build for the job while maintaining the simplicity and reliability of the Harper Kernel Foundry.**
+**The alloy mixtures system provides the flexibility to choose the right build for the job while maintaining the simplicity and reliability of the Harper Foundry.**

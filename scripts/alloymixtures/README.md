@@ -4,11 +4,12 @@ This directory contains different "alloy mixtures" - build script variants optim
 
 ## 🎯 Available Mixtures
 
-### `full.sh` - Production Full Build
-**Purpose:** Complete, production-ready kernel builds  
+### `harper_alloy_deb13.sh` - Harper Prime Alloy (Debian 13)
+**Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists  
 **Build Time:** 30-60+ minutes (depending on hardware)  
 **Artifacts:** Full .deb packages, headers, bzImage  
-**Use Case:** Production releases, complete feature set  
+**Use Case:** Enthusiast/hobbyist systems, experimentation, home labs  
+**Status:** ⚠️ EXPERIMENTAL - Use at your own risk, not for production!  
 
 **Features:**
 - Full Debian kernel configuration
@@ -21,10 +22,10 @@ This directory contains different "alloy mixtures" - build script variants optim
 **Usage:**
 ```bash
 # In params/foundry.params or custom params file:
-FOUNDRY_EXEC="alloymixtures/full.sh"
+FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
 
 # Or via command line:
-./start_build.sh --exec alloymixtures/full.sh
+./start_build.sh --exec alloymixtures/harper_alloy_deb13.sh
 ```
 
 ---
@@ -73,7 +74,7 @@ make test  # Uses tinyconfig by default
 
 ## 📊 Comparison Matrix
 
-| Feature | full.sh | tinyconfig.sh |
+| Feature | harper_alloy_deb13.sh | tinyconfig.sh |
 |---------|---------|---------------|
 | Build Time | 30-60+ min | 2-5 min |
 | Config Base | Debian default | tinyconfig |
@@ -82,7 +83,7 @@ make test  # Uses tinyconfig by default
 | Modules | ✅ All | ❌ None |
 | .deb Packages | ✅ Yes | ❌ No |
 | bzImage | ✅ Yes | ✅ Yes |
-| Production Ready | ✅ Yes | ❌ No |
+| Enthusiast Ready | ✅ Yes | ❌ No |
 | Good for Testing | ⚠️ Slow | ✅ Fast |
 
 ---
@@ -93,7 +94,7 @@ To add a new alloy mixture:
 
 1. **Create the script:**
    ```bash
-   cp alloymixtures/full.sh alloymixtures/my-custom.sh
+   cp alloymixtures/harper_alloy_deb13.sh alloymixtures/my-custom.sh
    ```
 
 2. **Modify for your needs:**
@@ -135,7 +136,7 @@ The "alloy mixture" metaphor reflects the foundry theme:
 - **Mixture** = Specific combination of settings
 
 Different alloys have different properties:
-- **Full build** = Strong, complete alloy (production metal)
+- **harper_alloy_deb13** = Strong, complete alloy (experimental enthusiast kernel)
 - **Tinyconfig** = Light, fast alloy (test sample)
 - **Custom builds** = Specialized alloys (specific applications)
 
@@ -177,7 +178,7 @@ All alloy mixture scripts must:
 ## 🚀 Quick Reference
 
 ```bash
-# Full production build
+# Complete Harper kernel build (experimental)
 ./start_build.sh --config-file params/foundry.params
 
 # Quick test build
@@ -194,7 +195,7 @@ All alloy mixture scripts must:
 
 ## 🧪 Testing New Mixtures
 
-Before using a new mixture in production:
+⚠️ **Important:** All Harper builds are experimental. Before using on real hardware:
 
 1. **Test with tinyconfig first:**
    ```bash

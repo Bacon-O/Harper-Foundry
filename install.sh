@@ -7,7 +7,7 @@ PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
 TEMP_PARAMS_FILE="${PARAMS_FILE}.tmp"
 
 echo "==================================================="
-echo " Harper Kernel Foundry: Interactive Setup"
+echo " Harper Foundry: Interactive Setup"
 echo "==================================================="
 echo ""
 

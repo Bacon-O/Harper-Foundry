@@ -49,10 +49,20 @@ RUN apt-get install -y \
     libssl-dev:amd64 \
     libc6-dev:amd64
 
-# 4. Set up a working directory
+# 4. Create non-root user for builds
+# Accept UID/GID as build arguments to match host user
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+RUN groupadd -g ${USER_GID} builder && \
+    useradd -m -u ${USER_UID} -g ${USER_GID} -s /bin/bash builder && \
+    mkdir -p /build /opt/factory/output /opt/factory/configs /opt/factory/scripts && \
+    chown -R builder:builder /build /opt/factory
+
+# 5. Set up a working directory
 WORKDIR /build
 
-# 5. Set environment variables to favor the x86_64 toolchain
+# 6. Set environment variables to favor the x86_64 toolchain
 ENV ARCH=x86_64
 ENV CROSS_COMPILE=x86_64-linux-gnu-
 ENV KBUILD_BUILD_ARCH=x86_64
@@ -60,3 +70,6 @@ ENV DEB_TARGET_ARCH=amd64
 
 # This ensures the container knows how to find the x86_64 libraries
 ENV PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+
+# 7. Switch to non-root user for all subsequent operations
+USER builder

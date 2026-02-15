@@ -1,4 +1,4 @@
-# Harper Kernel Foundry - Makefile
+# Harper Foundry - Makefile
 # Common tasks and shortcuts
 
 .PHONY: help setup validate check build test clean deep-clean status
@@ -6,7 +6,7 @@
 # Default target
 help:
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "  Harper Kernel Foundry - Make Targets"
+	@echo "  Harper Foundry - Make Targets"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
 	@echo "Setup & Configuration:"
