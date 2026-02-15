@@ -41,7 +41,7 @@ CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 # TARGET KERNEL DEFINITION
 # These parameters define the specific kernel to be built.
 # ==============================================================================
-
+# --- Target Specifications ---
 # Versioning & Tagging
 ARCH_TAG="x86_64v3"
 PROJECT_TAG="harper-v3"
