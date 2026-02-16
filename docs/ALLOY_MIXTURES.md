@@ -54,6 +54,7 @@ scripts/
 
 **Characteristics:**
 - Build time: 30-60+ minutes
+- Will track Debian backports 
 - Base: Debian (`defconfig`) with custom tuning applied
 - Architecture: **x86-64-v3** (AVX2, FMA, BMI2 optimizations for modern CPUs)
 - Scheduler: **BORE/EEVDF** - Burst-Oriented Response Enhancer for gaming/desktop responsiveness (reverts to EEVDF if BORE unavailable)
