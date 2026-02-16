@@ -85,7 +85,16 @@ fi
 
 # Ensure package indices are up-to-date
 echo "[INFO] Updating package indices..." >&2
-apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+if [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo &>/dev/null; then
+        sudo -n apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+    else
+        echo "[ERROR] sudo not available to run apt-get update" >&2
+        exit 1
+    fi
+else
+    apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+fi
 
 # Pull kernel source from trixie-backports repository
 # The -t flag targets the backports suite specifically
