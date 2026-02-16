@@ -41,8 +41,11 @@ mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
 echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
-apt-get source -y "$KERNEL_SOURCE"
-cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
+
+# Use kernel source plugin runner to handle various source types
+source "${PLUGIN_DIR}/kernelsources/runner.sh"
+KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "${KERNEL_VERSION:-latest}" "$CONTAINER_BUILD_ROOT")
+cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1; }
 
 # 3️⃣ Apply BORE/EEVDF Patch
 source "${PLUGIN_DIR}/patches/bore.sh"
