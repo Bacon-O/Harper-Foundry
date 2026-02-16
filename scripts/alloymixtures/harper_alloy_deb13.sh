@@ -80,14 +80,14 @@ echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --set-str MODULE_SIG_KEY ""
 
 # Protect the environment variables during this final dependency check
-make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
+make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
 # 7️⃣ Versioning
 TIMESTAMP=$(date +%Y%m%d%M)
 KERNEL_VER=$(make -s kernelversion)
 
 # SCHED_PRIORITY is now set by the BORE patch plugin
-export LOCALVERSION="-${PROJECT}-${ARCH_TAG}-${SCHEDULER_LABEL}"
+export LOCALVERSION="-${PROJECT}-${BUILD_ARCH_TAG}-${SCHEDULER_LABEL}"
 export KDEB_PKGVERSION="${KERNEL_VER}-${PROJECT}.${SCHED_PRIORITY}.${TIMESTAMP}"
 
 echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
@@ -96,19 +96,19 @@ echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 # 8️⃣ Compile Kernel with LLVM
 echo "🏗️ Compiling Kernel..."
 make -j"$FINAL_JOBS" \
-    LLVM="$MAKE_LLVM" \
+    LLVM="$BUILD_LLVM" \
     ARCH="$TARGET_ARCH" \
-    CROSS_COMPILE="$CROSS_CMD" \
+    CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
     KBUILD_BUILD_ARCH="$TARGET_ARCH" \
-    DEB_BUILD_ARCH="$MAKE_DEB_BUILD_ARCH" \
-    DEB_TARGET_ARCH="$MAKE_DEB_TARGET_ARCH" \
-    KBUILD_DEBARCH="$MAKE_DEB_TARGET_ARCH" \
-    CC="$MAKE_CC" \
-    HOSTCC="$MAKE_CC" \
-    HOSTLD="$MAKE_HOSTLD" \
-    HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
-    HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
-    USER_KCFLAGS="$USER_KCFLAGS" \
+    DEB_BUILD_ARCH="$BUILD_DEB_BUILD_ARCH" \
+    DEB_TARGET_ARCH="$BUILD_DEB_TARGET_ARCH" \
+    KBUILD_DEBARCH="$BUILD_DEB_TARGET_ARCH" \
+    CC="$BUILD_CC" \
+    HOSTCC="$BUILD_CC" \
+    HOSTLD="$BUILD_HOSTLD" \
+    HOSTCFLAGS="$BUILD_HOSTCFLAGS" \
+    HOSTLDFLAGS="$BUILD_HOSTLDFLAGS" \
+    KERNEL_CFLAGS="$KERNEL_CFLAGS" \
     LOCALVERSION="$LOCALVERSION" \
     KDEB_PKGVERSION="$KDEB_PKGVERSION" \
     bindeb-pkg

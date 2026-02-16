@@ -5,6 +5,58 @@
 
 The **Harper Foundry** is an extensible containerized build system. While currently configured for custom Debian Linux kernels with scheduler integration (BORE/EEVDF), tuning profiles, and automated QA, the foundry architecture can be extended to compile other programs. *(Note: Currently, only kernel build templates are available.)*
 
+[!CAUTION]
+## ⚠️ Early Stage Software
+
+**This project is still in early/enthusiast stage.** The logic works well for my specific use case, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
+
+**Known Limitations:**
+- Limited testing on platforms beyond x86_64/arm64 with Debian 13
+- Not recommended for production systems or mission-critical workloads
+- Expect rough edges, bugs, and breaking changes as the project evolves
+- The Harper kernel itself is experimental—use Debian's official kernels for stability
+
+If you hit issues, bugs, or have suggestions, please open an issue. This feedback helps improve the project.
+
+
+## Motivation
+
+### The Backstory
+
+This project started as a hands-on way to master CI/CD pipelines. After switching from Windows to Debian, I fell down the rabbit hole of Linux kernel tuning. While I loved the concept of projects like [linux-tkg](https://github.com/Frogging-Family/linux-tkg), I wanted something automated and tailored specifically to my hardware.
+
+### The Name
+
+I name all my home servers generic names. The build server for this project is named "Harper." During an early POC compile, the name got attached to the kernel; it had a nice ring to it, so it stuck. Harper Foundry was born: an automated forge that cross-compiles a tuned, x86-64-v3 Debian kernel from within a containerized environment.
+
+### Technical Stack (The Forge)
+
+To help others find the right tools, here is the machinery under the hood:
+
+- **CI/CD Orchestration:** GitHub Actions for fully automated builds
+- **Containerization:** Docker for a reproducible, isolated build environment
+- **Kernel Configuration:** Custom Kconfig optimizations (x86-64-v3) for modern CPU architectures
+- **Toolchain:** Debian Build-Essential & LLVM/Clang for cross-compiling
+- **Packaging:** Native .deb generation for easy installation on Debian-based systems
+
+### Was it worth the effort?
+
+Honestly? From a pure performance standpoint, probably not. Debian—and most major distributions—already ship incredibly stable, highly compatible, and well-patched kernels that are more than sufficient for 99% of use cases. If you are looking for a massive speed boost, you won't find a "magic pill" here. Seriously, that kernel that shipped with your distro is awesome—but if you want to tinker, you’ve found someone willing to listen.
+
+However, from a "Builder's" standpoint? Absolutely. The value of Harper Foundry isn't just the resulting .deb file; it was the journey of fighting Debian packaging, mastering containerized cross-compilation, and orchestrating a complex CI/CD pipeline. It's about having a "forge" that you own, end-to-end.
+
+### Who is this for?
+
+- **Kernel Hobbyists:** Those looking to build and tune their own kernels
+- **Learners:** Anyone exploring CI/CD fundamentals and containerization
+- **Developers:** Those who want a clean base to fork and tailor to their own needs
+
+### Public Reference Repo
+
+Right now, this public repo is just my clean "reference" setup, so the CI/CD actions are set to run manually. If you want to fire up the furnace and actually automate your own kernel builds, I highly recommend forking this project and setting up your own pipeline triggers.
+
+That keeps my commit history clean and puts you entirely in the driver's seat for your own build schedule. I’ve provided the templates and tools for development—everything from a clean shell/CLI compile environment to cron jobs and GitHub Actions. I am open to suggestions for improvements; there is still more on my list, but I think this is a good starting point to make this repo public.
+
 ## ✨ Features
 
 *   **🐳 Containerized Build:** Isolated, reproducible builds using Docker
@@ -13,9 +65,17 @@ The **Harper Foundry** is an extensible containerized build system. While curren
 *   **🛡️ Automated QA:** Extensible quality assurance framework validates configuration and binaries
 *   **🚀 CI/CD Ready:** GitHub Actions integration for automated builds
 *   **🎛️ Highly Configurable:** Fine-grained control via parameter files
-*   **🔧 Incremental Builds:** Optional fast rebuilds for development
+*   **🔧 Incremental Builds:** Optional fast rebuilds for developmen
+t## 🚀 Quick Start
 
-## 🚀 Quick Start
+### Tested Platforms
+
+Currently, the Harper Foundry has been tested and verified on:
+- **x86_64** (Native and cross-compilation target)
+- **arm64** (Native and cross-compilation host)
+- **Debian 13 (Trixie)** as the build environment
+
+Other Linux distributions should work, but **no testing has been performed**. If you encounter issues on other distros, contributions and bug reports are welcome.
 
 ### Prerequisites
 *   **Docker** (20.10+)
@@ -62,7 +122,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 📂 Project Structure
 
 *   `start_build.sh`: The main entry point for local builds.
-*   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.foundry.params`).
+*   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment hydration.
     *   `furnace_ignite.sh`: Docker container launch logic.
@@ -79,15 +139,15 @@ The build is configured via files in the `params/` directory. The default is `pa
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `PROJECT_ROOT` | Absolute path to repository on host | `/path/to/Debian-Harper` |
+| `PROJECT_ROOT` | Absolute path to repository on host | `/path/to/project/root` |
 | `HOST_OUTPUT_DIR` | Where build artifacts are stored | `/mnt/build-data/dist/release` |
 | `TARGET_ARCH` | Target CPU architecture | `x86_64`, `aarch64` |
-| `KERNEL_SOURCE` | Debian kernel source package | `linux/trixie-backports` |
-| `BORE_PATCH_URL` | URL to scheduler patch | `https://...` |
+| `KERNEL_SOURCE` | Kernel source plugin to use | `kernel.org`, `debian`, `debian/trixie-backports` |
+| `KERNEL_VERSION` | Kernel version or alias | `"latest"`, `"lts"`, `"6.11.8"`, empty for default |
 | `BASE_CONFIG` | Base kernel config | `defconfig`, `tinyconfig` |
-| `TUNING_CONFIG` | Additional config overlay | `debian_tune_test_v1.config` |
+| `TUNING_CONFIG` | Additional config overlay | `harper_alloy_deb13_tune.config` |
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
-| `QA_MODE` | QA strictness | `SOFT`, `HARD` |
+| `QA_MODE` | QA strictness | `RELAXED`, `ENFORCED` |
 
 ### Validation
 
@@ -116,7 +176,7 @@ The foundry accepts several arguments to control the process:
 
 | Flag | Long Option | Description |
 | :--- | :--- | :--- |
-| `-c` | `--config-file <path>` | Specify a custom params file (default: `params/foundry.params`). |
+| `-p` | `--params-file <path>` | Specify a params file (default: `params/foundry.params`). |
 | `-t` | `--test-run` | Enable test mode (uses `tinyconfig`, disables QEMU, ignores non-critical QA). |
 | `-r` | `--rebuild` | Force a rebuild of the Docker builder image. |
 | `-b` | `--bypass-qa` | Skip the Material Analysis (QA) stage. |
@@ -144,15 +204,26 @@ make deep-clean  # Remove all artifacts
 
 **Run a fast test build (tinyconfig):**
 ```bash
-./start_build.sh --config-file params/tinyconfig.foundry.params
+./start_build.sh --params-file params/tinyconfig.params
 # Or simply:
 make test
 ```
 
-**Build using a specific configuration file:**
+**Build using a specific params file:**
 ```bash
-./start_build.sh --config-file params/experimental.params
+./start_build.sh --params-file params/experimental.params
 ```
+
+**Apply override params on top of base config:**
+```bash
+# Use -o flag for base + override pattern
+./start_build.sh -p params/harper_alloy_deb13.params -o params/_test_overrides.params
+
+# Or use PRODUCTION_CONFIG environment variable
+PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+```
+
+See [params/README.md](params/README.md#configuration-override-patterns) for detailed override documentation.
 
 **Use a specific build mixture:**
 ```bash
@@ -172,7 +243,7 @@ The foundry supports different "alloy mixtures" - build configurations optimized
 
 | Mixture | Build Time | Purpose | Artifacts |
 |---------|------------|---------|-----------|
-| **harper_alloy_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages |
+| **harper_alloy_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages, optimized for desktop/gaming (compiled with CLANG/LLVM) |
 | **tinyconfig.sh** | 2-5 min | Quick testing | bzImage only |
 
 See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detailed information.
@@ -189,6 +260,14 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
 - 🏗️ 30-60+ minute builds
 - 🎯 Complete Harper kernel for enthusiasts
 - 📦 Complete .deb packages
+- 🔨 Compiled with CLANG/LLVM for modern optimizations
+- 🚀 Optimized for desktop/gaming workloads:
+  - x86-64-v3 CPU baseline (AVX2, FMA, BMI2)
+  - BORE (preferred) scheduler or EEVDF denpending on avaliability
+  - 1000Hz timer frequency (vs Debian's 250Hz)
+  - Full preemption for lower latency
+  - Intel/AMD P-State frequency scaling
+  - ZSTD kernel compression
 - ⚠️ Experimental - use at your own risk
 
 ### Cleanup
@@ -213,8 +292,7 @@ To remove all build artifacts from the distribution directory and prune the Dock
 
 GitHub Actions workflow (`.github/workflows/kernel-factory.yml`) provides automated builds:
 
-*   **Release Builds:** Triggered by version tags (e.g., `v1.0.0`) on the `main` branch - uses harper_alloy_deb13
-*   **Testing Builds:** Triggered by pushes to `dev` and `feature/*` branches - uses tinyconfig
+*   **Manual Dispatch:** Dual dropdown select base config + optional testing overrides
 *   **Manual Dispatch:** Run builds on-demand with custom configurations
 
 ⚠️ **Note:** All Harper builds are experimental. This is a hobbyist/enthusiast project.
@@ -225,6 +303,28 @@ GitHub Actions workflow (`.github/workflows/kernel-factory.yml`) provides automa
 2. **Smelt** - Execute containerized kernel build
 3. **Analysis** - Run QA tests on build artifacts
 4. **Cleanup** - Remove old builds and free disk space
+
+## 🔔 Automated Trigger Jobs
+
+Harper includes a trigger job system (plugin-based) that monitors Debian Trixie Backports for new kernel releases and automatically builds when available.
+
+**Features:**
+- 📡 Monitors Debian Salsa API for upstream updates
+- 🎯 Version tracking to avoid duplicate builds
+- ⚙️ Runs on configurable schedule (default: every 6 hours)
+- 🔧 Extensible plugin system for custom triggers
+
+**Quick Start:**
+```bash
+# Manual trigger check (via plugin system)
+source ./scripts/plugins/triggers/runner.sh
+trigger_build alloy_deb13_kernel
+
+# Force build regardless of version
+trigger_build alloy_deb13_kernel --force
+```
+
+For full documentation, see [Trigger Jobs Guide](docs/TRIGGER_JOBS.md).
 
 ## 🧪 Quality Assurance
 
@@ -277,7 +377,7 @@ QA_TEST_PACKAGE=(
 )
 
 # QA behavior
-QA_MODE="SOFT"          # SOFT = warn, HARD = fail build
+QA_MODE="RELAXED"       # RELAXED = warn, ENFORCED = fail build
 BYPASS_QA="false"       # Set true to skip QA entirely
 ```
 
@@ -316,13 +416,13 @@ You can use custom Docker images:
 
 ```bash
 # In params/foundry.params
-FOUNDRY_IMAGE="myregistry/custom-builder:latest"
+DOCKERFILE_PATH="myregistry/custom-builder:latest"
 ```
 
 Or build from a local Dockerfile:
 
 ```bash
-FOUNDRY_IMAGE="docker/my_custom.dockerfile"
+DOCKERFILE_PATH="docker/my_custom.dockerfile"
 ```
 
 ### Adding Custom QA Tests
@@ -373,8 +473,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 ## 🙏 Acknowledgments
 
 - **BORE Scheduler** - [firelzrd/bore-scheduler](https://github.com/firelzrd/bore-scheduler)
-- **Debian Kernel Team** - For maintaining excellent kernel packages
-- **Linux-TKG** - Inspiration for kernel tuning approaches
+- **Linux-TKG** - [Frogging-Family/linux-tkg](https://github.com/Frogging-Family/linux-tkg) - Inspiration for kernel tuning approaches
+- **Debian and the Debian kernel team** - [wiki.debian.org/Kernel](https://wiki.debian.org/Kernel) - Excellent reference for Debian kernel concepts
 
 ## 📞 Support
 
@@ -382,4 +482,12 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 - **Discussions:** [GitHub Discussions](https://github.com/Bacon-O/Debian-Harper/discussions)
 
 ## TODO
-*   Improve testing framework, perhaps introduce modular test packages
+*   General testing
+*   Improve testing framework
+*   Create additional param files for other kernels/distro
+*   Create a non-kernel/generic compile job
+*   Improve documentation
+*   Refine docker image(s)
+*   Improve plugins/triggers
+*   Improve plugins/notifiers
+*   Refine "harvest" steps

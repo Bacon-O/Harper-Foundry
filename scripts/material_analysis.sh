@@ -2,7 +2,7 @@
 set -e
 
 # 1. Load the Foundry Environment
-# This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_OUTPUT_DIR
+# This ensures we have access to QA_CRITICAL_CHECKS, QA_OPTIONAL_CHECKS, and HOST_OUTPUT_DIR
 source "$(dirname "$0")/env_setup.sh" "$@"
 
 # --- Visual Foundry Utilities ---
@@ -12,11 +12,11 @@ log_error() { echo -e "\e[31m[ERROR]\e[0m $1"; }
 
 handle_failure() {
     local test_name=$1
-    if [[ "$QA_MODE" == "HARD" ]]; then
-        log_error "QA FAILURE: [$test_name]. Aborting (QA_MODE=HARD)."
+    if [[ "$QA_MODE" == "ENFORCED" ]]; then
+        log_error "QA FAILURE: [$test_name]. Aborting (QA_MODE=ENFORCED)."
         exit 1
     else
-        log_warn "QA WARNING: [$test_name] failed. Continuing (QA_MODE=SOFT)."
+        log_warn "QA WARNING: [$test_name] failed. Continuing (QA_MODE=RELAXED)."
     fi
 }
 
@@ -27,15 +27,13 @@ for test_script in "${QA_TESTS[@]}"; do
     
     if [[ -x "$full_path" ]]; then
         log_info "Running plugin: $test_script"
-        if ! "$full_path"; then
+        if ! "$full_path" "$@"; then
             handle_failure "$test_script"
         fi
     else
         log_warn "Plugin missing or not executable: $full_path"
     fi
 done
-
----
 
 # --- Phase 2: Package-Level Bundles ---
 log_info "Phase 2: Executing Host-Native Package Suites..."
@@ -49,7 +47,7 @@ for package in "${QA_TEST_PACKAGE[@]}"; do
             if [[ -x "$subtest" ]]; then
                 test_name=$(basename "$subtest")
                 log_info "  -> Executing: $test_name"
-                if ! "$subtest"; then
+                if ! "$subtest" "$@"; then
                     handle_failure "$package/$test_name"
                 fi
             fi

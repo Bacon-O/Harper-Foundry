@@ -49,7 +49,7 @@ build:
 
 test:
 	@echo "🧪 Running tinyconfig quick test build..."
-	./start_build.sh --config-file params/tinyconfig.foundry.params
+	./start_build.sh --params-file params/tinyconfig.params
 
 rebuild:
 	@echo "🔨 Rebuilding Docker image and kernel..."

@@ -40,7 +40,8 @@ RUN apt-get update && apt-get install -y \
     libdw-dev \
     crossbuild-essential-amd64 \
     quilt \
-    python3-dacite
+    python3-dacite \
+    wget
     
 # 3. Install x86_64 Target Libraries (the "Satisfiers")
 # These prevent the "cannot find -lelf" and "wrong format" errors
@@ -58,6 +59,13 @@ RUN groupadd -g ${USER_GID} builder && \
     useradd -m -u ${USER_UID} -g ${USER_GID} -s /bin/bash builder && \
     mkdir -p /build /opt/factory/output /opt/factory/configs /opt/factory/scripts && \
     chown -R builder:builder /build /opt/factory
+
+# 4a. Install sudo and allow builder user passwordless root access for troubleshooting
+RUN apt-get install -y sudo && \
+    echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    mkdir -p /etc/sudoers.d && \
+    echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder && \
+    chmod 0440 /etc/sudoers.d/builder
 
 # 5. Set up a working directory
 WORKDIR /build

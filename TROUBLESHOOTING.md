@@ -106,8 +106,8 @@ make: *** [Makefile:1234] Error 1
    ```bash
    # In params/foundry.params, ensure these match:
    TARGET_ARCH="x86_64"
-   CROSS_CMD="x86_64-linux-gnu-"
-   MAKE_CC="clang --target=x86_64-linux-gnu"
+   CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
+   BUILD_CC="clang --target=x86_64-linux-gnu"
    ```
 
 3. Try a clean build:
@@ -127,7 +127,7 @@ virtual memory exhausted: Cannot allocate memory
 1. Reduce parallelism:
    ```bash
    # In params/foundry.params
-   FOUNDRY_NPROC="4"  # Reduce from default
+   PARALLEL_JOBS="4"  # Reduce from default
    ```
 
 2. Increase Docker memory limit:
@@ -178,9 +178,9 @@ Verify architecture consistency:
 ```bash
 # These should align:
 TARGET_ARCH="x86_64"              # Kernel arch
-DEB_TARGET_ARCH="amd64"           # Debian package arch
-CROSS_CMD="x86_64-linux-gnu-"     # Toolchain prefix
-MAKE_CC="clang --target=x86_64-linux-gnu"
+DEB_HOST_ARCH="amd64"            # Debian package arch
+CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"     # Toolchain prefix
+BUILD_CC="clang --target=x86_64-linux-gnu"
 ```
 
 ### Issue: Configuration Merge Conflicts
@@ -289,7 +289,7 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
    echo "CONFIG_xyz=y" >> configs/your_tuning.config
    ```
 
-2. Or remove from `CHECK_LIST` if not actually required
+2. Or remove from `QA_CRITICAL_CHECKS` if not actually required
 
 3. Check if option name changed in newer kernel versions
 
@@ -328,7 +328,7 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
 1. Increase parallelism:
    ```bash
    # In params/foundry.params
-   FOUNDRY_NPROC=""  # Empty = use all cores
+   PARALLEL_JOBS=""  # Empty = use all cores
    ```
 
 2. Use incremental builds:

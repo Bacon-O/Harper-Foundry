@@ -5,6 +5,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # 2. Handle Arguments
 PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
+OVERRIDE_PARAMS=""
 TEST_RUN_MODE="false"
 DOCKER_REBUILD="false"
 BYPASS_QA_CLI="false"
@@ -15,15 +16,20 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
-            echo "  -c, --config-file <path>  Specify a custom params file."
+            echo "  -p, --params-file <path>  Specify a params file."
+            echo "  -o, --overrides <path>    Apply override params on top of base."
             echo "  -t, --test-run            Enable test mode (tinyconfig, no QEMU)."
             echo "  -r, --rebuild             Force Docker image rebuild."
             echo "  -b, --bypass-qa           Skip Material Analysis."
             echo "  -i, --incremental         Skip 'make clean' for faster rebuilds."
             echo "  -e, --exec <script>       Override the container execution script."
+            echo ""
+            echo "Interactive Modes:"
+            echo "  --shell                   Launch interactive container shell."
+            echo "  --shell-menu              Show menu to select params file, then shell."
             exit 0
             ;;
-        -c|--config-file)
+        -p|--params-file)
             if [[ -z "$2" ]] || [[ "$2" == -* ]]; then
                 echo "❌ Error: Argument for $1 is missing"
                 exit 1
@@ -37,6 +43,21 @@ while [[ "$#" -gt 0 ]]; do
                 exit 1
             fi
             shift 
+            ;;
+        -o|--overrides)
+            if [[ -z "$2" ]] || [[ "$2" == -* ]]; then
+                echo "❌ Error: Argument for $1 is missing"
+                exit 1
+            fi
+            if [[ -f "$2" ]]; then
+                OVERRIDE_PARAMS="$(realpath "$2")"
+            elif [[ -f "${REPO_ROOT}/$2" ]]; then
+                OVERRIDE_PARAMS="${REPO_ROOT}/$2"
+            else
+                echo "❌ Error: Specified override file '$2' not found."
+                exit 1
+            fi
+            shift
             ;;
         -t|--test-run)
             TEST_RUN_MODE="true"
@@ -67,6 +88,11 @@ while [[ "$#" -gt 0 ]]; do
     shift 
 done
 
+# Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
+if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry.params" ]; then
+    PARAMS_FILE="${REPO_ROOT}/params/tinyconfig.params"
+fi
+
 # 3. Load and Hydrate
 if [ -f "$PARAMS_FILE" ]; then
     echo "📖 Moving fuel truck into place from $PARAMS_FILE..."
@@ -74,14 +100,31 @@ if [ -f "$PARAMS_FILE" ]; then
     source "$PARAMS_FILE"
     set +a
     
+    # Apply overrides if specified
+    if [ -n "$OVERRIDE_PARAMS" ] && [ -f "$OVERRIDE_PARAMS" ]; then
+        echo "🔄 Applying overrides from $(basename "$OVERRIDE_PARAMS")..."
+        set -a
+        source "$OVERRIDE_PARAMS"
+        set +a
+    fi
+    
     # 4. Burner Control (Parallelism)
-    # Uses FOUNDRY_NPROC from params or defaults to all available cores
-    if [ -z "$FOUNDRY_NPROC" ]; then
+    # Uses PARALLEL_JOBS from params or defaults to all available cores
+    if [ -z "$PARALLEL_JOBS" ]; then
         export FINAL_JOBS=$(nproc)
         echo "🔥 Using full furnace power: $FINAL_JOBS cores."
     else
-        export FINAL_JOBS="$FOUNDRY_NPROC"
+        export FINAL_JOBS="$PARALLEL_JOBS"
         echo "🔥 Using restricted furnace power: $FINAL_JOBS cores."
+    fi
+
+    # 4.5. Container Path Adjustments
+    # If running inside a container, translate host paths to container paths
+    if [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+        # Inside container: plugins are mounted at /opt/factory/plugins
+        export PLUGIN_DIR="/opt/factory/plugins/"
+        export TEST_FUNCTIONS_DIR="/opt/factory/plugins/qatests/tests/"
+        export TEST_PACKAGE_DIR="/opt/factory/plugins/qatests/packages/"
     fi
 
     # 5. Apply Overrides (CLI Arguments > Params File)
@@ -122,28 +165,36 @@ echo "👤 Identity: $HOST_UID:$HOST_GID"
 echo "🏗️  Host Architecture: $HOST_ARCH"
     
     # 7. Image Source Detection
-    if [[ -f "${REPO_ROOT}/${FOUNDRY_IMAGE}" ]]; then
+    if [[ -f "${REPO_ROOT}/${DOCKERFILE_PATH}" ]]; then
         export FOUNDRY_IMAGE_TYPE="build"
-        export DOCKERFILE_PATH="${REPO_ROOT}/${FOUNDRY_IMAGE}"
-    elif [[ -f "$FOUNDRY_IMAGE" ]]; then
+        export DOCKERFILE_PATH="${REPO_ROOT}/${DOCKERFILE_PATH}"
+    elif [[ -f "$DOCKERFILE_PATH" ]]; then
         export FOUNDRY_IMAGE_TYPE="build"
-        export DOCKERFILE_PATH="$FOUNDRY_IMAGE"
+        export DOCKERFILE_PATH="$DOCKERFILE_PATH"
     else
         export FOUNDRY_IMAGE_TYPE="pull"
-        export REMOTE_IMAGE_REF="$FOUNDRY_IMAGE"
+        export REMOTE_IMAGE_REF="$DOCKERFILE_PATH"
     fi
 
     # 8. Metadata (Anchor the BUILD_ID to the GitHub Run)
-    if [ -n "$GITHUB_RUN_ID" ]; then
-        export BUILD_ID="gh_${GITHUB_RUN_ID}"
-    else
-        export BUILD_ID=$(date +%Y%m%d_%H%M)
+    # Only calculate BUILD_ID if not already set (e.g., from start_build.sh)
+    if [ -z "$BUILD_ID" ]; then
+        if [ -n "$GITHUB_RUN_ID" ]; then
+            export BUILD_ID="gh_${GITHUB_RUN_ID}"
+        else
+            export BUILD_ID=$(date +%Y%m%d_%H%M%S)
+        fi
     fi
 
     export CURRENT_DIST_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
-    mkdir -p "$CURRENT_DIST_DIR"
     
-    echo "📂 Artifact Target: $CURRENT_DIST_DIR"    
+    # Only create output directory on host, not inside container (it's already mounted)
+    if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+        mkdir -p "$CURRENT_DIST_DIR"
+        echo "📂 Artifact Target: $CURRENT_DIST_DIR"
+    else
+        echo "📂 Running in container - output mounted at /opt/factory/output"
+    fi    
     echo "✅ Environment fueled for $TARGET_ARCH build."
 else
     echo "❌ Error: $PARAMS_FILE not found!"

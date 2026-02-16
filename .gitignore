@@ -40,3 +40,6 @@ desktop.ini
 # Environment
 .env
 .env.local
+
+# Test Scripts (local only)
+.tests/

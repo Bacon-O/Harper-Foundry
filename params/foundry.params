@@ -1,5 +1,16 @@
 # ==============================================================================
-# HARPER FOUNDRY: BLUEPRINT CONFIGURATION
+# HARPER FOUNDRY: BLUEPRINT CONFIGURATION - TEMPLATE
+# ==============================================================================
+# ⚠️  THIS IS A TEMPLATE! DO NOT USE DIRECTLY!
+#
+# This file intentionally has INCOMPLETE/INVALID configuration to prevent
+# accidental use. Copy and customize this file to create your own build config.
+#
+# Example:
+#   cp params/foundry.params params/my_custom_build.params
+#   # Edit params/my_custom_build.params with your settings
+#   ./start_build.sh -p params/my_custom_build.params
+#
 # ==============================================================================
 
 # ==============================================================================
@@ -9,11 +20,9 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
-# Host paths for build data, repository root, and distribution output.
-# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-HOST_OUTPUT_DIR="/mnt/build-data/dist/release"
+# ⚠️  REQUIRED: Set these to your actual paths!
+PROJECT_ROOT="EDIT_ME_HOST_REPO_PATH"
+HOST_OUTPUT_DIR="EDIT_ME_HOST_OUTPUT_PATH"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
@@ -21,14 +30,13 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
+FOUNDRY_EXEC="EDIT_ME_EXECUTION_SCRIPT"
 INCREMENTAL_BUILD="false"
 
-
 # --- Foundry Image Configuration ---
-# Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
-FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_v2.dockerfile"
-IMAGE_NAME="debian-harper-worker"
+# ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
+DOCKERFILE_PATH="EDIT_ME_DOCKER_IMAGE_PATH"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # --- Container Internal Paths (Do not change unless Dockerfile changes) ---
 # These paths reflect the internal structure of the Docker container.
@@ -41,46 +49,72 @@ CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 # TARGET KERNEL DEFINITION
 # These parameters define the specific kernel to be built.
 # ==============================================================================
-# --- Target Specifications -----
-# Versioning & Tagging
-ARCH_TAG="x86_64v3"
-PROJECT_TAG="harper-v3"
+
+# --- Versioning & Tagging ---
+BUILD_ARCH_TAG="EDIT_ME_ARCH_TAG"
+RELEASE_TAG="EDIT_ME_PROJECT_TAG"
 
 # --- Target Specifications ---
-TARGET_ARCH="x86_64"
+# ⚠️  REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
+TARGET_ARCH="EDIT_ME_TARGET_ARCH"
 
-# "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
-# The compiler accepts this as a concrete CPU model.
-USER_KCFLAGS="-march=haswell -mtune=haswell"
-CROSS_CMD="x86_64-linux-gnu-"
-KDEB_NAME="linux-upstream-harper-v3"
-KERNEL_SOURCE="linux/trixie-backports"
-DEB_TARGET_ARCH="amd64"
-HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+KERNEL_CFLAGS="EDIT_ME_KERNEL_CFLAGS"
+CROSS_COMPILE_PREFIX="EDIT_ME_CROSS_COMPILE"
+DEBIAN_PACKAGE_NAME="EDIT_ME_KDEB_NAME"
 
-MAKE_DEB_BUILD_ARCH="arm64"
-MAKE_DEB_TARGET_ARCH="amd64"
-MAKE_CC="clang --target=x86_64-linux-gnu"
-MAKE_HOSTLD="x86_64-linux-gnu-ld"
-MAKE_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
-MAKE_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
-MAKE_LLVM="1"
+# --- Kernel Source Strategy (Plugin-based) ---
+# The kernel source plugin system maps KERNEL_SOURCE to specific fetching methods.
+# Supported values:
+#   - "kernel.org"  : Official vanilla upstream sources (fast, no Debian patches)
+#   - "debian"      : Debian apt-get source (includes Debian customizations)
+#   - "debian/trixie-backports" : Debian Trixie Backports (newer kernels with Debian patches)
+#   - "custom"      : Skip auto-fetch; implement your own logic in ci-build
+#   - "none"        : Skip auto-fetch; implement your own logic in ci-build
+# See: scripts/plugins/kernelsources/README.md
+KERNEL_SOURCE="EDIT_ME_KERNEL_SOURCE"
+# KERNEL_VERSION supports semantic aliases (source-aware interpretation):
+#   - "" (empty) or omitted: Uses source defaults (kernel.org → 6.11.8, debian → latest, etc.)
+#   - "latest": Latest stable/available from source
+#   - "stable": Latest stable (same as latest for most sources)
+#   - "lts": Latest LTS kernel if available from source
+#   - "rc": Release candidates if available
+#   - Specific version: "6.11.8", "6.10.5", etc. (pins to exact version when available)
+# Examples:
+#   KERNEL_VERSION=""                  # Uses source defaults
+#   KERNEL_VERSION="latest"            # Always get newest available
+#   KERNEL_VERSION="lts"               # Get LTS variant
+#   KERNEL_VERSION="6.11.8"            # Pin to specific version
+KERNEL_VERSION=""
+
+DEB_HOST_ARCH="EDIT_ME_DEB_TARGET_ARCH"
+HOST_QEMU_STATIC="/usr/bin/qemu-EDIT_ME_ARCH-static"
+
+BUILD_DEB_BUILD_ARCH="EDIT_ME_BUILD_ARCH"
+BUILD_DEB_TARGET_ARCH="EDIT_ME_TARGET_ARCH"
+BUILD_CC="EDIT_ME_C_COMPILER"
+BUILD_HOSTLD="EDIT_ME_HOSTLD"
+BUILD_HOSTCFLAGS="EDIT_ME_HOSTCFLAGS"
+BUILD_HOSTLDFLAGS="EDIT_ME_HOSTLDFLAGS"
+BUILD_LLVM="1"
+
 # ==============================================================================
 # BUILD STRATEGY & FEATURES
 # These parameters control the build process and specific kernel features.
 # ==============================================================================
 
 # --- Performance & Parallelism ---
-# Number of CPU cores for the build. Leave empty ("") to use all available cores (nproc default).
-FOUNDRY_NPROC=""
+# Number of CPU cores for the build. Leave empty ("") to use all available cores.
+PARALLEL_JOBS=""
 
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
-BASE_CONFIG="defconfig"
-TUNING_CONFIG="debian_tune_test_v1.config"
+BASE_CONFIG="EDIT_ME_BASE_CONFIG"
+TUNING_CONFIG="EDIT_ME_TUNING_CONFIG"
+
+# Note: KERNEL_VERSION is used by kernel source plugins to determine which kernel
+# version to fetch. It's optional - see KERNEL_VERSION documentation above.
 
 # --- Scheduler Patch ---
-BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
 
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
@@ -90,102 +124,26 @@ PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
 TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
 TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 
-
 # --- QA Flags ---
-# @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
-# Set to "false" to skip QEMU boot testing.
 ENABLE_QEMU_TESTS="false"
+QA_MODE="RELAXED"
 
-# QA mode controls the strictness of QA tests. "SOFT" will log warnings but not fail the build, 
-# while "HARD" will fail the build on any QA test failure.
-QA_MODE="SOFT"
-
-# A list of individual QA test scripts to run. 
-# These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
 QA_TESTS=(
 )
 
-# A list of QA packages to run /plugins/qatests/testpackages
 QA_TEST_PACKAGE=(
-    "harperbase"
 )
 
 # --- Chemical Audit: Critical (Must Pass) ---
-# Exact internal Kconfig names to verify. If any are missing, the build is considered BROKEN.
-CHECK_LIST=( 
+QA_CRITICAL_CHECKS=( 
 )
+
 # --- Chemical Audit: Optional (Warn Only) ---
-# If these are missing, a warning is logged but the kernel is still shipped.
-# This supports fallback strategies (e.g., BORE -> EEVDF).
-WARN_LIST=(
-    "CONFIG_ACPI="
-    "CONFIG_ATA="
-    "CONFIG_BLK_DEV_INITRD="
-    "CONFIG_BLK_DEV_NVME="
-    "CONFIG_BPF_SYSCALL=n"
-    "CONFIG_BTRFS_FS=m"
-    "CONFIG_BUG="
-    "CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL="
-    "CONFIG_CPU_FREQ="
-    "CONFIG_CPU_SUP_AMD="
-    "CONFIG_CPU_SUP_INTEL="
-    "CONFIG_DEBUG_INFO=n"
-    "CONFIG_DEBUG_KERNEL=n"
-    "CONFIG_DEVTMPFS_MOUNT="
-    "CONFIG_DEVTMPFS="
-    "CONFIG_DRM_AMDGPU=m"
-    "CONFIG_DRM_KMS_HELPER="
-    "CONFIG_DRM_NOUVEAU=m"
-    "CONFIG_DRM_SCHED="
-    "CONFIG_DRM_TTM="
-    "CONFIG_DRM="
-    "CONFIG_EFI_STUB="
-    "CONFIG_EFI="
-    "CONFIG_EXFAT_FS="
-    "CONFIG_EXT4_FS="
-    "CONFIG_FAT_FS="
-    "CONFIG_FTRACE=n"
-    "CONFIG_FUSE_FS=m"
-    "CONFIG_GENERIC_CPU="
-    "CONFIG_HIGH_RES_TIMERS="
-    "CONFIG_HZ_500="
-    "CONFIG_HZ=500"
-    "CONFIG_ISO9660_FS=m"
-    "CONFIG_KALLSYMS_ALL="
-    "CONFIG_KALLSYMS="
-    "CONFIG_KPROBES=n"
-    "CONFIG_LATENCYTOP=n"
-    "CONFIG_MODULE_UNLOAD="
-    "CONFIG_MODULES_TREE_LOOKUP="
-    "CONFIG_MODULES_USE_ELF_RELA="
-    "CONFIG_MODULES="
-    "CONFIG_MODVERSIONS="
-    "CONFIG_MSDOS_FS="
-    "CONFIG_NO_HZ_IDLE="
-    "CONFIG_NTFS3_FS=m"
-    "CONFIG_NVME_CORE="
-    "CONFIG_OVERLAY_FS=m"
-    "CONFIG_PANIC_ON_OOPS=n"
-    "CONFIG_PREEMPT_DYNAMIC="
-    "CONFIG_PREEMPT="
-    "CONFIG_PRINTK="
-    "CONFIG_PROC_FS="
-    "CONFIG_SATA_AHCI="
-    "CONFIG_SCHED_AUTOGROUP="
-    "CONFIG_SCHED_BORE="
-    "CONFIG_STACK_VALIDATION=n"
-    "CONFIG_SYSFS="
-    "CONFIG_TMPFS="
-    "CONFIG_UDF_FS=m"
-    "CONFIG_UPROBES=n"
-    "CONFIG_VFAT_FS="
-    "CONFIG_X86_AMD_PSTATE="
-    "CONFIG_X86_INTEL_PSTATE="
-    "CONFIG_XFS_FS=m"
+QA_OPTIONAL_CHECKS=(
 )
 
 # --- VM Proving Ground Specs (for QEMU testing) ---
-VM_MEM="1G"
-VM_CORES="4"
-VM_TIMEOUT="30s"
+QA_VM_MEMORY="1G"
+QA_VM_CORES="4"
+QA_VM_TIMEOUT="30s"

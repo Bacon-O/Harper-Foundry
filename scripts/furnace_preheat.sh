@@ -15,10 +15,13 @@ fi
 # 3. Audit the 'Ore' (Using REPO_ROOT for stability)
 echo "🔍 Checking Input Materials..."
 
-TUNING_PATH="${REPO_ROOT}/configs/$TUNING_CONFIG"
-if [ ! -f "$TUNING_PATH" ]; then
-    echo "❌ ERROR: Missing Charge Material: $TUNING_PATH"
-    exit 1
+# TUNING_CONFIG is optional - only validate if set
+if [ -n "$TUNING_CONFIG" ]; then
+    TUNING_PATH="${REPO_ROOT}/configs/$TUNING_CONFIG"
+    if [ ! -f "$TUNING_PATH" ]; then
+        echo "❌ ERROR: Missing Charge Material: $TUNING_PATH"
+        exit 1
+    fi
 fi
 
 if [[ "$BASE_CONFIG" != "defconfig" && "$BASE_CONFIG" != "tinyconfig" ]]; then

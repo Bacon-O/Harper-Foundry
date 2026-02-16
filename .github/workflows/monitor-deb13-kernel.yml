@@ -1,0 +1,61 @@
+name: Monitor Debian Trixie Kernel Releases
+
+# Trigger on schedule (check for new releases every 6 hours)
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if version unchanged'
+        required: false
+        default: 'false'
+
+jobs:
+  monitor-and-trigger:
+    runs-on: self-hosted
+    name: Check for Debian Trixie Kernel Updates
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up monitoring environment
+        run: |
+          # Ensure curl and jq are available
+          command -v curl > /dev/null || (apt-get update && apt-get install -y curl)
+          command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
+      
+      - name: Run kernel release trigger
+        run: |
+          source ./scripts/plugins/triggers/runner.sh
+          if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
+            trigger_build alloy_deb13_kernel --force
+          else
+            trigger_build alloy_deb13_kernel
+          fi
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+      
+      - name: Update version tracking file
+        if: success()
+        run: |
+          # Placeholder: This would be done by trigger script on successful build
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if git diff --quiet version_tracking/alloy_deb13_latest_kernel.txt; then
+            echo "No version changes to commit"
+          else
+            git add version_tracking/alloy_deb13_latest_kernel.txt
+            git commit -m "Update tracked kernel version [skip ci]"
+            git push
+          fi
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Kernel release check failed"
+          exit 1

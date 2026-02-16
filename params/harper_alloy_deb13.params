@@ -1,0 +1,212 @@
+# ==============================================================================
+# HARPER FOUNDRY: HARPER ALLOY DEB13 - x86_64v3 Build
+# ==============================================================================
+# This is a COMPLETE, WORKING example configuration for building the Harper
+# kernel for Debian 13 (Trixie) with x86-64-v3 optimizations (AVX2, FMA, BMI2).
+#
+# Optimizations from base Debian config:
+#   • Architecture: x86-64-v3 baseline (modern CPU instructions)
+#   • Scheduler: BORE (Burst-Oriented Response Enhancer) with EEVDF fallback
+#   • Timer: 1000Hz (vs Debian's 250Hz) for reduced latency
+#   • Preemption: Full preemption for lower response times
+#   • CPU Frequency: Intel & AMD P-State with schedutil governor
+#   • Boot: ZSTD compression for faster kernel decompression
+#   • Target: Optimized for gaming/desktop workloads
+#
+# Use this as a reference or starting point for custom builds.
+# ==============================================================================
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# These parameters are essential for the build system to function.
+# Incorrect values will likely prevent the build from starting or completing.
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# Host paths for build data, repository root, and distribution output.
+# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
+PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
+HOST_OUTPUT_DIR="/mnt/build-data/dist/release/harper-deb13/"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Execution ---
+# The script within the container that Docker will execute.
+FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
+INCREMENTAL_BUILD="false"
+
+
+# --- Foundry Image Configuration ---
+# Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
+DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
+
+# --- Container Internal Paths (Do not change unless Dockerfile changes) ---
+# These paths reflect the internal structure of the Docker container.
+CONTAINER_BUILD_ROOT="/build"
+CONTAINER_OUTPUT_DIR="/opt/factory/output"
+CONTAINER_CONFIG_DIR="/opt/factory/configs"
+CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# These parameters define the specific kernel to be built.
+# ==============================================================================
+# --- Target Specifications ----
+# Versioning & Tagging
+BUILD_ARCH_TAG="x86_64v3"
+RELEASE_TAG="harper-v3"
+
+# --- Target Specifications ---
+TARGET_ARCH="x86_64"
+
+# "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
+# The compiler accepts this as a concrete CPU model.
+KERNEL_CFLAGS="-march=haswell -mtune=haswell"
+CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
+DEBIAN_PACKAGE_NAME="linux-upstream-harper-v3"
+
+# --- Kernel Source Strategy (Plugin-based) ---
+# Using Debian Trixie Backports for newer kernels with full Debian integration
+KERNEL_SOURCE="debian/trixie-backports"
+# "latest" always fetches the most recent kernel available in trixie-backports
+# Other options: "lts" (latest LTS), "stable", "6.11.8" (specific version)
+KERNEL_VERSION="latest"
+
+DEB_HOST_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+
+BUILD_DEB_BUILD_ARCH="arm64"
+BUILD_DEB_TARGET_ARCH="amd64"
+BUILD_CC="clang --target=x86_64-linux-gnu"
+BUILD_HOSTLD="x86_64-linux-gnu-ld"
+BUILD_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+BUILD_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+BUILD_LLVM="1"
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# These parameters control the build process and specific kernel features.
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Number of CPU cores for the build. Leave empty ("") to use all available cores.
+PARALLEL_JOBS=""
+
+# --- Build Strategy ---
+# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+BASE_CONFIG="defconfig"
+TUNING_CONFIG="harper_alloy_deb13_tune.config"
+
+# --- Scheduler Patch ---
+BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# These parameters control post-build validation and testing.
+# ==============================================================================
+PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
+TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
+TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
+
+
+# --- QA Flags ---
+# @NO_PROMPT (This is explicitly set to "false" by install.sh)
+BYPASS_QA="false"
+# Set to "false" to skip QEMU boot testing.
+ENABLE_QEMU_TESTS="false"
+
+# QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
+# while "ENFORCED" will fail the build on any QA test failure.
+QA_MODE="RELAXED"
+
+# A list of individual QA test scripts to run. 
+# These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
+QA_TESTS=(
+)
+
+# A list of QA packages to run /plugins/qatests/testpackages
+QA_TEST_PACKAGE=(
+    "harperbase"
+)
+
+# --- Chemical Audit: Critical (Must Pass) ---
+# Exact internal Kconfig names to verify. If any are missing, the build is considered BROKEN.
+QA_CRITICAL_CHECKS=( 
+)
+# --- Chemical Audit: Optional (Warn Only) ---
+# If these are missing, a warning is logged but the kernel is still shipped.
+# This supports fallback strategies (e.g., BORE -> EEVDF).
+QA_OPTIONAL_CHECKS=(
+    "CONFIG_ACPI="
+    "CONFIG_ATA="
+    "CONFIG_BLK_DEV_INITRD="
+    "CONFIG_BLK_DEV_NVME="
+    "CONFIG_BPF_SYSCALL=n"
+    "CONFIG_BTRFS_FS=m"
+    "CONFIG_BUG="
+    "CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL="
+    "CONFIG_CPU_FREQ="
+    "CONFIG_CPU_SUP_AMD="
+    "CONFIG_CPU_SUP_INTEL="
+    "CONFIG_DEBUG_INFO=n"
+    "CONFIG_DEBUG_KERNEL=n"
+    "CONFIG_DEVTMPFS_MOUNT="
+    "CONFIG_DEVTMPFS="
+    "CONFIG_DRM_AMDGPU=m"
+    "CONFIG_DRM_KMS_HELPER="
+    "CONFIG_DRM_NOUVEAU=m"
+    "CONFIG_DRM_SCHED="
+    "CONFIG_DRM_TTM="
+    "CONFIG_DRM="
+    "CONFIG_EFI_STUB="
+    "CONFIG_EFI="
+    "CONFIG_EXFAT_FS="
+    "CONFIG_EXT4_FS="
+    "CONFIG_FAT_FS="
+    "CONFIG_FTRACE=n"
+    "CONFIG_FUSE_FS=m"
+    "CONFIG_GENERIC_CPU="
+    "CONFIG_HIGH_RES_TIMERS="
+    "CONFIG_HZ_500="
+    "CONFIG_HZ=500"
+    "CONFIG_ISO9660_FS=m"
+    "CONFIG_KALLSYMS_ALL="
+    "CONFIG_KALLSYMS="
+    "CONFIG_KPROBES=n"
+    "CONFIG_LATENCYTOP=n"
+    "CONFIG_MODULE_UNLOAD="
+    "CONFIG_MODULES_TREE_LOOKUP="
+    "CONFIG_MODULES_USE_ELF_RELA="
+    "CONFIG_MODULES="
+    "CONFIG_MODVERSIONS="
+    "CONFIG_MSDOS_FS="
+    "CONFIG_NO_HZ_IDLE="
+    "CONFIG_NTFS3_FS=m"
+    "CONFIG_NVME_CORE="
+    "CONFIG_OVERLAY_FS=m"
+    "CONFIG_PANIC_ON_OOPS=n"
+    "CONFIG_PREEMPT_DYNAMIC="
+    "CONFIG_PREEMPT="
+    "CONFIG_PRINTK="
+    "CONFIG_PROC_FS="
+    "CONFIG_SATA_AHCI="
+    "CONFIG_SCHED_AUTOGROUP="
+    "CONFIG_SCHED_BORE="
+    "CONFIG_STACK_VALIDATION=n"
+    "CONFIG_SYSFS="
+    "CONFIG_TMPFS="
+    "CONFIG_UDF_FS=m"
+    "CONFIG_UPROBES=n"
+    "CONFIG_VFAT_FS="
+    "CONFIG_X86_AMD_PSTATE="
+    "CONFIG_X86_INTEL_PSTATE="
+    "CONFIG_XFS_FS=m"
+)
+
+# --- VM Proving Ground Specs (for QEMU testing) ---
+VM_MEM="1G"
+VM_CORES="4"
+VM_TIMEOUT="30s"

@@ -50,7 +50,7 @@ In your params file:
 
 ```bash
 # QA Configuration
-QA_MODE="SOFT"                                    # HARD = fail build | SOFT = warn only
+QA_MODE="RELAXED"                              # ENFORCED = fail build | RELAXED = warn only
 BYPASS_QA="false"                                  # Set true to skip all QA
 TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"   # Individual tests location
 TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"  # Test packages location
@@ -69,8 +69,8 @@ QA_TEST_PACKAGE=(
 
 ### QA Modes
 
-- **`SOFT`**: Tests run but failures only generate warnings (default)
-- **`HARD`**: Test failures abort the build immediately
+- **`RELAXED`**: Tests run but failures only generate warnings (default)
+- **`ENFORCED`**: Test failures abort the build immediately
 
 ### Bypass QA
 

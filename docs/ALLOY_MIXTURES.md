@@ -33,7 +33,7 @@ scripts/
 ### Configuration Files
 
 **New Files:**
-- `params/tinyconfig.foundry.params` - Fast test configuration
+- `params/tinyconfig.params` - Fast test configuration
 - `scripts/alloymixtures/README.md` - Alloy mixtures documentation
 - `scripts/alloymixtures/harper_alloy_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
 - `scripts/alloymixtures/tinyconfig.sh` - Quick test script
@@ -55,10 +55,15 @@ scripts/
 
 **Characteristics:**
 - Build time: 30-60+ minutes
-- Full Debian configuration
-- BORE scheduler patching
-- Complete tuning profiles
-- All kernel modules
+- Base: Debian (`defconfig`) with custom tuning applied
+- Architecture: **x86-64-v3** (AVX2, FMA, BMI2 optimizations for modern CPUs)
+- Scheduler: **BORE/EEVDF** - Burst-Oriented Response Enhancer for gaming/desktop responsiveness (reverts to EEVDF if BORE unavailable)
+- Timer Frequency: **1000Hz** - Reduced latency for responsive desktop (vs Debian's 250Hz)
+- CPU Frequency Scaling: Intel P-State & AMD P-State enabled
+- Preemption: Full preemption enabled for lower latency
+- Memory: Multi-core and SMT scheduling optimizations
+- Compression: ZSTD kernel compression for faster boot
+- All kernel modules compiled
 - Debian packages (.deb, .changes, .buildinfo)
 - Comprehensive QA testing
 
@@ -68,7 +73,7 @@ scripts/
 ./start_build.sh
 
 # Explicit
-./start_build.sh --config-file params/foundry.params
+./start_build.sh --params-file params/foundry.params
 
 # Via make
 make build
@@ -79,6 +84,25 @@ make build
 - bzImage
 - kernel.config
 - .changes and .buildinfo files
+
+#### What Changes from Stock Debian?
+
+Harper Alloy Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
+
+| Optimization | Debian Default | Harper Alloy | Reason |
+|---|---|---|---|
+| **CPU Baseline** | Generic (2004-era compatible) | x86-64-v3 | Enables modern CPU instructions (AVX2, FMA, BMI2) |
+| **Scheduler** | EEVDF | BORE (→ EEVDF fallback) | Burst responsiveness for games, desktop interactivity |
+| **Timer Tick** | 250 Hz | 1000 Hz | Reduced latency, smoother interaction |
+| **Preemption** | Voluntary | Full | Lower response times for user input |
+| **CPU Governor** | Performance/Powersave | Schedutil | Coordinates frequency scaling with task scheduler |
+| **P-State** | Minimal | Intel + AMD | Native CPU frequency control |
+| **Kernel Compression** | gzip/xz | ZSTD | Faster boot decompression |
+| **Tuning** | Conservative defaults | Desktop/gaming optimized | Balances responsiveness with stability |
+
+**Profile Targets:** Ryzen 5800X3D/7900GRE and Intel i7-12700H systems
+**Ideal For:** Gaming, desktop workstations, enthusiast systems
+**Not Recommended For:** Server workloads, real-time systems
 
 ---
 
@@ -98,7 +122,7 @@ make build
 **Usage:**
 ```bash
 # Using dedicated params file
-./start_build.sh --config-file params/tinyconfig.foundry.params
+./start_build.sh --params-file params/tinyconfig.params
 
 # Via make (recommended)
 make test
@@ -139,7 +163,7 @@ make test
 
 # After (much faster!)
 - name: Test Build
-  run: ./start_build.sh --config-file params/tinyconfig.foundry.params
+  run: ./start_build.sh --params-file params/tinyconfig.params
   # Or: make test
 ```
 
@@ -235,7 +259,7 @@ This ensures consistent artifact handling regardless of mixture used.
 
 **Tinyconfig:**
 - Runs minimal tests: `filesexists` only
-- QA_MODE=SOFT (warnings only)
+- QA_MODE=RELAXED (warnings only)
 - Skips package/module validation
 
 ## Future Mixtures
@@ -262,7 +286,7 @@ All changes have been validated:
 ✅ All checks passed! Configuration is valid.
 
 # ✅ Tinyconfig params validation  
-./scripts/validate_params.sh params/tinyconfig.foundry.params
+./scripts/validate_params.sh params/tinyconfig.params
 ✅ All checks passed! Configuration is valid.
 
 # ✅ Backward compatibility

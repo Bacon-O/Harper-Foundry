@@ -35,8 +35,8 @@ REQUIRED_VARS=(
     "PROJECT_ROOT"
     "HOST_OUTPUT_DIR"
     "FOUNDRY_EXEC"
-    "FOUNDRY_IMAGE"
-    "IMAGE_NAME"
+    "DOCKERFILE_PATH"
+    "CONTAINER_IMAGE_NAME"
     "TARGET_ARCH"
     "KERNEL_SOURCE"
     "BASE_CONFIG"
@@ -56,12 +56,12 @@ echo "🗂️  Checking Path Existence..."
 
 # --- Path Checks ---
 # Check if Docker image exists (if it's a file path)
-if [[ -f "${REPO_ROOT}/${FOUNDRY_IMAGE}" ]] || [[ -f "$FOUNDRY_IMAGE" ]]; then
-    echo "  ✅ Dockerfile found: $FOUNDRY_IMAGE"
-elif [[ "$FOUNDRY_IMAGE" =~ / ]]; then
-    echo "  ℹ️  Registry image (will be pulled): $FOUNDRY_IMAGE"
+if [[ -f "${REPO_ROOT}/${DOCKERFILE_PATH}" ]] || [[ -f "$DOCKERFILE_PATH" ]]; then
+    echo "  ✅ Dockerfile found: $DOCKERFILE_PATH"
+elif [[ "$DOCKERFILE_PATH" =~ / ]]; then
+    echo "  ℹ️  Registry image (will be pulled): $DOCKERFILE_PATH"
 else
-    echo "  ⚠️  WARNING: Cannot verify image path: $FOUNDRY_IMAGE"
+    echo "  ⚠️  WARNING: Cannot verify image path: $DOCKERFILE_PATH"
     ((WARNINGS++))
 fi
 
@@ -107,10 +107,10 @@ else
 fi
 
 # Check cross-compilation consistency
-if [ -n "$CROSS_CMD" ]; then
-    echo "  ✅ Cross-compilation enabled: $CROSS_CMD"
-    if [ -z "$MAKE_CC" ]; then
-        echo "  ⚠️  WARNING: CROSS_CMD set but MAKE_CC is empty"
+if [ -n "$CROSS_COMPILE_PREFIX" ]; then
+    echo "  ✅ Cross-compilation enabled: $CROSS_COMPILE_PREFIX"
+    if [ -z "$BUILD_CC" ]; then
+        echo "  ⚠️  WARNING: CROSS_COMPILE_PREFIX set but BUILD_CC is empty"
         ((WARNINGS++))
     fi
 fi
@@ -126,8 +126,8 @@ else
     echo "  ✅ QA enabled"
 fi
 
-if [ "$QA_MODE" != "SOFT" ] && [ "$QA_MODE" != "HARD" ]; then
-    echo "  ⚠️  WARNING: Invalid QA_MODE: $QA_MODE (should be SOFT or HARD)"
+if [ "$QA_MODE" != "RELAXED" ] && [ "$QA_MODE" != "ENFORCED" ]; then
+    echo "  ⚠️  WARNING: Invalid QA_MODE: $QA_MODE (should be RELAXED or ENFORCED)"
     ((WARNINGS++))
 else
     echo "  ✅ QA_MODE: $QA_MODE"

@@ -2,7 +2,7 @@
 set -e
 
 # 1. Load the Foundry Environment
-# This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_OUTPUT_DIR
+# This ensures we have access to QA_CRITICAL_CHECKS, QA_OPTIONAL_CHECKS, and HOST_OUTPUT_DIR
 source "$(dirname "$0")/env_setup.sh" "$@"
 
 # --- STAGE 3: STRESS TEST (QEMU) ---

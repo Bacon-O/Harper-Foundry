@@ -54,7 +54,7 @@ scripts/plugins/qatests/
 - Updated `TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"`
 - Updated `TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"`
 
-**Modified**: `params/tinyconfig.foundry.params`
+**Modified**: `params/tinyconfig.params`
 - Updated `TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"`
 - Updated `TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"`
 
@@ -116,7 +116,7 @@ All existing functionality preserved:
 Validated with:
 ```bash
 ./scripts/validate_params.sh params/foundry.params
-./scripts/validate_params.sh params/tinyconfig.foundry.params
+./scripts/validate_params.sh params/tinyconfig.params
 ```
 
 Both configurations pass all validation checks:

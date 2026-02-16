@@ -10,14 +10,25 @@ This directory contains different "alloy mixtures" - build script variants optim
 **Artifacts:** Full .deb packages, headers, bzImage  
 **Use Case:** Enthusiast/hobbyist systems, experimentation, home labs  
 **Status:** ⚠️ EXPERIMENTAL - Use at your own risk, not for production!  
+**Compiler:** 🔧 CLANG/LLVM (not GCC) for modern optimization capabilities
 
 **Features:**
-- Full Debian kernel configuration
-- BORE scheduler patching (with EEVDF fallback)
-- Complete tuning profile application
-- All kernel modules
+- **Compiler:** CLANG/LLVM provides modern optimizations and better support for newer CPU instruction sets
+- Base Configuration: Debian kernel (`defconfig`) with tuning overlays
+- Architecture Optimization: x86-64-v3 baseline (replaces generic 2004-era CPU baseline)
+  - Enables AVX2, FMA, BMI2 instruction sets for modern CPUs (Zen 3+, Haswell+)
+- Scheduler: BORE (Burst-Oriented Response Enhancer) with automatic fallback to EEVDF
+  - Optimized for gaming and desktop responsiveness
+- Timer Frequency: 1000Hz (vs Debian's 250Hz) for reduced latency
+- CPU & Memory Tuning:
+  - Intel P-State + AMD P-State enabled for responsive frequency scaling
+  - Full preemption for lower latency
+  - Multi-core scheduling with SMT awareness
+  - `schedutil` CPU frequency governor (coordinates with scheduler)
+- Boot Optimization: ZSTD kernel compression for faster decompression
+- Comprehensive QA testing
+- All kernel modules compiled
 - Debian package generation (.deb, .changes, .buildinfo)
-- Comprehensive artifact collection
 
 **Usage:**
 ```bash
@@ -47,7 +58,7 @@ FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
 **Usage:**
 ```bash
 # Using the dedicated params file:
-./start_build.sh --config-file params/tinyconfig.foundry.params
+./start_build.sh --params-file params/tinyconfig.params
 
 # Or specify exec directly:
 ./start_build.sh --exec alloymixtures/tinyconfig.sh
@@ -105,7 +116,7 @@ To add a new alloy mixture:
 
 3. **Create matching params file (optional):**
    ```bash
-   cp params/foundry.params params/my-custom.foundry.params
+   cp params/foundry.params params/my-custom.params
    ```
 
 4. **Update the params:**
@@ -179,10 +190,10 @@ All alloy mixture scripts must:
 
 ```bash
 # Complete Harper kernel build (experimental)
-./start_build.sh --config-file params/foundry.params
+./start_build.sh --params-file params/foundry.params
 
 # Quick test build
-./start_build.sh --config-file params/tinyconfig.foundry.params
+./start_build.sh --params-file params/tinyconfig.params
 
 # Custom mixture
 ./start_build.sh --exec alloymixtures/my-custom.sh
@@ -204,7 +215,7 @@ All alloy mixture scripts must:
 
 2. **Validate configuration:**
    ```bash
-   ./scripts/validate_params.sh params/my-new.foundry.params
+   ./scripts/validate_params.sh params/my-new.params
    ```
 
 3. **Check output artifacts:**

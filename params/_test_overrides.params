@@ -1,0 +1,93 @@
+#!/bin/bash
+# ==============================================================================
+# HARPER FOUNDRY: TESTING OVERRIDE CONFIGURATION
+# ==============================================================================
+# This params file implements an INHERITANCE pattern:
+#   1. Source a "desktop kernel" base config (the parent)
+#   2. Override specific values for testing/CI purposes (the child)
+#
+# Use Case:
+#   • Maintain one complete base config with all kernel settings
+#   • Override only test-specific values (output paths, QA modes, etc.)
+#   • Perfect for GitHub workflows that need slight variations
+#
+# How to Change Base Config:
+#   Set PRODUCTION_CONFIG to point to your base params file.
+#   Default: harper_alloy_deb13.params (complete, working configuration)
+#
+# NOTE: PRODUCTION_CONFIG is a variable name referring to base config selection.
+#       The Harper kernel is experimental and NOT suitable for production systems.
+# ==============================================================================
+
+# --- Base Configuration ---
+# Which base params file should we inherit from?
+# ⚠️  REQUIRED: This file MUST be invoked with PRODUCTION_CONFIG environment variable set
+# The PRODUCTION_CONFIG variable specifies which base config to use as the parent.
+#
+# Usage:
+#   PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+#   PRODUCTION_CONFIG=tinyconfig.params ./start_build.sh -p params/_test_overrides.params
+#
+# This ensures explicit base config selection (no implicit defaults in workflows).
+if [ -z "$PRODUCTION_CONFIG" ]; then
+    echo "❌ Error: PRODUCTION_CONFIG environment variable not set"
+    echo ""
+    echo "This params file requires a production base config to be specified."
+    echo "It cannot be used standalone - it applies overrides to another params file."
+    echo ""
+    echo "Usage:"
+    echo "  PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params"
+    echo "  PRODUCTION_CONFIG=tinyconfig.params ./start_build.sh -p params/_test_overrides.params"
+    echo ""
+    echo "Available production configs in params/:"
+    ls -1 "$(dirname "${BASH_SOURCE[0]}")" | grep -E '\.params$' | grep -v '^_' | sed 's/^/  - /'
+    exit 1
+fi
+
+# 1. Load the Base Kernel Config (The Parent)
+PARAMS_DIR="$(dirname "${BASH_SOURCE[0]}")"
+if [[ -f "$PARAMS_DIR/$PRODUCTION_CONFIG" ]]; then
+    echo "🏗️  Loading base config: $PRODUCTION_CONFIG"
+    source "$PARAMS_DIR/$PRODUCTION_CONFIG"
+else
+    echo "❌ Error: Base config '$PRODUCTION_CONFIG' not found in $PARAMS_DIR"
+    exit 1
+fi
+
+# ==============================================================================
+# 2. Apply Testing Overrides (The Child)
+# ==============================================================================
+# Override any values from the production config for testing purposes.
+# Common overrides:
+#   • HOST_OUTPUT_DIR: Send builds to preprod/test directory
+#   • QA_MODE: Set to ENFORCED for stricter testing
+#   • BYPASS_QA: Ensure QA runs (set to false)
+#   • ENABLE_QEMU_TESTS: Enable/disable QEMU boot tests
+#   • KERNEL_VERSION: Pin to specific version for reproducible tests
+# ==============================================================================
+
+# --- Output Directory Override ---
+# Divert build artifacts to a testing/preprod directory instead of production
+HOST_OUTPUT_DIR="/mnt/build-data/dist/testing"
+
+# --- QA Testing Overrides ---
+# Enforce strict QA for testing builds (vs RELAXED for production)
+QA_MODE="RELAXED"
+BYPASS_QA="false"
+
+# --- Optional: Version Pinning for Reproducible Tests ---
+# Uncomment to pin to a specific kernel version instead of "latest"
+# KERNEL_VERSION="6.12.8"
+
+# --- Optional: QEMU Testing ---
+# Uncomment to enable QEMU boot tests in CI
+# ENABLE_QEMU_TESTS="true"
+
+# --- Optional: Incremental Build Control ---
+# Uncomment to enable incremental builds for faster testing iterations
+# INCREMENTAL_BUILD="true"
+
+echo "🧪 Testing Profile Loaded:"
+echo "   Base Config: $PRODUCTION_CONFIG"
+echo "   Output Dir: $HOST_OUTPUT_DIR"
+echo "   QA Mode: $QA_MODE"

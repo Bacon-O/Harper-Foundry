@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Alloy Mixtures System** - Modular build script variants in `scripts/alloymixtures/`
-  - `harper_alloy_deb13.sh` - Harper's Debian 13 production builds (moved from `ci-build.sh`)
+  - `harper_alloy_deb13.sh` - Harper's Debian 13 desktop kernel builds (moved from `ci-build.sh`)
   - `tinyconfig.sh` - Fast 2-5 minute test builds for pipeline validation
   - Comprehensive README documenting each mixture
 - **Tinyconfig Quick Test** - Dedicated fast build configuration
-  - `params/tinyconfig.foundry.params` - Optimized for speed
+  - `params/tinyconfig.params` - Optimized for speed
   - Minimal QA validation (filesexists only)
   - Builds bzImage in 2-5 minutes vs 30-60+ for full build
 - **Prerequisites checker** (`scripts/check_prerequisites.sh`) - Validates system requirements before building

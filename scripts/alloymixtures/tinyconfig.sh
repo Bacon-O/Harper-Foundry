@@ -26,22 +26,39 @@ echo "⚡ Fast build mode: Minimal kernel for pipeline testing"
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 echo ""
 
-# 2️⃣ Prepare Source
+# 2️⃣ Load Kernel Source Plugin System
+# This allows flexible kernel source handling (kernel.org, debian, custom, etc.)
+if [ -f "/opt/factory/scripts/plugins/kernelsources/runner.sh" ]; then
+    source /opt/factory/scripts/plugins/kernelsources/runner.sh
+else
+    echo "⚠️  WARNING: kernel source plugin system not found"
+    echo "⚠️  This build requires KERNEL_SOURCE and KERNEL_VERSION to be set via params"
+fi
+
+# 3️⃣ Fetch Kernel Source
+# The plugin system handles mapping KERNEL_SOURCE parameter to appropriate fetching method
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
-echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
-apt-get source -y "$KERNEL_SOURCE"
-cd linux-*/ || { echo "❌ ERROR: Kernel source not found"; exit 1; }
+echo "📥 Fetching kernel source via plugin: KERNEL_SOURCE=$KERNEL_SOURCE"
+KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION" "$CONTAINER_BUILD_ROOT")
+if [ $? -ne 0 ]; then
+    echo "❌ ERROR: Failed to fetch kernel via plugin"
+    exit 1
+fi
 
-# 3️⃣ Initialize Minimal Config
+echo "📦 Kernel source ready: $KERNEL_DIR"
+cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to enter kernel directory"; exit 1; }
+
+# 4️⃣ Initialize Minimal Config
 echo "🛠 Generating tinyconfig (absolute minimum)..."
 rm -f .config
+rm -f arch/*/configs/.config 2>/dev/null || true
 
 # Use tinyconfig for the fastest possible build
-make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" tinyconfig
+make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" tinyconfig
 
-# 4️⃣ Essential Tweaks for Bootability (Optional)
+# 5️⃣ Essential Tweaks for Bootability (Optional)
 # Tinyconfig is TOO minimal - add bare essentials for a bootable kernel
 echo "🔧 Enabling minimal bootable features..."
 ./scripts/config --enable TTY
@@ -51,7 +68,7 @@ echo "🔧 Enabling minimal bootable features..."
 ./scripts/config --enable PROC_FS
 ./scripts/config --enable SYSFS
 
-# 5️⃣ Sanitization (Keys)
+# 6️⃣ Sanitization (Keys)
 echo "🧹 Stripping Keys..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
@@ -59,32 +76,33 @@ echo "🧹 Stripping Keys..."
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
 ./scripts/config --set-str MODULE_SIG_KEY ""
 
-# Finalize config
-make LLVM="$MAKE_LLVM" ARCH="$TARGET_ARCH" olddefconfig
+# Finalize config - use yes to auto-answer prompts with defaults
+echo "🔧 Finalizing minimal config (auto-accepting defaults)..."
+yes "" | make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" oldconfig 2>/dev/null || true
 
-# 6️⃣ Versioning
+# 7️⃣ Versioning
 TIMESTAMP=$(date +%Y%m%d%H%M)
 KERNEL_VER=$(make -s kernelversion)
 
-export LOCALVERSION="-${PROJECT_TAG}-${ARCH_TAG}-tinytest"
-export KDEB_PKGVERSION="${KERNEL_VER}-${PROJECT_TAG}.test.${TIMESTAMP}"
+export LOCALVERSION="-${RELEASE_TAG}-${BUILD_ARCH_TAG}-tinytest"
+export KDEB_PKGVERSION="${KERNEL_VER}-${RELEASE_TAG}.test.${TIMESTAMP}"
 
 echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
 echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 echo ""
 
-# 7️⃣ Compile Kernel (Just bzImage, no modules for speed)
+# 8️⃣ Compile Kernel (Just bzImage, no modules for speed)
 echo "🏗️ Compiling Minimal Kernel..."
 echo "⚡ Building bzImage only (no modules, no packages) for max speed..."
 time make -j"$FINAL_JOBS" \
-    LLVM="$MAKE_LLVM" \
+    LLVM="$BUILD_LLVM" \
     ARCH="$TARGET_ARCH" \
-    CROSS_COMPILE="$CROSS_CMD" \
-    CC="$MAKE_CC" \
-    HOSTCC="$MAKE_CC" \
-    HOSTLD="$MAKE_HOSTLD" \
-    HOSTCFLAGS="$MAKE_HOSTCFLAGS" \
-    HOSTLDFLAGS="$MAKE_HOSTLDFLAGS" \
+    CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
+    CC="$BUILD_CC" \
+    HOSTCC="$BUILD_CC" \
+    HOSTLD="$BUILD_HOSTLD" \
+    HOSTCFLAGS="$BUILD_HOSTCFLAGS" \
+    HOSTLDFLAGS="$BUILD_HOSTLDFLAGS" \
     LOCALVERSION="$LOCALVERSION" \
     bzImage
 
@@ -92,7 +110,7 @@ echo ""
 echo "✅ bzImage compilation complete!"
 echo ""
 
-# 8️⃣ Collect Artifacts
+# 9️⃣ Collect Artifacts
 echo "📦 Collecting test artifacts..."
 mkdir -p "$CONTAINER_OUTPUT_DIR"
 
@@ -136,7 +154,7 @@ EOF
 echo "✅ Build info saved"
 echo ""
 
-# 9️⃣ Summary
+# 🔟 Summary
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Tinyconfig Test Build Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

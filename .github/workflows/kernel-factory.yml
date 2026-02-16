@@ -1,32 +1,36 @@
 name: Harper Kernel Factory
 
 # Build Strategy:
-# - Production (tags on main): Full production build (params/foundry.params)
-# - Main branch: Full testing build (params/_testing.foundry.params)
-# - Dev/Feature branches: Fast tinyconfig (2-5 min) for quick validation
-# - Manual dispatch: User selects which configuration to use
+# - Manual dispatch only: Dual dropdown - select base params + optional testing overrides
+# - This is a public reference repo - shadow repo has production pipelines
 
 on:
-  push:
-    branches: [ main, dev, feature/* ]
-    tags:
-      - 'v*' # Triggers on tags like v1.0, v2.1-beta, etc.
   workflow_dispatch:
     inputs:
-      config_file:
-        description: 'Forge Profile'
+      base_params:
+        description: 'Base Configuration'
         type: choice
-        default: 'params/tinyconfig.foundry.params'
+        required: true
+        default: 'tinyconfig.params'
         options:
-          - 'params/tinyconfig.foundry.params'
-          - 'params/_testing.foundry.params'
-          - 'params/foundry.params'
+          - 'tinyconfig.params'
+          - 'harper_alloy_deb13.params'
+      
+      override_mode:
+        description: 'Apply Override'
+        type: choice
+        required: true
+        default: 'none'
+        options:
+          - 'none'
+          - 'testing.params (test output dir)'
 
 jobs:
   preheat:
     runs-on: self-hosted
     outputs:
       args: ${{ steps.set-args.outputs.args }}
+      env_vars: ${{ steps.set-args.outputs.env_vars }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -34,42 +38,38 @@ jobs:
       - name: Configure Arguments
         id: set-args
         run: |
-          # 1. Manual Dispatch: Use the dropdown selection
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            FILE="${{ github.event.inputs.config_file }}"
-            echo "🕹️ Manual Dispatch: $FILE"
+          ENV_VARS=""
           
-          # 2. Production Logic: Must be a Version Tag on the Main branch
-          elif [[ "${{ github.ref }}" == refs/tags/v* ]] && [[ "${{ github.event.base_ref }}" == "refs/heads/main" || "${{ github.ref_name }}" =~ ^v ]]; then
-            FILE="params/foundry.params"
-            echo "🏷️ Production Tag on Main detected."
+          # Manual dispatch is the only trigger for this public reference repo
+          # Use dual dropdown selection: base params + optional override
+          BASE_PARAMS="${{ github.event.inputs.base_params }}"
+          OVERRIDE_MODE="${{ github.event.inputs.override_mode }}"
           
-          # 3. Feature branches: Use fast tinyconfig for quick validation
-          elif [[ "${{ github.ref }}" == refs/heads/feature/* ]]; then
-            FILE="params/tinyconfig.foundry.params"
-            echo "🧪 Feature branch: Using tinyconfig for fast validation."
+          echo "🕹️ Manual Dispatch"
+          echo "   Base: $BASE_PARAMS"
+          echo "   Override: $OVERRIDE_MODE"
           
-          # 4. Dev branch: Use tinyconfig for speed
-          elif [[ "${{ github.ref }}" == refs/heads/dev ]]; then
-            FILE="params/tinyconfig.foundry.params"
-            echo "🧪 Dev branch: Using tinyconfig for fast testing."
-          
-          # 5. Main branch: Use full testing build
-          elif [[ "${{ github.ref }}" == refs/heads/main ]]; then
-            FILE="params/_testing.foundry.params"
-            echo "🏗️ Main branch: Using full testing configuration."
-          
-          # 6. Default: Everything else uses tinyconfig for speed
+          # Check if override mode is selected
+          if [[ "$OVERRIDE_MODE" == "testing.params"* ]]; then
+            # Use _test_overrides.params with PRODUCTION_CONFIG env var
+            FILE="params/_test_overrides.params"
+            ENV_VARS="PRODUCTION_CONFIG=$BASE_PARAMS"
+            echo "🧪 Applying testing overrides to $BASE_PARAMS"
+            echo "   → Output: /mnt/build-data/dist/testing"
+            echo "   → QA Mode: ENFORCED"
           else
-            FILE="params/tinyconfig.foundry.params"
-            echo "🧪 Default: Using tinyconfig for fast validation."
+            # Use base params directly (no override)
+            FILE="params/$BASE_PARAMS"
+            echo "📦 Using $BASE_PARAMS directly (no overrides)"
           fi
           
           echo "🚀 Selected Blueprint: $FILE"
-          echo "args=--config-file $FILE" >> $GITHUB_OUTPUT
+          echo "args=--params-file $FILE" >> $GITHUB_OUTPUT
+          echo "env_vars=$ENV_VARS" >> $GITHUB_OUTPUT
       
       - name: Charge Audit
-        run: bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
+        run: |
+          ${{ steps.set-args.outputs.env_vars }} bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
 
   smelt:
     needs: preheat
@@ -78,7 +78,8 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Ignition
-        run: bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
+        run: |
+          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
 
   analysis:
     needs: [preheat, smelt]
@@ -88,7 +89,8 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Material QA
-        run: bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
+        run: |
+          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
 
   cleanup:
     needs: [preheat, analysis]
@@ -98,4 +100,5 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Purge Slag
-        run: bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}
+        run: |
+          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}

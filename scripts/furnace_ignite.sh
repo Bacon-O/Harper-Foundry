@@ -11,32 +11,82 @@ echo "🔥 Igniting the Furnace..."
 if [ "$FOUNDRY_IMAGE_TYPE" == "build" ]; then
     BUILD_ARGS="--build-arg USER_UID=$HOST_UID --build-arg USER_GID=$HOST_GID"
     [ "$DOCKER_REBUILD" == "true" ] && BUILD_ARGS="$BUILD_ARGS --no-cache"
-    echo "🏗️  Building $IMAGE_NAME from $DOCKERFILE_PATH..."
+    echo "🏗️  Building $CONTAINER_IMAGE_NAME from $DOCKERFILE_PATH..."
     echo "   Using UID:GID = $HOST_UID:$HOST_GID"
-    docker build $BUILD_ARGS -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
+    docker build $BUILD_ARGS -t "$CONTAINER_IMAGE_NAME" -f "$DOCKERFILE_PATH" .
 else
     echo "🌐 Pulling $REMOTE_IMAGE_REF..."
     docker pull "$REMOTE_IMAGE_REF"
-    docker tag "$REMOTE_IMAGE_REF" "$IMAGE_NAME"
+    docker tag "$REMOTE_IMAGE_REF" "$CONTAINER_IMAGE_NAME"
 fi
 
 # 4. Dynamic Execution
 echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
 echo "Kernel version will be appended with: $LOCALVERSION"
-docker run -i --rm \
-    -e CONTAINER_OUTPUT_DIR="$CONTAINER_OUTPUT_DIR" \
-    -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
-    -e INCREMENTAL_BUILD="$INCREMENTAL_BUILD" \
-    -e ARCH="$TARGET_ARCH" \
-    -e CROSS_COMPILE="$CROSS_COMPILE" \
-    -e KBUILD_BUILD_ARCH="$TARGET_ARCH" \
-    -e DEB_TARGET_ARCH="$DEB_TARGET_ARCH" \
-    -v "${HOST_QEMU_STATIC=}":/usr/bin/qemu-x86_64-static:ro \
-    -v "${PROJECT_ROOT}:/build" \
-    -v "${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro" \
-    -v "${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro" \
-    -v "${REPO_ROOT}/params:/opt/factory/params:ro" \
-    -v "${CURRENT_DIST_DIR}:/opt/factory/output" \
-    -w "/build" \
-    "$IMAGE_NAME" \
-    bash "${CONTAINER_SCRIPTS_DIR}/${FOUNDRY_EXEC}" "$@"
+
+# Determine entrypoint based on mode
+if [ "$SHELL_MODE" == "true" ]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🐚 HarperShell Mode Activated"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📋 Configuration: $(basename $PARAMS_FILE)"
+    echo ""
+    echo "📂 Mounted Directories:"
+    echo "   /build                     (source root)"
+    echo "   /opt/factory/plugins       (build plugins)"
+    echo "   /opt/factory/configs       (kernel configs)"
+    echo "   /opt/factory/scripts       (build scripts)"
+    echo "   /opt/factory/output        (build artifacts)"
+    echo ""
+    echo "🔧 Environment:"
+    echo "   Target Arch:   $TARGET_ARCH"
+    echo "   Host Arch:     $HOST_ARCH"
+    echo "   Jobs:          $FINAL_JOBS"
+    echo "   Docker Image:  $DOCKERFILE_PATH"
+    echo ""
+    echo "⚠️  Note: Build scripts have not been run yet."
+    echo "   Source files may not be fetched. You may need to:"
+    echo "   • apt-get source <kernel-source>"
+    echo "   • Or manually fetch files from /build"
+    echo ""
+    echo "💡 Tips:"
+    echo "   • cd /build to access source code"
+    echo "   • cd /opt/factory/output to see build results"
+    echo "   • Type 'exit' to leave the container"
+    echo ""
+    echo "🔑 Escalation (if container supports it):"
+    echo "   • sudo su - (to become root for package installation)"
+    echo "   • sudo apt-get install <package> (install packages as needed)"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    DOCKER_FLAGS="-it"
+    CONTAINER_CMD="bash"
+else
+    DOCKER_FLAGS="-i"
+    CONTAINER_CMD="bash \"${CONTAINER_SCRIPTS_DIR}/${FOUNDRY_EXEC}\" \"\$@\""
+fi
+
+eval "docker run $DOCKER_FLAGS --rm \
+    -e CONTAINER_OUTPUT_DIR=\"$CONTAINER_OUTPUT_DIR\" \
+    -e CONTAINER_PLUGINS_DIR=\"/opt/factory/plugins\" \
+    -e GITHUB_RUN_ID=\"$GITHUB_RUN_ID\" \
+    -e INCREMENTAL_BUILD=\"$INCREMENTAL_BUILD\" \
+    -e ARCH=\"$TARGET_ARCH\" \
+    -e CROSS_COMPILE=\"$CROSS_COMPILE\" \
+    -e KBUILD_BUILD_ARCH=\"$TARGET_ARCH\" \
+    -e DEB_HOST_ARCH=\"$DEB_HOST_ARCH\" \
+    -e PRODUCTION_CONFIG=\"$PRODUCTION_CONFIG\" \
+    -e OVERRIDE_PARAMS=\"$OVERRIDE_PARAMS\" \
+    -v \"${HOST_QEMU_STATIC=}\":/usr/bin/qemu-x86_64-static:ro \
+    -v \"${PROJECT_ROOT}:/build\" \
+    -v \"${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro\" \
+    -v \"${REPO_ROOT}/scripts/plugins:/opt/factory/plugins:ro\" \
+    -v \"${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro\" \
+    -v \"${REPO_ROOT}/params:/opt/factory/params:ro\" \
+    -v \"${CURRENT_DIST_DIR}:/opt/factory/output\" \
+    -w \"/build\" \
+    \"$CONTAINER_IMAGE_NAME\" \
+    $CONTAINER_CMD"

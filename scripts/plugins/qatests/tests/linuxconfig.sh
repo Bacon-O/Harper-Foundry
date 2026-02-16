@@ -2,7 +2,7 @@
 set -e
 
 # 1. Load the Foundry Environment
-# This ensures we have access to CHECK_LIST, WARN_LIST, and HOST_OUTPUT_DIR
+# This ensures we have access to QA_CRITICAL_CHECKS, QA_OPTIONAL_CHECKS, and HOST_OUTPUT_DIR
 source "$(dirname "$0")/../../env_setup.sh" "$@"
 
 # 2. Locate Latest Build Directory
@@ -24,7 +24,7 @@ MISSING_CRITICAL=0
 
 # Part A: Critical Elements (Must Pass)
 echo "🛡️  Checking Critical Systems..."
-for CHECK in "${CHECK_LIST[@]}"; do
+for CHECK in "${QA_CRITICAL_CHECKS[@]}"; do
     if grep -Fq "$CHECK" "$CONFIG_FILE"; then
         echo "   ✅ CONFIRMED: $CHECK"
     else
@@ -35,8 +35,8 @@ done
 
 # Part B: Optional Elements (Warn Only)
 echo "⚠️  Checking Optional Systems..."
-if [ "${#WARN_LIST[@]}" -gt 0 ]; then
-    for CHECK in "${WARN_LIST[@]}"; do
+if [ "${#QA_OPTIONAL_CHECKS[@]}" -gt 0 ]; then
+    for CHECK in "${QA_OPTIONAL_CHECKS[@]}"; do
         if grep -Fq "$CHECK" "$CONFIG_FILE"; then
             echo "   ✅ OPTIONAL: $CHECK detected."
         else

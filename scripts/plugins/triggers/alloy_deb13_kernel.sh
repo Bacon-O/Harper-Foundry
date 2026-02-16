@@ -1,0 +1,204 @@
+#!/bin/bash
+
+# ==============================================================================
+# Harper Foundry: Debian Trixie Kernel Release Trigger Plugin
+# ==============================================================================
+# Monitors Debian Salsa API for new linux-image versions in trixie-backports
+# Compares against last successful build version and triggers CI if new release available
+#
+# Usage:
+#   source ./scripts/plugins/triggers/alloy_deb13_kernel.sh
+#   alloy_deb13_kernel_trigger [--force]
+#
+# Options:
+#   --force   Skip version comparison and trigger build anyway
+#
+# Environment:
+#   REPO_ROOT - Set automatically if not provided
+#
+# ==============================================================================
+
+set -euo pipefail
+
+REPO_ROOT="${REPO_ROOT:-.}"
+VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/alloy_deb13_latest_kernel.txt"
+DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/repository/branches"
+
+# ==============================================================================
+# FUNCTION: alloy_deb13_kernel_trigger
+# ==============================================================================
+# Main trigger function for Debian Trixie kernel monitoring
+#
+# Arguments:
+#   --force   Skip version comparison and trigger build
+#
+# Returns:
+#   0 - Action completed (build triggered or no action needed)
+#   1 - Error occurred
+#
+# ==============================================================================
+alloy_deb13_kernel_trigger() {
+    local force_build=false
+    
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --force)
+                force_build=true
+                shift
+                ;;
+            *)
+                log_warn "Unknown option: $1"
+                shift
+                ;;
+        esac
+    done
+    
+    log_info "=== Debian Trixie Kernel Release Monitor ==="
+    
+    # ==========================================================================
+    # STEP 1: Check Prerequisites
+    # ==========================================================================
+    
+    log_info "Checking prerequisites..."
+    
+    if ! command -v curl &> /dev/null; then
+        log_error "curl not found. Please install curl."
+        return 1
+    fi
+    
+    if [ ! -f "$VERSION_TRACKING_FILE" ]; then
+        log_warn "Version tracking file not found at $VERSION_TRACKING_FILE"
+        log_info "Initializing version tracking..."
+        mkdir -p "$(dirname "$VERSION_TRACKING_FILE")"
+        cat > "$VERSION_TRACKING_FILE" << 'EOF'
+KERNEL_VERSION=6.11.8
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=initialized
+SCHED_PRIORITY=1
+EOF
+    fi
+    
+    # ==========================================================================
+    # STEP 2: Query Debian Salsa API for Latest Release
+    # ==========================================================================
+    
+    log_info "Querying Debian Salsa API for linux-image versions..."
+    log_info "Endpoint: $DEBIAN_SALSA_API"
+    
+    local api_response
+    api_response=$(curl -s "$DEBIAN_SALSA_API" || echo "")
+    
+    if [ -z "$api_response" ]; then
+        log_error "Failed to fetch from Debian Salsa API"
+        return 1
+    fi
+    
+    # Parse the latest version (placeholder - extract actual kernel version from Debian package)
+    # TODO: Parse response to extract latest kernel version accurately
+    local latest_upstream_version
+    latest_upstream_version=$(echo "$api_response" | jq -r '.[0].name' 2>/dev/null || echo "latest")
+    
+    log_ok "Latest upstream version from API: $latest_upstream_version"
+    
+    # ==========================================================================
+    # STEP 3: Load Last Successfully Compiled Version
+    # ==========================================================================
+    
+    log_info "Loading last compiled version from $VERSION_TRACKING_FILE"
+    
+    # Source the tracking file
+    # shellcheck disable=SC1090
+    source "$VERSION_TRACKING_FILE"
+    
+    local last_compiled_version="${KERNEL_VERSION:-unknown}"
+    local last_build_date="${LAST_BUILD_DATE:-unknown}"
+    local build_status="${BUILD_STATUS:-unknown}"
+    local last_sched_priority="${SCHED_PRIORITY:-1}"
+    
+    log_ok "Last compiled version: $last_compiled_version"
+    log_ok "Last build date: $last_build_date"
+    log_ok "Build status: $build_status"
+    log_ok "Scheduler priority: $last_sched_priority (1=EEVDF, 2=BORE)"
+    
+    # ==========================================================================
+    # STEP 4: Compare Versions and Determine if Build is Needed
+    # ==========================================================================
+    
+    log_info "Comparing versions..."
+    
+    local build_needed=false
+    local build_reason=""
+    
+    if [ "$force_build" = true ]; then
+        log_warn "FORCE BUILD requested via --force flag"
+        build_needed=true
+        build_reason="forced"
+    elif [ "$latest_upstream_version" != "$last_compiled_version" ]; then
+        log_warn "New version detected: $latest_upstream_version (previously: $last_compiled_version)"
+        log_info "New kernel version may have BORE patch available - triggering build"
+        build_needed=true
+        build_reason="new_version"
+    else
+        # Same version - check scheduler status
+        if [ "$last_sched_priority" = "2" ]; then
+            log_ok "BORE already compiled for version $last_compiled_version - no action needed"
+        else
+            log_ok "Version $last_compiled_version already built with EEVDF (priority=$last_sched_priority)"
+            log_info "Not retrying same version - BORE patch likely unavailable for this kernel"
+            log_info "Will build automatically when new kernel version is released"
+        fi
+        build_needed=false
+    fi
+    
+    # ==========================================================================
+    # STEP 5: Trigger Build if Needed
+    # ==========================================================================
+    
+    if [ "$build_needed" = true ]; then
+        log_warn "Triggering harper_alloy_deb13 build for kernel $latest_upstream_version (reason: $build_reason)..."
+        
+        # PLACEHOLDER: Execute build or trigger CI pipeline
+        # This is the core execution point - customize based on your infrastructure
+        
+        cat << 'EXECUTION_PLACEHOLDER'
+
+    ╔════════════════════════════════════════════════════════════════════════════╗
+    ║                      BUILD TRIGGER PLACEHOLDER                             ║
+    ╠════════════════════════════════════════════════════════════════════════════╣
+    ║ New kernel version detected. Build trigger would execute here.             ║
+    ║                                                                            ║
+    ║ Implementation options:                                                    ║
+    │ 1. GitHub Actions: Use workflow_dispatch to trigger CI pipeline            ║
+    │    gh workflow run ci-build.yml -f kernel_version=<version>               ║
+    │                                                                            ║
+    │ 2. Docker: Build locally                                                  ║
+    │    ./start_build.sh --params-file params/harper_alloy_deb13.params        ║
+    │                                                                            ║
+    │ 3. Remote: SSH to build server and execute                                 ║
+    │    ssh buildserver 'cd /path && ./start_build.sh ...'                     ║
+    │                                                                            ║
+    │ 4. Queue: Add to job queue for batch processing                            ║
+    │                                                                            ║
+    ║ NOTE: After successful build, capture SCHED_PRIORITY from bore.sh plugin   ║
+    ║       (1=EEVDF fallback, 2=BORE successfully applied)                      ║
+    ╚════════════════════════════════════════════════════════════════════════════╝
+
+EXECUTION_PLACEHOLDER
+
+        # After successful build, update version tracking file:
+        # IMPORTANT: Capture SCHED_PRIORITY from build output (exported by bore.sh)
+        # cat > "$VERSION_TRACKING_FILE" << EOF
+        # KERNEL_VERSION=$latest_upstream_version
+        # LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+        # BUILD_STATUS=success
+        # SCHED_PRIORITY=<captured from build - 1 for EEVDF, 2 for BORE>
+        # EOF
+        
+        log_ok "Build trigger executed (placeholder)"
+        return 0
+    else
+        log_ok "No action needed. Latest version already built."
+        return 0
+    fi
+}
