@@ -87,13 +87,13 @@ fi
 echo "[INFO] Updating package indices..." >&2
 if [ "$(id -u)" -ne 0 ]; then
     if command -v sudo &>/dev/null; then
-        sudo -n apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+        sudo -n apt-get update 2>&1 | grep -E "(Reading|Building)" >&2 || true
     else
         echo "[ERROR] sudo not available to run apt-get update" >&2
         exit 1
     fi
 else
-    apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+    apt-get update 2>&1 | grep -E "(Reading|Building)" >&2 || true
 fi
 
 # Pull kernel source from trixie-backports repository
