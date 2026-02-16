@@ -41,8 +41,9 @@ mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
 echo "📥 Fetching kernel source via plugin: KERNEL_SOURCE=$KERNEL_SOURCE"
-KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION" "$CONTAINER_BUILD_ROOT" | tail -n1)
-if [ $? -ne 0 ]; then
+fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION" "$CONTAINER_BUILD_ROOT" >/dev/null
+KERNEL_DIR=$(find "$CONTAINER_BUILD_ROOT" -maxdepth 1 -type d -name "linux-*" | head -n1)
+if [ -z "$KERNEL_DIR" ]; then
     echo "❌ ERROR: Failed to fetch kernel via plugin"
     exit 1
 fi
