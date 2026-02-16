@@ -45,6 +45,18 @@ REQUIRED_VARS=(
 
 for var in "${REQUIRED_VARS[@]}"; do
     if [ -z "${!var}" ]; then
+        if [ "$var" == "BUILD_WORKSPACE_DIR" ]; then
+            BUILD_WORKSPACE_DIR="${REPO_ROOT}/build-workspace"
+            echo "  ⚠️  $var not set, defaulting to $BUILD_WORKSPACE_DIR"
+            ((WARNINGS++))
+            continue
+        fi
+        if [ "$var" == "HOST_OUTPUT_DIR" ]; then
+            HOST_OUTPUT_DIR="${REPO_ROOT}/output"
+            echo "  ⚠️  $var not set, defaulting to $HOST_OUTPUT_DIR"
+            ((WARNINGS++))
+            continue
+        fi
         echo "  ❌ MISSING: $var is not set"
         ((ERRORS++))
     else

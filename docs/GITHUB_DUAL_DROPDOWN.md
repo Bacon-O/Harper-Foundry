@@ -55,7 +55,7 @@ Base: harper_deb13.params
 Override: none
 
 → Executes: params/harper_deb13.params
-→ Output: /mnt/build-data/dist/release/harper-deb13/
+→ Output: /path/to/output/release/harper-deb13/
 → QA Mode: RELAXED (from original params)
 ```
 
@@ -71,7 +71,7 @@ Override: testing.params (test output dir + enforced QA)
 → Executes: params/_test_overrides.params
 → _test_overrides.params sources harper_deb13.params
 → _test_overrides.params overrides:
-   • Output: /mnt/build-data/dist/testing
+  • Output: /path/to/output/testing
    • QA Mode: ENFORCED
    • Bypass QA: false
 ```
@@ -185,7 +185,7 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/$PRODUCTION_CONFIG"
 
 # Apply overrides
-HOST_OUTPUT_DIR="/mnt/build-data/dist/testing"
+HOST_OUTPUT_DIR="/path/to/output/testing"
 QA_MODE="ENFORCED"
 ```
 
@@ -227,13 +227,13 @@ You can create multiple override profiles:
 ```bash
 # params/_staging.params
 source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_deb13.params}"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/staging"
+HOST_OUTPUT_DIR="/path/to/output/staging"
 QA_MODE="RELAXED"
 KERNEL_VERSION="6.12.8"  # Pinned for stability
 
 # params/_preprod.params
 source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_deb13.params}"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/preprod"
+HOST_OUTPUT_DIR="/path/to/output/preprod"
 QA_MODE="ENFORCED"
 ENABLE_QEMU_TESTS="true"
 ```

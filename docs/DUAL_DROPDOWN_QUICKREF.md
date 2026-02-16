@@ -41,7 +41,7 @@ Workflow executes:
 
 Result:
   • Sources: params/harper_deb13.params
-  • Output: /mnt/build-data/dist/release/harper-deb13/
+  • Output: /path/to/output/release/harper-deb13/
   • QA Mode: RELAXED (from original params)
 ```
 
@@ -56,7 +56,7 @@ Workflow executes:
 
 Result:
   • _test_overrides.params sources: harper_deb13.params
-  • Output: /mnt/build-data/dist/testing (overridden)
+  • Output: /path/to/output/testing (overridden)
   • QA Mode: ENFORCED (overridden)
   • Bypass QA: false (overridden)
 ```

@@ -10,6 +10,9 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
+# HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
+# Note: REPO_ROOT is auto-detected
 BUILD_WORKSPACE_DIR="/mnt/build-data/tinyconfig/"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
@@ -36,9 +39,7 @@ RELEASE_TAG="harper-test"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
-KERNEL_CFLAGS="-march=haswell -mtune=haswell"
 CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
-DEBIAN_PACKAGE_NAME="linux-upstream-harper-test"
 
 # --- Kernel Source Strategy (Plugin-based) ---
 # Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
@@ -75,9 +76,8 @@ BASE_CONFIG="tinyconfig"
 # No tuning config for tinyconfig - we want absolute minimum
 TUNING_CONFIG=""
 
-# --- Scheduler Patch ---
-# Skip scheduler patches in quick test mode for speed
-BORE_PATCH_URL=""
+# --- Patches if any ---
+
 
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING

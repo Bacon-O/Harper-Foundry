@@ -95,7 +95,7 @@ fi
 
 # 3. Load and Hydrate
 if [ -f "$PARAMS_FILE" ]; then
-    echo "📖 Moving fuel truck into place from $PARAMS_FILE..."
+    echo "📖 Consulting the blueprint from $PARAMS_FILE..."
     set -a
     # shellcheck source=/dev/null
     source "$PARAMS_FILE"
@@ -108,6 +108,43 @@ if [ -f "$PARAMS_FILE" ]; then
         # shellcheck source=/dev/null
         source "$OVERRIDE_PARAMS"
         set +a
+    fi
+
+    # 3.5 Default host paths if not set in params
+    USE_PARAM_SCOPED_DIRS="${USE_PARAM_SCOPED_DIRS:-true}"
+    if [ -z "$BUILD_WORKSPACE_DIR" ]; then
+        DEFAULT_WORKSPACE_BASE="${REPO_ROOT}/build-workspace"
+        if [ "$USE_PARAM_SCOPED_DIRS" != "false" ]; then
+            if [ -n "$PRODUCTION_CONFIG" ]; then
+                WORKSPACE_TAG="$(basename "$PRODUCTION_CONFIG" .params)"
+            else
+                WORKSPACE_TAG="$(basename "$PARAMS_FILE" .params)"
+            fi
+            BUILD_WORKSPACE_DIR="${DEFAULT_WORKSPACE_BASE}/${WORKSPACE_TAG}"
+        else
+            BUILD_WORKSPACE_DIR="${DEFAULT_WORKSPACE_BASE}"
+        fi
+    fi
+    if [ -z "$HOST_OUTPUT_DIR" ]; then
+        DEFAULT_OUTPUT_BASE="${REPO_ROOT}/output"
+        if [ "$USE_PARAM_SCOPED_DIRS" != "false" ]; then
+            if [ -z "$WORKSPACE_TAG" ]; then
+                if [ -n "$PRODUCTION_CONFIG" ]; then
+                    WORKSPACE_TAG="$(basename "$PRODUCTION_CONFIG" .params)"
+                else
+                    WORKSPACE_TAG="$(basename "$PARAMS_FILE" .params)"
+                fi
+            fi
+            HOST_OUTPUT_DIR="${DEFAULT_OUTPUT_BASE}/${WORKSPACE_TAG}"
+        else
+            HOST_OUTPUT_DIR="${DEFAULT_OUTPUT_BASE}"
+        fi
+    fi
+    export BUILD_WORKSPACE_DIR HOST_OUTPUT_DIR
+
+    # Create default host directories if running on host
+    if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+        mkdir -p "$BUILD_WORKSPACE_DIR" "$HOST_OUTPUT_DIR"
     fi
     
     # 4. Burner Control (Parallelism)

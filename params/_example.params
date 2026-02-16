@@ -9,13 +9,15 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
-# Host paths for build data, repository root, and distribution output.
+# BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
+# HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
+# USE_PARAM_SCOPED_DIRS: When true, repo-relative defaults are scoped per params name
+# Note: REPO_ROOT is auto-detected
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. Use fast storage (SSD/NVMe) for best performance. This is mounted as /build in the container."
-BUILD_WORKSPACE_DIR="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
-# @PROMPT "HOST_REPO_ROOT: The absolute path to the root of this repository on your host machine. This is used by host-side scripts."
-HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+BUILD_WORKSPACE_DIR=""
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-HOST_OUTPUT_DIR="/mnt/build-data/dist/release"
+HOST_OUTPUT_DIR=""
+USE_PARAM_SCOPED_DIRS="true"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
@@ -23,74 +25,95 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
+FOUNDRY_EXEC="alloymixtures/tinyconfig.sh"
+INCREMENTAL_BUILD="false"
 
 # --- Foundry Image Configuration ---
-# Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
-FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_full_auto.dockerfile"
-IMAGE_NAME="debian-harper-worker"
+DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION
-# These parameters define the specific kernel to be built.
 # ==============================================================================
+
+# Versioning & Tagging
+BUILD_ARCH_TAG="x86_64v3"
+RELEASE_TAG="example"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
-CC_TOOLCHAIN="LLVM=1"
-# "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
-# The compiler accepts this as a concrete CPU model.
-USER_KCFLAGS="-march=haswell -mtune=haswell"
-CROSS_CMD="CROSS_COMPILE=x86_64-linux-gnu-"
-KDEB_NAME="linux-upstream-harper-v3"
-KERNEL_SOURCE="debian/trixie-backports"
+CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
+
+# --- Kernel Source Strategy (Plugin-based) ---
+# Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
+KERNEL_SOURCE="kernel.org"
+# Use latest LTS kernel by default (stable, long-term support)
+KERNEL_VERSION="lts"
+# Other options:
+#   KERNEL_VERSION="latest"  # Latest stable release
+#   KERNEL_VERSION="rc"      # Latest mainline/RC
+#   KERNEL_VERSION="6.11.8"  # Specific version
+
+DEB_HOST_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+
+BUILD_DEB_BUILD_ARCH="arm64"
+BUILD_DEB_TARGET_ARCH="amd64"
+BUILD_CC="clang --target=x86_64-linux-gnu"
+BUILD_HOSTLD="x86_64-linux-gnu-ld"
+BUILD_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+BUILD_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+BUILD_LLVM="1"
 
 # ==============================================================================
 # BUILD STRATEGY & FEATURES
-# These parameters control the build process and specific kernel features.
 # ==============================================================================
 
 # --- Performance & Parallelism ---
 # Number of CPU cores for the build. Leave empty ("") to use all available cores (nproc default).
-FOUNDRY_NPROC=""
+PARALLEL_JOBS=""
 
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
-BASE_CONFIG="defconfig"
-TUNING_CONFIG="exampletune.config"
+BASE_CONFIG="tinyconfig"
+TUNING_CONFIG="
 
-# --- Scheduler Patch ---
-BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
+# --- Patches if any ---
+
 
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
-# These parameters control post-build validation and testing.
 # ==============================================================================
 
 # --- QA Flags ---
-# @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
-# Set to "false" to skip QEMU boot testing.
 ENABLE_QEMU_TESTS="false"
 
+QA_MODE="RELAXED"
+
+QA_TESTS=(
+    "filesexists.sh"
+)
+
+QA_TEST_PACKAGE=(
+    "harperbase"
+)
+
 # --- Chemical Audit: Critical (Must Pass) ---
-# Exact internal Kconfig names to verify. If any are missing, the build is considered BROKEN.
-CHECK_LIST=(
-    "CONFIG_PREEMPT_RT=y"
+QA_CRITICAL_CHECKS=( 
+    "CONFIG_TTY=y"
+    "CONFIG_PRINTK=y"
 )
 
 # --- Chemical Audit: Optional (Warn Only) ---
-# If these are missing, a warning is logged but the kernel is still shipped.
-# This supports fallback strategies (e.g., BORE -> EEVDF).
-WARN_LIST=(
+QA_OPTIONAL_CHECKS=(
     "CONFIG_SCHED_BORE=y"
     "CONFIG_NTSYNC=y"
-    "CONFIG_MCORE2=y"
     "CONFIG_HZ_500=y"
     "CONFIG_PREEMPT=y"
 )
 
 # --- VM Proving Ground Specs (for QEMU testing) ---
-VM_MEM="1G"
-VM_CORES="4"
-VM_TIMEOUT="30s"
+QA_VM_MEMORY="1G"
+QA_VM_CORES="4"
+QA_VM_TIMEOUT="30s"

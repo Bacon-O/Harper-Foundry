@@ -18,7 +18,7 @@ Successfully implemented a **dual dropdown system** for GitHub Actions workflows
 
 **Key Overrides:**
 ```bash
-HOST_OUTPUT_DIR="/mnt/build-data/dist/testing"  # Preprod location
+HOST_OUTPUT_DIR="/path/to/output/testing"  # Preprod location
 QA_MODE="ENFORCED"                              # Stricter testing
 BYPASS_QA="false"                               # Ensure QA runs
 ```
@@ -204,7 +204,7 @@ Test 1: harper_deb13.params (no override)
 Test 2: harper_deb13.params + testing.params
   ✅ Loads base config
   ✅ Applies overrides
-  ✅ Output: /mnt/build-data/dist/testing
+  ✅ Output: /path/to/output/testing
   ✅ QA Mode: ENFORCED
 
 Test 3: tinyconfig.params + testing.params

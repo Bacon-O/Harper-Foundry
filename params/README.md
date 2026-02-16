@@ -83,7 +83,7 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/$PRODUCTION_CONFIG"
 
 # 2. Override specific values for testing
-HOST_OUTPUT_DIR="/mnt/build-data/dist/testing"
+HOST_OUTPUT_DIR="/path/to/output/testing"
 QA_MODE="ENFORCED"
 BYPASS_QA="false"
 ```
@@ -191,6 +191,7 @@ EOF
 ### Core Setup (Required)
 - `BUILD_WORKSPACE_DIR` - Build workspace on host (use fast storage like SSD/NVMe), mounted as /build
 - `HOST_OUTPUT_DIR` - Where .deb files go
+- `USE_PARAM_SCOPED_DIRS` - When true, repo-relative defaults are scoped per params name
 - `DOCKERFILE_PATH` - Docker image to use
 - `FOUNDRY_EXEC` - Script to run inside container
 

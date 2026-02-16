@@ -23,7 +23,13 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
-# Host paths for build data, repository root, and distribution output.
+# BUILD_WORKSPACE_DIR: Where kernel compilation occurs (can be on fast storage like SSD/NVMe/tmpfs)
+#                      This is mounted as /build inside the container
+# HOST_OUTPUT_DIR:     Base directory where build artifacts are stored
+#                      Each build creates a subdirectory: build_<timestamp>
+# 
+# Note: REPO_ROOT (repository location) is auto-detected and does not need configuration
+#
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. Use fast storage (SSD/NVMe) for best performance. This is mounted as /build in the container."
 BUILD_WORKSPACE_DIR="/mnt/build-data/harper_deb13/"
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."

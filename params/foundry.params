@@ -20,9 +20,17 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where kernel compilation occurs (can be on fast storage)
+#                      Mounted as /build inside the container
+# HOST_OUTPUT_DIR:     Where build artifacts are stored (each build creates build_<timestamp>)
+# USE_PARAM_SCOPED_DIRS: When true, repo-relative defaults are scoped per params name
+# 
+# Note: REPO_ROOT is auto-detected - no configuration needed
+#
 # ⚠️  REQUIRED: Set these to your actual paths!
 BUILD_WORKSPACE_DIR="EDIT_ME_HOST_REPO_PATH"
 HOST_OUTPUT_DIR="EDIT_ME_HOST_OUTPUT_PATH"
+USE_PARAM_SCOPED_DIRS="true"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""

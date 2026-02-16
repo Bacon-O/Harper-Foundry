@@ -140,8 +140,9 @@ The build is configured via files in the `params/` directory. The default is `pa
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `BUILD_WORKSPACE_DIR` | Build workspace on host, mounted as /build | `/mnt/build-data/workspace` |
-| `HOST_OUTPUT_DIR` | Where build artifacts are stored | `/mnt/build-data/dist/release` |
+| `BUILD_WORKSPACE_DIR` | Build workspace on host, mounted as /build | `/path/to/build/workspace` |
+| `HOST_OUTPUT_DIR` | Where build artifacts are stored | `/path/to/output/dir` |
+| `USE_PARAM_SCOPED_DIRS` | Scope default paths per params name | `true` |
 | `TARGET_ARCH` | Target CPU architecture | `x86_64`, `aarch64` |
 | `KERNEL_SOURCE` | Kernel source plugin to use | `kernel.org`, `debian`, `debian/trixie-backports` |
 | `KERNEL_VERSION` | Kernel version or alias | `"latest"`, `"lts"`, `"6.11.8"`, empty for default |

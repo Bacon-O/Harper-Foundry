@@ -76,14 +76,14 @@ fi
 source "$(dirname "${BASH_SOURCE[0]}")/$PRODUCTION_CONFIG"
 
 # 2. Override specific values
-HOST_OUTPUT_DIR="/mnt/build-data/dist/testing"
+HOST_OUTPUT_DIR="/path/to/output/testing"
 QA_MODE="ENFORCED"
 BYPASS_QA="false"
 ```
 
 **Result:**
 - ✅ Inherits all kernel settings from production (BORE patches, x86-64-v3, 1000Hz, etc.)
-- ✅ Overrides output directory to `/mnt/build-data/dist/testing`
+- ✅ Overrides output directory to `/path/to/output/testing`
 - ✅ Enforces stricter QA mode for testing builds
 - ✅ Easy to maintain - update production config once, testing inherits changes
 
@@ -244,7 +244,7 @@ jobs:
           cat > params/_env_override.params << EOF
           #!/bin/bash
           source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
-          HOST_OUTPUT_DIR="/mnt/build-data/dist/${{ inputs.environment }}"
+          HOST_OUTPUT_DIR="/path/to/output/${{ inputs.environment }}"
           QA_MODE="ENFORCED"
           KERNEL_VERSION="6.12.8"  # Pin for reproducibility
           EOF
@@ -259,19 +259,19 @@ Instead of one `_test_overrides.params`, you can create multiple override files:
 ```bash
 # params/_preprod.params
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/preprod"
+HOST_OUTPUT_DIR="/path/to/output/preprod"
 QA_MODE="ENFORCED"
 KERNEL_VERSION="latest"
 
 # params/_staging.params  
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/staging"
+HOST_OUTPUT_DIR="/path/to/output/staging"
 QA_MODE="RELAXED"
 KERNEL_VERSION="6.12.8"  # Pinned for stability
 
 # params/_qa.params
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/qa"
+HOST_OUTPUT_DIR="/path/to/output/qa"
 QA_MODE="ENFORCED"
 ENABLE_QEMU_TESTS="true"  # Full QEMU boot testing
 ```
