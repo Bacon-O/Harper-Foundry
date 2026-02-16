@@ -7,7 +7,7 @@ The **Harper Foundry** is an extensible containerized build system. While curren
 
 ## ⚠️ Early Stage Software
 
-**This project is still in early/enthusiast stage.** I have validated yhe logic for my specific use cae, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
+**This project is still in early/enthusiast stage.** I have validated the logic for my specific use cae, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
 
 **Known Limitations:**
 - Limited testing on platforms beyond x86_64/arm64 with Debian 13
