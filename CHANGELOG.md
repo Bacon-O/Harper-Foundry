@@ -122,5 +122,5 @@ When preparing a release, copy this template:
 
 ---
 
-[Unreleased]: https://github.com/Bacon-O/Debian-Harper/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/Bacon-O/Debian-Harper/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Bacon-O/Harper-Foundry/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Bacon-O/Harper-Foundry/releases/tag/v1.0.0

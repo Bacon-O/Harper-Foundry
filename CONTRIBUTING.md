@@ -26,8 +26,8 @@ Before contributing, ensure you have:
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Debian-Harper.git
-   cd Debian-Harper
+   git clone https://github.com/YOUR_USERNAME/Harper-Foundry.git
+   cd Harper-Foundry
    ```
 3. Run the interactive setup:
    ```bash
@@ -233,7 +233,7 @@ feat: add ARM64 cross-compilation support
 ## Project Structure
 
 ```
-Debian-Harper/
+Harper-Foundry/
 ├── configs/           # Kernel configuration fragments
 ├── docker/           # Dockerfiles for build environments
 ├── params/           # Build parameter files

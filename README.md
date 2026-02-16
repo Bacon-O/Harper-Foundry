@@ -86,8 +86,8 @@ Other Linux distributions should work, but **no testing has been performed**. If
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Bacon-O/Debian-Harper.git
-   cd Debian-Harper
+   git clone https://github.com/Bacon-O/Harper-Foundry.git
+   cd Harper-Foundry
    ```
 
 2. **Run interactive setup:**
@@ -478,8 +478,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/Bacon-O/Debian-Harper/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/Bacon-O/Debian-Harper/discussions)
+- **Issues:** [GitHub Issues](https://github.com/Bacon-O/Harper-Foundry/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Bacon-O/Harper-Foundry/discussions)
 
 ## TODO
 *   General testing
