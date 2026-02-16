@@ -72,7 +72,7 @@ if ! command -v apt-get &>/dev/null; then
 fi
 
 # Pull kernel source (will extract to linux-* directory)
-if ! apt-get source "linux${VERSION_CONSTRAINT}" 2>/dev/null; then
+if ! apt-get source "linux${VERSION_CONSTRAINT}" 1>&2; then
     echo "[ERROR] Failed to fetch Debian kernel source" >&2
     echo "[ERROR] Hint: Ensure 'deb-src' lines are in /etc/apt/sources.list" >&2
     echo "[ERROR] Hint: Run 'apt-get update' after adding deb-src lines" >&2
