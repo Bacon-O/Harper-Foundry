@@ -147,7 +147,7 @@ The build is configured via files in the `params/` directory. The default is `pa
 | `KERNEL_SOURCE` | Kernel source plugin to use | `kernel.org`, `debian`, `debian/trixie-backports` |
 | `KERNEL_VERSION` | Kernel version or alias | `"latest"`, `"lts"`, `"6.11.8"`, empty for default |
 | `BASE_CONFIG` | Base kernel config | `defconfig`, `tinyconfig` |
-| `TUNING_CONFIG` | Additional config overlay | `harper_alloy_deb13_tune.config` |
+| `TUNING_CONFIG` | Additional config overlay | `harper_deb13_tune.config` |
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
 | `QA_MODE` | QA strictness | `RELAXED`, `ENFORCED` |
 
@@ -245,7 +245,7 @@ The foundry supports different "alloy mixtures" - build configurations optimized
 
 | Mixture | Build Time | Purpose | Artifacts |
 |---------|------------|---------|-----------|
-| **harper_alloy_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages, optimized for desktop/gaming (compiled with CLANG/LLVM) |
+| **harper_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages, optimized for desktop/gaming (compiled with CLANG/LLVM) |
 | **tinyconfig.sh** | 2-5 min | Quick testing | bzImage only |
 
 See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detailed information.
@@ -258,7 +258,7 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
 - 📦 Minimal artifacts (bzImage only)
 - ✅ Perfect for testing changes
 
-**Harper Alloy Deb13 (Full Build):**
+**Harper deb13 (Full Build):**
 - 🏗️ 30-60+ minute builds
 - 🎯 Complete Harper kernel for enthusiasts
 - 📦 Complete .deb packages
@@ -320,10 +320,10 @@ Harper includes a trigger job system (plugin-based) that monitors Debian Trixie 
 ```bash
 # Manual trigger check (via plugin system)
 source ./scripts/plugins/triggers/runner.sh
-trigger_build alloy_deb13_kernel
+trigger_build harper_deb13_kernel
 
 # Force build regardless of version
-trigger_build alloy_deb13_kernel --force
+trigger_build harper_deb13_kernel --force
 ```
 
 For full documentation, see [Trigger Jobs Guide](docs/TRIGGER_JOBS.md).

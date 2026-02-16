@@ -7,8 +7,8 @@
 # Compares against last successful build version and triggers CI if new release available
 #
 # Usage:
-#   source ./scripts/plugins/triggers/alloy_deb13_kernel.sh
-#   alloy_deb13_kernel_trigger [--force]
+#   source ./scripts/plugins/triggers/harper_deb13_kernel.sh
+#   harper_deb13_kernel_trigger [--force]
 #
 # Options:
 #   --force   Skip version comparison and trigger build anyway
@@ -21,11 +21,11 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-.}"
-VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/alloy_deb13_latest_kernel.txt"
+VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/harper_deb13_latest_kernel.txt"
 DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/repository/branches"
 
 # ==============================================================================
-# FUNCTION: alloy_deb13_kernel_trigger
+# FUNCTION: harper_deb13_kernel_trigger
 # ==============================================================================
 # Main trigger function for Debian Trixie kernel monitoring
 #
@@ -37,7 +37,7 @@ DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/reposi
 #   1 - Error occurred
 #
 # ==============================================================================
-alloy_deb13_kernel_trigger() {
+harper_deb13_kernel_trigger() {
     local force_build=false
     
     # Parse arguments
@@ -156,7 +156,7 @@ EOF
     # ==========================================================================
     
     if [ "$build_needed" = true ]; then
-        log_warn "Triggering harper_alloy_deb13 build for kernel $latest_upstream_version (reason: $build_reason)..."
+        log_warn "Triggering harper_deb13. build for kernel $latest_upstream_version (reason: $build_reason)..."
         
         # PLACEHOLDER: Execute build or trigger CI pipeline
         # This is the core execution point - customize based on your infrastructure

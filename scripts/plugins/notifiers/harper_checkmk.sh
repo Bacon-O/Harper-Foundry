@@ -10,7 +10,7 @@
 #   harper_checkmk_check [--profile <profile_name>]
 #
 # Options:
-#   --profile    Build profile to monitor (default: alloy_deb13)
+#   --profile    Build profile to monitor (default: harper_deb13)
 #
 # Exit Codes (CheckMK standard):
 #   0 - OK       : New build successful or no changes
@@ -39,14 +39,14 @@ NOTIFICATION_STATE_DIR="$REPO_ROOT/version_tracking/.notification_state"
 # Main CheckMK check function for Harper builds
 #
 # Arguments:
-#   --profile <name>  Build profile to monitor (default: alloy_deb13)
+#   --profile <name>  Build profile to monitor (default: harper_deb13)
 #
 # Returns:
 #   0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
 #
 # ==============================================================================
 harper_checkmk_check() {
-    local profile="alloy_deb13"
+    local profile="harper_deb13"
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do

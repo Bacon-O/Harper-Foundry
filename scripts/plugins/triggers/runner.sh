@@ -11,7 +11,7 @@
 #   trigger_build <trigger_type> [options...]
 #
 # Supported Trigger Types:
-#   - alloy_deb13_kernel    : Debian Trixie Backports kernel releases
+#   - harper_deb13_kernel    : Debian Trixie Backports kernel releases
 #   - (add more as needed)
 #
 # ==============================================================================
@@ -39,7 +39,7 @@ log_error() { echo -e "${RED}[ERROR]${NC}  $1"; }
 # Main dispatcher function. Routes to appropriate trigger plugin.
 #
 # Arguments:
-#   $1 - trigger_type (e.g., "alloy_deb13_kernel")
+#   $1 - trigger_type (e.g., "harper_deb13_kernel")
 #   $2+ - options to pass to the plugin
 #
 # Returns:

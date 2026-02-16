@@ -22,7 +22,7 @@ scripts/
 scripts/
 ├── alloymixtures/       # NEW: Build script variants
 │   ├── README.md        # Documentation for all mixtures
-│   ├── harper_alloy_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
+│   ├── harper_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
 │   └── tinyconfig.sh    # Quick tests (2-5 min)
 ├── env_setup.sh
 ├── furnace_ignite.sh
@@ -34,11 +34,11 @@ scripts/
 **New Files:**
 - `params/tinyconfig.params` - Fast test configuration
 - `scripts/alloymixtures/README.md` - Alloy mixtures documentation
-- `scripts/alloymixtures/harper_alloy_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
+- `scripts/alloymixtures/harper_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
 - `scripts/alloymixtures/tinyconfig.sh` - Quick test script
 
 **Modified Files:**
-- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_alloy_deb13.sh`
+- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_deb13..sh`
 - `Makefile` - `make test` now uses tinyconfig params
 - `README.md` - Added alloy mixtures section
 - `CONTRIBUTING.md` - Updated test instructions
@@ -46,7 +46,7 @@ scripts/
 
 ## The Two Mixtures
 
-### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_alloy_deb13.sh`)
+### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_deb13..sh`)
 
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists
 
@@ -86,9 +86,9 @@ make build
 
 #### What Changes from Stock Debian?
 
-Harper Alloy Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
+Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 
-| Optimization | Debian Default | Harper Alloy | Reason |
+| Optimization | Debian Default | Harper | Reason |
 |---|---|---|---|
 | **CPU Baseline** | Generic (2004-era compatible) | x86-64-v3 | Enables modern CPU instructions (AVX2, FMA, BMI2) |
 | **Scheduler** | EEVDF | BORE (→ EEVDF fallback) | Burst responsiveness for games, desktop interactivity |
@@ -149,7 +149,7 @@ make test
 
 **Action required:** `ci-build.sh` has been removed.
 - Update any custom scripts or containers that referenced `ci-build.sh`
-- Use `scripts/alloymixtures/harper_alloy_deb13.sh` instead
+- Use `scripts/alloymixtures/harper_deb13..sh` instead
 - `foundry.params` already uses the new path
 
 ### For CI/CD Pipelines
@@ -207,7 +207,7 @@ make build
 
 ### 3. **Resource Optimization**
 - Test builds use minimal resources
-- Release builds (harper_alloy_deb13) get full resources
+- Release builds (harper_deb13.) get full resources
 - Better CI/CD efficiency
 
 ### 4. **Extensibility**
@@ -290,7 +290,7 @@ All changes have been validated:
 
 # ✅ Backward compatibility
 ls -la scripts/alloymixtures/*.sh
--rwxr-xr-x ... alloymixtures/harper_alloy_deb13.sh
+-rwxr-xr-x ... alloymixtures/harper_deb13..sh
 -rwxr-xr-x ... alloymixtures/tinyconfig.sh
 ```
 
@@ -306,7 +306,7 @@ Updated files:
 ## Breaking Changes
 
 **Yes.** The `ci-build.sh` symlink has been removed.
-- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_alloy_deb13.sh`
+- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_deb13..sh`
 - All documented commands in this guide already use the new path
 
 ## Recommendations
@@ -316,7 +316,7 @@ Updated files:
 # Use tinyconfig for quick validation
 make test
 
-# Use harper_alloy_deb13 for complete builds (experimental)
+# Use harper_deb13. for complete builds (experimental)
 make build
 ```
 

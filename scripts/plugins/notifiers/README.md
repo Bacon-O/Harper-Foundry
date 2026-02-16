@@ -14,7 +14,7 @@ The notifiers system provides integrations with monitoring platforms, notificati
 - Routes to plugin functions: `{notifier_name}_check()`
 
 **Available Plugins:**
-- `harper_checkmk.sh` - CheckMK local check monitoring **specifically for Harper Alloy Deb13 builds**
+- `harper_checkmk.sh` - CheckMK local check monitoring **specifically for Harper Deb13 builds**
   - Monitors: Build status, BORE scheduler priority (Harper-specific)
   - Notifications: One-time on new builds, persistent warnings/criticals
   - Exit codes: 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
@@ -32,7 +32,7 @@ source ./scripts/plugins/notifiers/runner.sh
 **Run check manually:**
 ```bash
 notify harper_checkmk
-notify harper_checkmk --profile alloy_deb13
+notify harper_checkmk --profile harper_deb13
 ```
 
 **Add to CheckMK agent:**
@@ -46,12 +46,12 @@ cat > /usr/lib/check_mk_agent/local/harper_builds << 'EOF'
 #!/bin/bash
 REPO_ROOT="/path/to/Debian-Harper"  # CHANGE THIS to your repo path
 source "$REPO_ROOT/scripts/plugins/notifiers/runner.sh"
-notify harper_checkmk --profile alloy_deb13
+notify harper_checkmk --profile harper_deb13
 EOF
 chmod +x /usr/lib/check_mk_agent/local/harper_builds
 ```
 
-## CheckMK Notification Logic (Harper Alloy Deb13)
+## CheckMK Notification Logic (Harper Deb13)
 
 The CheckMK plugin implements smart notification logic to avoid spam:
 
@@ -80,7 +80,7 @@ The plugin tracks notification state in `version_tracking/.notification_state/`:
 
 ```
 version_tracking/.notification_state/
-└── alloy_deb13_notified.txt
+└── harper_deb13_notified.txt
     ├── NOTIFIED_VERSION=6.11.8
     ├── NOTIFIED_STATUS=success
     ├── NOTIFIED_PRIORITY=1
@@ -98,7 +98,7 @@ To manually clear persistent warnings:
 
 ```bash
 # Remove notification state file
-rm version_tracking/.notification_state/alloy_deb13_notified.txt
+rm version_tracking/.notification_state/harper_deb13_notified.txt
 
 # Next check will re-evaluate and notify based on current status
 ```
@@ -108,7 +108,7 @@ Or rebuild kernel to address the issue:
 ```bash
 # For BORE warning: Trigger rebuild when BORE patch is available
 source ./scripts/plugins/triggers/runner.sh
-trigger_build alloy_deb13_kernel --force
+trigger_build harper_deb13_kernel --force
 
 # For build failure: Fix the issue and rebuild
 ```
@@ -124,7 +124,7 @@ trigger_build alloy_deb13_kernel --force
 # Harper Foundry: Custom Notifier Plugin
 
 email_notifier_check() {
-    local profile="${1:-alloy_deb13}"
+    local profile="${1:-harper_deb13}"
     
     # Your implementation:
     # 1. Read version tracking file
@@ -151,7 +151,7 @@ chmod +x scripts/plugins/notifiers/email_notifier.sh
 4. **Test:**
 ```bash
 source ./scripts/plugins/notifiers/runner.sh
-notify email_notifier --profile alloy_deb13
+notify email_notifier --profile harper_deb13
 ```
 
 ## Environment Variables
@@ -173,7 +173,7 @@ Create `scripts/plugins/notifiers/prometheus.sh`:
 #!/bin/bash
 
 prometheus_check() {
-    local profile="${1:-alloy_deb13}"
+    local profile="${1:-harper_deb13}"
     local version_file="$REPO_ROOT/version_tracking/${profile}_latest_kernel.txt"
     
     source "$version_file"
@@ -185,7 +185,7 @@ prometheus_check() {
 # TYPE harper_build_status gauge
 harper_build_status{profile="$profile",version="$KERNEL_VERSION"} $([ "$BUILD_STATUS" = "success" ] && echo 1 || echo 2)
 
-# HELP harper_scheduler_priority Scheduler priority (1=EEVDF, 2=BORE) - Harper Alloy Deb13 specific
+# HELP harper_scheduler_priority Scheduler priority (1=EEVDF, 2=BORE) - Harper Deb13 specific
 # TYPE harper_scheduler_priority gauge
 harper_scheduler_priority{profile="$profile",version="$KERNEL_VERSION"} $SCHED_PRIORITY
 EOF
@@ -203,14 +203,14 @@ Create `scripts/plugins/notifiers/slack.sh`:
 
 slack_check() {
     local webhook_url="$SLACK_WEBHOOK_URL"
-    local profile="${1:-alloy_deb13}"
+    local profile="${1:-harper_deb13}"
     
     source "$REPO_ROOT/version_tracking/${profile}_latest_kernel.txt"
     
     local message=""
     local color="good"
     
-    # Note: SCHED_PRIORITY is Harper Alloy Deb13 specific
+    # Note: SCHED_PRIORITY is Harper Deb13 specific
     # 1 = EEVDF fallback (BORE patch failed)
     # 2 = BORE successfully applied
     if [ "$BUILD_STATUS" = "failed" ]; then
@@ -253,7 +253,7 @@ Solution: Check notification state file exists and is being updated
 ```
 Problem: CheckMK shows OK when build actually failed
 Solution: Verify version tracking file has correct BUILD_STATUS
-  cat version_tracking/alloy_deb13_latest_kernel.txt
+  cat version_tracking/harper_deb13_latest_kernel.txt
 ```
 
 **Notification state corruption:**

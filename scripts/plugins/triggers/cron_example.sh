@@ -34,6 +34,21 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 LOGFILE="$REPO_ROOT/logs/trigger_cron.log"
 mkdir -p "$(dirname "$LOGFILE")"
 
+# Locking (prevent overlapping runs)
+LOCK_DIR="$REPO_ROOT/var/lock"
+LOCK_FILE="$LOCK_DIR/harper_trigger_cron.lock"
+mkdir -p "$LOCK_DIR"
+
+if command -v flock >/dev/null 2>&1; then
+    exec 200>"$LOCK_FILE"
+    if ! flock -n 200; then
+        echo "[$(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)] Another cron run is active. Exiting." | tee -a "$LOGFILE"
+        exit 0
+    fi
+else
+    echo "[$(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)] WARNING: flock not found; lock disabled." | tee -a "$LOGFILE"
+fi
+
 # Logging helper
 log_to_file() {
     echo "[$(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)] $1" | tee -a "$LOGFILE"
@@ -60,7 +75,7 @@ source "$REPO_ROOT/scripts/plugins/triggers/runner.sh"
 log_to_file "Checking for new kernel releases..."
 
 # Run the trigger plugin
-if trigger_build alloy_deb13_kernel 2>&1 | tee -a "$LOGFILE"; then
+if trigger_build harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"; then
     TRIGGER_EXIT_CODE=${PIPESTATUS[0]}
 else
     TRIGGER_EXIT_CODE=$?
@@ -87,7 +102,7 @@ log_to_file "Trigger check completed with exit code: $TRIGGER_EXIT_CODE"
 #         
 #         # Update version tracking file with build results
 #         # (You'd need to extract SCHED_PRIORITY from build logs)
-#         # cat > "$REPO_ROOT/version_tracking/alloy_deb13_latest_kernel.txt" << EOF
+#         # cat > "$REPO_ROOT/version_tracking/harper_deb13_latest_kernel.txt" << EOF
 #         # KERNEL_VERSION=<detected_version>
 #         # LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
 #         # BUILD_STATUS=success
@@ -105,7 +120,7 @@ log_to_file "Trigger check completed with exit code: $TRIGGER_EXIT_CODE"
 
 # OPTION C: Queue the build for later execution
 # if [ $TRIGGER_EXIT_CODE -eq 0 ]; then
-#     echo "build:alloy_deb13:$(date +%s)" >> "$REPO_ROOT/build_queue.txt"
+#     echo "build:harper_deb13:$(date +%s)" >> "$REPO_ROOT/build_queue.txt"
 #     log_to_file "Build queued for processing"
 # fi
 

@@ -205,7 +205,7 @@ EOF
 - `BASE_CONFIG` - Starting kernel config (defconfig, tinyconfig)
 - `TUNING_CONFIG` - Additional config fragment
 - `BORE_PATCH_URL` - BORE scheduler patch
-- `PARALLEL_JOBS` - CPU cores for build
+- `PARALLEL_JOBS` - Build jobs if left blank defaults to nproc-1 (min 1)
 
 ### Quality Assurance
 - `BYPASS_QA` - Skip QA tests (true/false)

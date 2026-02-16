@@ -38,7 +38,7 @@ The plugin sets these environment variables:
 The plugin is automatically sourced by alloy mixture scripts:
 
 ```bash
-# In scripts/alloymixtures/harper_alloy_deb13.sh
+# In scripts/alloymixtures/harper_deb13..sh
 source "${PLUGIN_DIR}/patches/bore.sh"
 ```
 

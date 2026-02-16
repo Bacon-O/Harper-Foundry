@@ -385,7 +385,7 @@ RUN apt-get install -y libelf-dev:amd64
 
 **Cause:** Debian signing keys not stripped
 
-**Solution:** Verify `scripts/alloymixtures/harper_alloy_deb13.sh` includes:
+**Solution:** Verify `scripts/alloymixtures/harper_deb13.sh` includes:
 ```bash
 ./scripts/config --set-str MODULE_SIG_KEY ""
 ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""

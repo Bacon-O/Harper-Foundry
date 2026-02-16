@@ -32,9 +32,9 @@ jobs:
         run: |
           source ./scripts/plugins/triggers/runner.sh
           if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
-            trigger_build alloy_deb13_kernel --force
+            trigger_build harper_deb13_kernel --force
           else
-            trigger_build alloy_deb13_kernel
+            trigger_build harper_deb13_kernel
           fi
         env:
           REPO_ROOT: ${{ github.workspace }}
@@ -46,10 +46,10 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          if git diff --quiet version_tracking/alloy_deb13_latest_kernel.txt; then
+          if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
             echo "No version changes to commit"
           else
-            git add version_tracking/alloy_deb13_latest_kernel.txt
+            git add version_tracking/harper_deb13_latest_kernel.txt
             git commit -m "Update tracked kernel version [skip ci]"
             git push
           fi

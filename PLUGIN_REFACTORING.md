@@ -24,7 +24,7 @@ Refactored the Harper Foundry plugin system to improve modularity and organizati
 - Template for creating new patch plugins
 - Usage examples and best practices
 
-**Modified**: `scripts/alloymixtures/harper_alloy_deb13.sh`
+**Modified**: `scripts/alloymixtures/harper_deb13.sh`
 - Removed inline BORE patching code (lines 36-46)
 - Now sources the BORE plugin: `source "${PLUGIN_DIR}/patches/bore.sh"`
 - Simplified versioning logic (removed redundant scheduler check)

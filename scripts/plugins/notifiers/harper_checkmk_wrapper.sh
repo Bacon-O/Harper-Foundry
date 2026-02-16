@@ -13,4 +13,4 @@ REPO_ROOT="${REPO_ROOT}"
 # Load runner and execute check
 cd "$REPO_ROOT" || exit 3
 source "$REPO_ROOT/scripts/plugins/notifiers/runner.sh" 2>/dev/null || exit 3
-notify harper_checkmk --profile alloy_deb13
+notify harper_checkmk --profile harper_deb13

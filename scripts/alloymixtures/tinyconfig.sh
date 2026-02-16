@@ -150,7 +150,7 @@ This is a minimal test build to validate the foundry
 pipeline. It contains only the bare minimum kernel
 features and should NOT be used in production.
 
-For a complete Harper kernel build, use the 'harper_alloy_deb13.sh' alloy
+For a complete Harper kernel build, use the 'harper_deb13..sh' alloy
 mixture (still experimental—for enthusiast/hobbyist use).
 EOF
 
@@ -172,7 +172,7 @@ echo "  ✅ Build toolchain"
 echo "  ✅ Compilation process"
 echo "  ✅ Artifact collection"
 echo ""
-echo "For a complete Harper kernel, use: FOUNDRY_EXEC=alloymixtures/harper_alloy_deb13.sh"
+echo "For a complete Harper kernel, use: FOUNDRY_EXEC=alloymixtures/harper_deb13..sh"
 echo "(Experimental - enthusiast/hobbyist use only)"
 echo ""
 

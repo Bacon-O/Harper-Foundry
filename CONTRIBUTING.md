@@ -282,7 +282,7 @@ Harper-Foundry/
 
 - `params/foundry.params` - Default build configuration
 - `scripts/env_setup.sh` - Environment variable definitions
-- `scripts/alloymixtures/harper_alloy_deb13.sh` - Core build logic (runs in Docker)
+- `scripts/alloymixtures/harper_deb13.sh` - Core build logic (runs in Docker)
 - `scripts/material_analysis.sh` - QA test runner
 - `.github/workflows/kernel-factory.yml` - CI/CD pipeline
 

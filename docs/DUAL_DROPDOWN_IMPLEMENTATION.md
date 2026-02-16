@@ -81,7 +81,7 @@ Created comprehensive documentation:
 
 Validates three scenarios:
 1. ✅ Direct params execution (no override)
-2. ✅ Harper Alloy Deb13 + testing overrides
+2. ✅ Harper Deb13 + testing overrides
 3. ✅ Tinyconfig + testing overrides
 
 ## How to Use

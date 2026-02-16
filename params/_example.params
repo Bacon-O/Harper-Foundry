@@ -70,13 +70,13 @@ BUILD_LLVM="1"
 # ==============================================================================
 
 # --- Performance & Parallelism ---
-# Number of CPU cores for the build. Leave empty ("") to use all available cores (nproc default).
+# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
 PARALLEL_JOBS=""
 
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="tinyconfig"
-TUNING_CONFIG="
+TUNING_CONFIG=""
 
 # --- Patches if any ---
 

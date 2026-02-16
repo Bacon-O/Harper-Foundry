@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Alloy Mixtures System** - Modular build script variants in `scripts/alloymixtures/`
-  - `harper_alloy_deb13.sh` - Harper's Debian 13 desktop kernel builds (moved from `ci-build.sh`)
+  - `harpe_deb13.sh` - Harper's Debian 13 desktop kernel builds (moved from `ci-build.sh`)
   - `tinyconfig.sh` - Fast 2-5 minute test builds for pipeline validation
   - Comprehensive README documenting each mixture
 - **Tinyconfig Quick Test** - Dedicated fast build configuration
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QA test package structure for `harperbase` test suite
 
 ### Changed
-- **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/harper_alloy_deb13.sh`
+- **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/harper_deb13.sh`
   - Removed `ci-build.sh` symlink; update any custom references
   - Updated `FOUNDRY_EXEC` in `foundry.params`
 - **Makefile `test` target** - Now uses tinyconfig for much faster testing
@@ -76,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/furnace_preheat.sh` - Prerequisites checking
 - `scripts/furnace_ignite.sh` - Docker container orchestration
 - `scripts/furnace_clean.sh` - Artifact cleanup
-- `scripts/alloymixtures/harper_alloy_deb13.sh` - Container-internal build logic
+- `scripts/alloymixtures/harper_deb13.sh` - Container-internal build logic
 - `scripts/material_analysis.sh` - QA test orchestration
 - QA test plugins:
   - `filesexists.sh` - File presence validation

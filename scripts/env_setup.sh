@@ -151,8 +151,11 @@ if [ -f "$PARAMS_FILE" ]; then
     # Uses PARALLEL_JOBS from params or defaults to all available cores
     if [ -z "$PARALLEL_JOBS" ]; then
         FINAL_JOBS=$(nproc)
+        if [ "$FINAL_JOBS" -gt 1 ]; then
+            FINAL_JOBS=$((FINAL_JOBS - 1))
+        fi
         export FINAL_JOBS
-        echo "🔥 Using full furnace power: $FINAL_JOBS cores."
+        echo "🔥 Using default: $FINAL_JOBS core(s)."
     else
         export FINAL_JOBS="$PARALLEL_JOBS"
         echo "🔥 Using restricted furnace power: $FINAL_JOBS cores."

@@ -2,7 +2,7 @@
 
 This document describes how to set up and customize automated trigger jobs for building new kernel versions when releases become available.
 
-**Example Implementation:** This guide uses the **Harper Alloy Deb13** build profile as the reference example, demonstrating automated builds triggered by Debian Trixie Backports kernel releases.
+**Example Implementation:** This guide uses the **Harper Deb13** build profile as the reference example, demonstrating automated builds triggered by Debian Trixie Backports kernel releases.
 
 ## Overview
 
@@ -36,15 +36,15 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
 │  (scripts/plugins/triggers/runner.sh)                       │
 │                                                             │
 │  - Loads appropriate trigger plugin                         │
-│  - Routes to: alloy_deb13_kernel_trigger() function              │
+│  - Routes to: harper_deb13_kernel_trigger() function              │
 │  - Manages environment and logging                          │
 └────────────────────┬────────────────────────────────────────┘
                      │
-                     │ Calls alloy_deb13_kernel_trigger()
+                     │ Calls harper_deb13_kernel_trigger()
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Trigger Plugin: Debian Trixie Kernel Monitor              │
-│  (scripts/plugins/triggers/alloy_deb13_kernel.sh)               │
+│  (scripts/plugins/triggers/harper_deb13_kernel.sh)               │
 │                                                             │
 │  1. Query Debian Salsa API                                  │
 │  2. Load last compiled version                              │
@@ -98,7 +98,7 @@ The `version_tracking/` directory maintains state for each build profile:
 ```
 version_tracking/
 ├── README.md                        # This directory's documentation
-└── alloy_deb13_latest_kernel.txt    # Last successful kernel version (Alloy Deb13)
+└── harper_deb13_latest_kernel.txt    # Last successful kernel version (Alloy Deb13)
     ├── KERNEL_VERSION=6.11.8
     ├── LAST_BUILD_DATE=2026-02-15
     └── BUILD_STATUS=success
@@ -112,7 +112,7 @@ Trigger plugins live in `scripts/plugins/triggers/`:
 ```
 scripts/plugins/triggers/
 ├── runner.sh                 # Main dispatcher (routes to plugins)
-├── alloy_deb13_kernel.sh     # Debian Trixie kernel monitor plugin (EXAMPLE)
+├── harper_deb13_kernel.sh     # Debian Trixie kernel monitor plugin (EXAMPLE)
 └── README.md                # Plugin system documentation
 ```
 
@@ -152,10 +152,10 @@ gh workflow run monitor-deb13-kernel.yml
 ```bash
 # Load the trigger plugin runner and execute (Alloy Deb13 example)
 source ./scripts/plugins/triggers/runner.sh
-trigger_build alloy_deb13_kernel
+trigger_build harper_deb13_kernel
 
 # Force build regardless of version:
-trigger_build alloy_deb13_kernel --force
+trigger_build harper_deb13_kernel --force
 ```
 
 ## Implementation: The Placeholder
@@ -190,7 +190,7 @@ ssh buildserver 'cd /path/to/harper && \
 Add to a queue for batch processing:
 ```bash
 # Example: Enqueue to Redis or local queue
-redis-cli LPUSH "kernel_builds" "kernel_version:latest:config:harper_alloy_deb13"
+redis-cli LPUSH "kernel_builds" "kernel_version:latest:config:harper_deb13."
 ```
 
 ## Customization
@@ -233,7 +233,7 @@ trigger_build fedora_kernel
 
 ### Change Target Build Profile
 
-Modify `scripts/plugins/triggers/alloy_deb13_kernel.sh`:
+Modify `scripts/plugins/triggers/harper_deb13_kernel.sh`:
 
 ```yaml
 on:
@@ -261,7 +261,7 @@ To trigger multiple kernel monitors in sequence:
 source ./scripts/plugins/triggers/runner.sh
 
 # Monitor multiple sources
-trigger_build alloy_deb13_kernel
+trigger_build harper_deb13_kernel
 trigger_build fedora_kernel  # After implementing
 trigger_build custom_kernel  # If you create it
 ```
@@ -287,7 +287,7 @@ BUILD_STATUS=success               # success | failed | in_progress
 - Test manually: `curl https://salsa.debian.org/api/v4/projects/debian%2Flinux/repository/branches`
 
 ### "Version file not found"
-- Initialize: `mkdir -p version_tracking && touch version_tracking/alloy_deb13_latest_kernel.txt`
+- Initialize: `mkdir -p version_tracking && touch version_tracking/harper_deb13_latest_kernel.txt`
 - Add to git: `git add version_tracking/`
 - Commit: `git commit -m "Initialize version tracking"`
 
@@ -297,16 +297,16 @@ BUILD_STATUS=success               # success | failed | in_progress
 - Check logs: `gh run view <run_id> --log`
 
 ### "Version tracking out of sync"
-- Reset to known state: `echo "KERNEL_VERSION=6.11.8" > version_tracking/alloy_deb13_latest_kernel.txt`
+- Reset to known state: `echo "KERNEL_VERSION=6.11.8" > version_tracking/harper_deb13_latest_kernel.txt`
 - Commit: `git add version_tracking/ && git commit -m "Reset version tracking"`
 
 ## Next Steps
 
-1. **Replace the placeholder** in `scripts/plugins/triggers/alloy_deb13_kernel.sh` with your build execution method
+1. **Replace the placeholder** in `scripts/plugins/triggers/harper_deb13_kernel.sh` with your build execution method
 2. **Test locally** before enabling automated workflow:
    ```bash
    source ./scripts/plugins/triggers/runner.sh
-   trigger_build alloy_deb13_kernel
+   trigger_build harper_deb13_kernel
    ```
 3. **Monitor first builds** carefully to ensure version tracking updates correctly
 4. **Add notifications** (optional) - Email, Slack, Discord updates on build completion

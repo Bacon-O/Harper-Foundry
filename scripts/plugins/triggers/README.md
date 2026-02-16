@@ -14,9 +14,9 @@ The trigger system monitors upstream sources and automatically initiates builds 
 - Routes to plugin functions: `{trigger_name}_trigger()`
 
 **Available Plugins:**
-- `alloy_deb13_kernel.sh` - Debian Trixie Backports kernel releases
+- `harper_deb13_kernel.sh` - Debian Trixie Backports kernel releases
   - Monitors: Debian Salsa API
-  - Tracks: Version in `version_tracking/alloy_deb13_latest_kernel.txt`
+  - Tracks: Version in `version_tracking/harper_deb13_latest_kernel.txt`
   - Executes: Build trigger (placeholder)
 
 ## Usage
@@ -31,10 +31,10 @@ source ./scripts/plugins/triggers/runner.sh
 
 ```bash
 # Check for new kernel versions
-trigger_build alloy_deb13_kernel
+trigger_build harper_deb13_kernel
 
 # Force build regardless of version
-trigger_build alloy_deb13_kernel --force
+trigger_build harper_deb13_kernel --force
 ```
 
 ### Create a New Plugin
@@ -112,7 +112,7 @@ The `.github/workflows/monitor-deb13-kernel.yml` workflow calls:
 
 ```bash
 source ./scripts/plugins/triggers/runner.sh
-trigger_build alloy_deb13_kernel
+trigger_build harper_deb13_kernel
 ```
 
 To add a new trigger to the workflow, update the workflow file to call:
@@ -203,7 +203,7 @@ fedora_kernel_trigger() {
 source ./scripts/plugins/triggers/runner.sh
 
 # Monitor multiple sources in sequence
-trigger_build alloy_deb13_kernel && \
+trigger_build harper_deb13_kernel && \
 trigger_build fedora_kernel # if it exists
 ```
 

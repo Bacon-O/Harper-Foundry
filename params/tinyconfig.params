@@ -67,7 +67,7 @@ BUILD_LLVM="1"
 # ==============================================================================
 
 # --- Performance & Parallelism ---
-# Use all available cores for fastest build
+# Defaults to nproc-1 (min 1) when empty
 PARALLEL_JOBS=""
 
 # --- Build Strategy ---

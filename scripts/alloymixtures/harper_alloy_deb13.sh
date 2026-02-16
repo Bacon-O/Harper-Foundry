@@ -2,7 +2,7 @@
 set -e
 
 # ==============================================================================
-#  HARPER ALLOY: DEBIAN 13 (TRIXIE) - ENTHUSIAST BUILD
+#  HARPER: DEBIAN 13 (TRIXIE) - ENTHUSIAST BUILD
 # ==============================================================================
 # Harper's primary kernel alloy, forged from Debian 13 (Trixie) backports.
 # This is NOT vanilla Debian—it's a custom Harper Forge kernel with:

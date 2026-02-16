@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Harper Alloy Deb13** is the main production configuration, compiled with **CLANG/LLVM** for modern optimization capabilities.
+**Harper Deb13** is the main production configuration, compiled with **CLANG/LLVM** for modern optimization capabilities.
 
 Harper Foundry supports **two methods** for applying override params files:
 

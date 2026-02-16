@@ -63,7 +63,14 @@ if [ "$SHELL_MODE" == "true" ]; then
     echo ""
     
     DOCKER_FLAGS="-it"
-    CONTAINER_CMD="bash"
+    CONTAINER_PARAMS_FILE="/opt/factory/params/$(basename "$PARAMS_FILE")"
+    CONTAINER_OVERRIDE_ARGS=""
+    if [ -n "$OVERRIDE_PARAMS" ]; then
+        CONTAINER_OVERRIDE_FILE="/opt/factory/params/$(basename "$OVERRIDE_PARAMS")"
+        CONTAINER_OVERRIDE_ARGS="-o \"$CONTAINER_OVERRIDE_FILE\""
+    fi
+    # Preload params into the shell environment
+    CONTAINER_CMD="bash -lc \"source /opt/factory/scripts/env_setup.sh -p \\\"$CONTAINER_PARAMS_FILE\\\" $CONTAINER_OVERRIDE_ARGS; echo 'Parameters loaded to environment variables.'; exec bash\""
 else
     DOCKER_FLAGS="-i"
     # Standardized container paths - these are constants defined by the Docker image

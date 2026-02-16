@@ -1,5 +1,5 @@
 # ==============================================================================
-# HARPER FOUNDRY: HARPER ALLOY DEB13 - x86_64v3 Build
+# HARPER FOUNDRY: HARPER DEB13 - x86_64v3 Build
 # ==============================================================================
 # This is a COMPLETE, WORKING example configuration for building the Harper
 # kernel for Debian 13 (Trixie) with x86-64-v3 optimizations (AVX2, FMA, BMI2).
@@ -41,7 +41,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
+FOUNDRY_EXEC="alloymixtures/harper_deb13..sh"
 INCREMENTAL_BUILD="false"
 
 
@@ -91,13 +91,13 @@ BUILD_LLVM="1"
 # ==============================================================================
 
 # --- Performance & Parallelism ---
-# Number of CPU cores for the build. Leave empty ("") to use all available cores.
+# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
 PARALLEL_JOBS=""
 
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
-TUNING_CONFIG="harper_alloy_deb13_tune.config"
+TUNING_CONFIG="harper_deb13._tune.config"
 
 # --- Scheduler Patch ---
 BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
