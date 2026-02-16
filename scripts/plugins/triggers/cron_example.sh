@@ -22,7 +22,7 @@ set -euo pipefail
 # Cron runs with minimal environment - set everything explicitly
 
 # Repository root (CHANGE THIS to your Harper installation path)
-export REPO_ROOT="/home/matthew@int.faushaus.net/devel/Debian-Harper"
+export REPO_ROOT="/path/to/repo/root"
 
 # Change to repo directory
 cd "$REPO_ROOT" || exit 1

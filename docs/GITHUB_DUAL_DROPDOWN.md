@@ -7,7 +7,7 @@ The Harper kernel factory workflow now supports **dual dropdowns** for maximum f
 ### Dropdown 1: Base Configuration
 Select which params file to use as the foundation:
 - `tinyconfig.params` - Fast minimal build (2-5 min)
-- `harper_alloy_deb13.params` - Full desktop kernel Debian 13 build (experimental)
+- `harper_deb13.params` - Full desktop kernel Debian 13 build (experimental)
 - `foundry.params` - Template (requires customization)
 - `_example.params` - Reference example
 
@@ -31,7 +31,7 @@ When you trigger a manual workflow in GitHub Actions, you'll see:
 │ Base Configuration ▼                        │
 │ ┌─────────────────────────────────────┐    │
 │ │ tinyconfig.params                   │    │
-│ │ harper_alloy_deb13.params           │    │
+│ │ harper_deb13.params                 │    │
 │ │ foundry.params                      │    │
 │ │ _example.params                     │    │
 │ └─────────────────────────────────────┘    │
@@ -51,10 +51,10 @@ When you trigger a manual workflow in GitHub Actions, you'll see:
 #### Option 1: Direct Execution (Override = "none")
 
 ```
-Base: harper_alloy_deb13.params
+Base: harper_deb13.params
 Override: none
 
-→ Executes: params/harper_alloy_deb13.params
+→ Executes: params/harper_deb13.params
 → Output: /mnt/build-data/dist/release/harper-deb13/
 → QA Mode: RELAXED (from original params)
 ```
@@ -64,12 +64,12 @@ Override: none
 #### Option 2: Override Mode (Override = "testing.params...")
 
 ```
-Base: harper_alloy_deb13.params
+Base: harper_deb13.params
 Override: testing.params (test output dir + enforced QA)
 
-→ Sets: PRODUCTION_CONFIG=harper_alloy_deb13.params
+→ Sets: PRODUCTION_CONFIG=harper_deb13.params
 → Executes: params/_test_overrides.params
-→ _test_overrides.params sources harper_alloy_deb13.params
+→ _test_overrides.params sources harper_deb13.params
 → _test_overrides.params overrides:
    • Output: /mnt/build-data/dist/testing
    • QA Mode: ENFORCED
@@ -96,7 +96,7 @@ Apply Override: none
 ### 2. Production Preview
 
 ```
-Base Configuration: harper_alloy_deb13.params
+Base Configuration: harper_deb13.params
 Apply Override: testing.params (test output dir + enforced QA)
 ```
 
@@ -110,7 +110,7 @@ Apply Override: testing.params (test output dir + enforced QA)
 ### 3. Full Production Build
 
 ```
-Base Configuration: harper_alloy_deb13.params
+Base Configuration: harper_deb13.params
 Apply Override: none
 ```
 
@@ -124,7 +124,7 @@ Apply Override: none
 
 ```yaml
 # Try different kernel sources with testing overrides
-Base: harper_alloy_deb13.params → Override: testing.params
+Base: harper_deb13.params → Override: testing.params
   → Debian Trixie source + test output
 
 Base: tinyconfig.params → Override: testing.params
@@ -157,16 +157,16 @@ jobs:
 preheat:
   outputs:
     args: --params-file params/_test_overrides.params
-    env_vars: PRODUCTION_CONFIG=harper_alloy_deb13.params
+    env_vars: PRODUCTION_CONFIG=harper_deb13.params
 
 smelt:
   needs: preheat
   steps:
     - name: Ignition
       env:
-        PRODUCTION_CONFIG: harper_alloy_deb13.params  # From preheat
+        PRODUCTION_CONFIG: harper_deb13.params  # From preheat
       run: |
-        PRODUCTION_CONFIG=harper_alloy_deb13.params \
+        PRODUCTION_CONFIG=harper_deb13.params \
           bash ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
 ```
 
@@ -226,13 +226,13 @@ You can create multiple override profiles:
 
 ```bash
 # params/_staging.params
-source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_alloy_deb13.params}"
+source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_deb13.params}"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/staging"
 QA_MODE="RELAXED"
 KERNEL_VERSION="6.12.8"  # Pinned for stability
 
 # params/_preprod.params
-source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_alloy_deb13.params}"
+source "$(dirname "${BASH_SOURCE[0]}")/${PRODUCTION_CONFIG:-harper_deb13.params}"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/preprod"
 QA_MODE="ENFORCED"
 ENABLE_QEMU_TESTS="true"
@@ -264,7 +264,7 @@ This params file requires a production base config to be specified.
 
 ```bash
 # Correct usage
-PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+PRODUCTION_CONFIG=harper_deb13.params ./start_build.sh -p params/_test_overrides.params
 
 # Wrong usage (will error)
 ./start_build.sh -p params/_test_overrides.params
@@ -288,10 +288,10 @@ PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_ove
 **Solution:** The workflow sets `PRODUCTION_CONFIG` env var based on first dropdown. Inside `_test_overrides.params`:
 
 ```bash
-PRODUCTION_CONFIG="${PRODUCTION_CONFIG:-harper_alloy_deb13.params}"
+PRODUCTION_CONFIG="${PRODUCTION_CONFIG:-harper_deb13.params}"
 ```
 
-If `PRODUCTION_CONFIG` env var is not set, it defaults to `harper_alloy_deb13.params`.
+If `PRODUCTION_CONFIG` env var is not set, it defaults to `harper_deb13.params`.
 
 ## See Also
 

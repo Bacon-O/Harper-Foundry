@@ -170,13 +170,13 @@ EOF
     ║                                                                            ║
     ║ Implementation options:                                                    ║
     │ 1. GitHub Actions: Use workflow_dispatch to trigger CI pipeline            ║
-    │    gh workflow run ci-build.yml -f kernel_version=<version>               ║
+    │    gh workflow run ci-build.yml -f kernel_version=<version>                ║
     │                                                                            ║
-    │ 2. Docker: Build locally                                                  ║
-    │    ./start_build.sh --params-file params/harper_alloy_deb13.params        ║
+    │ 2. Docker: Build locally                                                   ║
+    │    ./start_build.sh --params-file params/harper_deb13.params               ║
     │                                                                            ║
     │ 3. Remote: SSH to build server and execute                                 ║
-    │    ssh buildserver 'cd /path && ./start_build.sh ...'                     ║
+    │    ssh buildserver 'cd /path && ./start_build.sh ...'                      ║
     │                                                                            ║
     │ 4. Queue: Add to job queue for batch processing                            ║
     │                                                                            ║

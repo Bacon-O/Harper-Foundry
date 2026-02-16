@@ -20,7 +20,7 @@ Both methods let you:
 
 ```bash
 # Apply override on top of base params
-./start_build.sh -p params/harper_alloy_deb13.params -o params/_test_overrides.params
+./start_build.sh -p params/harper_deb13.params -o params/_test_overrides.params
 
 # Works with any params combination
 ./start_build.sh -p params/foundry.params -o params/my_custom_overrides.params
@@ -50,7 +50,7 @@ KERNEL_VERSION="6.12.8"
 
 ```bash
 # Override file sources base via PRODUCTION_CONFIG
-PRODUCTION_CONFIG="harper_alloy_deb13.params" ./start_build.sh -p params/_test_overrides.params
+PRODUCTION_CONFIG="harper_deb13.params" ./start_build.sh -p params/_test_overrides.params
 
 # Use different base
 PRODUCTION_CONFIG="tinyconfig.params" ./start_build.sh -p params/_test_overrides.params
@@ -111,9 +111,9 @@ on:
         description: 'Base Configuration'
         type: choice
         required: true
-        default: 'harper_alloy_deb13.params'
+        default: 'harper_deb13.params'
         options:
-          - 'harper_alloy_deb13.params'
+          - 'harper_deb13.params'
           - 'foundry.params'
           - 'tinyconfig.params'
       
@@ -160,7 +160,7 @@ on:
         description: 'Production config to test'
         type: choice
         options:
-          - 'harper_alloy_deb13.params'
+          - 'harper_deb13.params'
           - 'tinyconfig.params'
           - 'my_custom_production.params'
 
@@ -199,7 +199,7 @@ jobs:
     strategy:
       matrix:
         base_config:
-          - harper_alloy_deb13.params
+          - harper_deb13.params
           - tinyconfig.params
     
     steps:
@@ -243,7 +243,7 @@ jobs:
           # Create temporary override params
           cat > params/_env_override.params << EOF
           #!/bin/bash
-          source "$(dirname "${BASH_SOURCE[0]}")/harper_alloy_deb13.params"
+          source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
           HOST_OUTPUT_DIR="/mnt/build-data/dist/${{ inputs.environment }}"
           QA_MODE="ENFORCED"
           KERNEL_VERSION="6.12.8"  # Pin for reproducibility
@@ -258,19 +258,19 @@ Instead of one `_test_overrides.params`, you can create multiple override files:
 
 ```bash
 # params/_preprod.params
-source "$(dirname "${BASH_SOURCE[0]}")/harper_alloy_deb13.params"
+source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/preprod"
 QA_MODE="ENFORCED"
 KERNEL_VERSION="latest"
 
 # params/_staging.params  
-source "$(dirname "${BASH_SOURCE[0]}")/harper_alloy_deb13.params"
+source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/staging"
 QA_MODE="RELAXED"
 KERNEL_VERSION="6.12.8"  # Pinned for stability
 
 # params/_qa.params
-source "$(dirname "${BASH_SOURCE[0]}")/harper_alloy_deb13.params"
+source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/qa"
 QA_MODE="ENFORCED"
 ENABLE_QEMU_TESTS="true"  # Full QEMU boot testing
@@ -290,7 +290,7 @@ config_file:
 ## Benefits
 
 ### Single Source of Truth
-- Production kernel config in one file (`harper_alloy_deb13.params`)
+- Production kernel config in one file (`harper_deb13.params`)
 - All kernel settings, patches, optimizations defined once
 - Testing/staging/preprod all inherit automatically
 

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+if ! command -v shellcheck >/dev/null 2>&1; then
+    echo "❌ shellcheck not found. Install it to commit."
+    exit 1
+fi
+
+mapfile -t files < <(git ls-files "*.sh")
+
+if [ "${#files[@]}" -eq 0 ]; then
+    exit 0
+fi
+
+echo "🔎 Running shellcheck on ${#files[@]} shell scripts..."
+shellcheck -x "${files[@]}"

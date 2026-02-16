@@ -97,6 +97,7 @@ fi
 if [ -f "$PARAMS_FILE" ]; then
     echo "📖 Moving fuel truck into place from $PARAMS_FILE..."
     set -a
+    # shellcheck source=/dev/null
     source "$PARAMS_FILE"
     set +a
     
@@ -104,6 +105,7 @@ if [ -f "$PARAMS_FILE" ]; then
     if [ -n "$OVERRIDE_PARAMS" ] && [ -f "$OVERRIDE_PARAMS" ]; then
         echo "🔄 Applying overrides from $(basename "$OVERRIDE_PARAMS")..."
         set -a
+        # shellcheck source=/dev/null
         source "$OVERRIDE_PARAMS"
         set +a
     fi
@@ -111,7 +113,8 @@ if [ -f "$PARAMS_FILE" ]; then
     # 4. Burner Control (Parallelism)
     # Uses PARALLEL_JOBS from params or defaults to all available cores
     if [ -z "$PARALLEL_JOBS" ]; then
-        export FINAL_JOBS=$(nproc)
+        FINAL_JOBS=$(nproc)
+        export FINAL_JOBS
         echo "🔥 Using full furnace power: $FINAL_JOBS cores."
     else
         export FINAL_JOBS="$PARALLEL_JOBS"
@@ -150,7 +153,8 @@ if [ -f "$PARAMS_FILE" ]; then
 
     # 6. Host Architecture Detection
     # Detect the actual host architecture for cross-compilation checks
-    export HOST_ARCH=$(uname -m)
+    HOST_ARCH=$(uname -m)
+    export HOST_ARCH
     
     # 7. Identity Logic
     # Only calculate if not already provided by the host environment
@@ -180,10 +184,11 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     # Only calculate BUILD_ID if not already set (e.g., from start_build.sh)
     if [ -z "$BUILD_ID" ]; then
         if [ -n "$GITHUB_RUN_ID" ]; then
-            export BUILD_ID="gh_${GITHUB_RUN_ID}"
+            BUILD_ID="gh_${GITHUB_RUN_ID}"
         else
-            export BUILD_ID=$(date +%Y%m%d_%H%M%S)
+            BUILD_ID=$(date +%Y%m%d_%H%M%S)
         fi
+        export BUILD_ID
     fi
 
     export CURRENT_DIST_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"

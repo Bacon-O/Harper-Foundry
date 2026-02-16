@@ -168,14 +168,14 @@ The trigger plugin includes a **PLACEHOLDER** for the actual build execution. Th
 Trigger the main CI/CD pipeline:
 ```bash
 gh workflow run ci-build.yml \
-  -f config_file=params/harper_alloy_deb13.params \
+  -f config_file=params/harper_deb13.params \
   -f kernel_version=latest
 ```
 
 ### Option 2: Local Docker Build
 Execute immediately:
 ```bash
-./start_build.sh --params-file params/harper_alloy_deb13.params \
+./start_build.sh --params-file params/harper_deb13.params \
                  --kernel-version latest
 ```
 
@@ -183,7 +183,7 @@ Execute immediately:
 Delegate to a build server:
 ```bash
 ssh buildserver 'cd /path/to/harper && \
-  ./start_build.sh --params-file params/harper_alloy_deb13.params'
+  ./start_build.sh --params-file params/harper_deb13.params'
 ```
 
 ### Option 4: Job Queue

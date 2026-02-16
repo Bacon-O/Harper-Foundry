@@ -16,7 +16,6 @@ fi
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
 KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
-CONFIG_FILE="${LATEST_BUILD_DIR}/kernel.config"
 
 # Check 2: Debian Package Validation
 echo "  📦 Checking for Debian Packages..."

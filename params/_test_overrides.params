@@ -13,7 +13,7 @@
 #
 # How to Change Base Config:
 #   Set PRODUCTION_CONFIG to point to your base params file.
-#   Default: harper_alloy_deb13.params (complete, working configuration)
+#   Default: harper_deb13.params (complete, working configuration)
 #
 # NOTE: PRODUCTION_CONFIG is a variable name referring to base config selection.
 #       The Harper kernel is experimental and NOT suitable for production systems.
@@ -25,7 +25,7 @@
 # The PRODUCTION_CONFIG variable specifies which base config to use as the parent.
 #
 # Usage:
-#   PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+#   PRODUCTION_CONFIG=harper_deb13.params ./start_build.sh -p params/_test_overrides.params
 #   PRODUCTION_CONFIG=tinyconfig.params ./start_build.sh -p params/_test_overrides.params
 #
 # This ensures explicit base config selection (no implicit defaults in workflows).
@@ -36,7 +36,7 @@ if [ -z "$PRODUCTION_CONFIG" ]; then
     echo "It cannot be used standalone - it applies overrides to another params file."
     echo ""
     echo "Usage:"
-    echo "  PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params"
+    echo "  PRODUCTION_CONFIG=harper_deb13.params ./start_build.sh -p params/_test_overrides.params"
     echo "  PRODUCTION_CONFIG=tinyconfig.params ./start_build.sh -p params/_test_overrides.params"
     echo ""
     echo "Available production configs in params/:"

@@ -13,7 +13,7 @@ Successfully implemented a **dual dropdown system** for GitHub Actions workflows
 **Features:**
 - Sources production params file (configurable via `PRODUCTION_CONFIG` env var)
 - Applies testing-specific overrides
-- Defaults to `harper_alloy_deb13.params` as the base config
+- Defaults to `harper_deb13.params` as the base config
 - Well-documented with usage examples
 
 **Key Overrides:**
@@ -29,7 +29,7 @@ BYPASS_QA="false"                               # Ensure QA runs
 
 **Dropdown 1: Base Configuration**
 - `tinyconfig.params` (default)
-- `harper_alloy_deb13.params`
+- `harper_deb13.params`
 - `foundry.params`
 - `_example.params`
 
@@ -89,7 +89,7 @@ Validates three scenarios:
 ### Via GitHub Actions UI
 
 1. Go to **Actions** → **Harper Kernel Factory** → **Run workflow**
-2. Select **Base Configuration** (e.g., `harper_alloy_deb13.params`)
+2. Select **Base Configuration** (e.g., `harper_deb13.params`)
 3. Select **Apply Override** (`none` or `testing.params`)
 4. Click **Run workflow**
 
@@ -97,10 +97,10 @@ Validates three scenarios:
 
 ```bash
 # No override
-./start_build.sh -p params/harper_alloy_deb13.params
+./start_build.sh -p params/harper_deb13.params
 
 # With testing override
-PRODUCTION_CONFIG=harper_alloy_deb13.params \
+PRODUCTION_CONFIG=harper_deb13.params \
   ./start_build.sh -p params/_test_overrides.params
 ```
 
@@ -121,14 +121,14 @@ Override: none
 
 ### Preprod Testing
 ```
-Base: harper_alloy_deb13.params
+Base: harper_deb13.params
 Override: testing.params
 → Full production build → test output directory
 ```
 
 ### Production Release
 ```
-Base: harper_alloy_deb13.params
+Base: harper_deb13.params
 Override: none
 → Full production build → release directory
 ```
@@ -148,13 +148,13 @@ Override: none
 
 ```
 GitHub Workflow (preheat job)
-  ├─> Sets: PRODUCTION_CONFIG=harper_alloy_deb13.params
+  ├─> Sets: PRODUCTION_CONFIG=harper_deb13.params
   └─> Passes to: smelt, analysis, cleanup jobs
        │
        └─> Executes: PRODUCTION_CONFIG=... bash ./scripts/...
             │
             └─> Inside _test_overrides.params:
-                 PRODUCTION_CONFIG="${PRODUCTION_CONFIG:-harper_alloy_deb13.params}"
+                 PRODUCTION_CONFIG="${PRODUCTION_CONFIG:-harper_deb13.params}"
                  source "$PARAMS_DIR/$PRODUCTION_CONFIG"
 ```
 
@@ -198,10 +198,10 @@ When not using manual dispatch:
 ## Testing Results
 
 ```
-Test 1: harper_alloy_deb13.params (no override)
+Test 1: harper_deb13.params (no override)
   ✅ Uses base params directly
   
-Test 2: harper_alloy_deb13.params + testing.params
+Test 2: harper_deb13.params + testing.params
   ✅ Loads base config
   ✅ Applies overrides
   ✅ Output: /mnt/build-data/dist/testing

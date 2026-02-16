@@ -58,7 +58,7 @@ CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 # --- Target Specifications ----
 # Versioning & Tagging
 BUILD_ARCH_TAG="x86_64v3"
-RELEASE_TAG="harper-v3"
+RELEASE_TAG="harper"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"

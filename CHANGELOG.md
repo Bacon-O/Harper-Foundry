@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Reorganized build scripts** - Moved `ci-build.sh` to `alloymixtures/harper_alloy_deb13.sh`
-  - Created symlink for backward compatibility
+  - Removed `ci-build.sh` symlink; update any custom references
   - Updated `FOUNDRY_EXEC` in `foundry.params`
 - **Makefile `test` target** - Now uses tinyconfig for much faster testing
 - **README structure** - Added alloy mixtures section and comparison table
@@ -76,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/furnace_preheat.sh` - Prerequisites checking
 - `scripts/furnace_ignite.sh` - Docker container orchestration
 - `scripts/furnace_clean.sh` - Artifact cleanup
-- `scripts/ci-build.sh` - Container-internal build logic
+- `scripts/alloymixtures/harper_alloy_deb13.sh` - Container-internal build logic
 - `scripts/material_analysis.sh` - QA test orchestration
 - QA test plugins:
   - `filesexists.sh` - File presence validation

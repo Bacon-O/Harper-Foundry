@@ -8,7 +8,7 @@
 # Or copy this file and modify REPO_ROOT path
 
 # Set Harper repository root (MODIFY THIS PATH)
-REPO_ROOT="${REPO_ROOT:-/home/matthew@int.faushaus.net/devel/Debian-Harper}"
+REPO_ROOT="${REPO_ROOT}"
 
 # Load runner and execute check
 cd "$REPO_ROOT" || exit 3

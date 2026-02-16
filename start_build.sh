@@ -8,10 +8,11 @@ echo ""
 
 # Generate BUILD_ID once at the start (persists across all env_setup.sh calls)
 if [ -n "$GITHUB_RUN_ID" ]; then
-    export BUILD_ID="gh_${GITHUB_RUN_ID}"
+    BUILD_ID="gh_${GITHUB_RUN_ID}"
 else
-    export BUILD_ID=$(date +%Y%m%d_%H%M%S)
+    BUILD_ID=$(date +%Y%m%d_%H%M%S)
 fi
+export BUILD_ID
 
 # Pre-parse arguments for shell mode and menu (before env_setup)
 SHELL_MODE="false"
@@ -65,6 +66,7 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         -t|--test-run)
             TEST_RUN="true"
+            export TEST_RUN
             BUILD_ARGS+=("--test-run")
             ;;
         *)
@@ -84,7 +86,7 @@ fi
 if [ "$SHELL_MENU" == "true" ]; then
     echo "📂 Available param configs:"
     echo ""
-    params_list=($(ls params/*.params 2>/dev/null | grep -v "^params/_" | xargs -n1 basename))
+    mapfile -t params_list < <(for f in params/*.params; do [[ "$(basename "$f")" != _* ]] && basename "$f"; done)
     
     if [ ${#params_list[@]} -eq 0 ]; then
         echo "❌ No param files found in params/ directory"

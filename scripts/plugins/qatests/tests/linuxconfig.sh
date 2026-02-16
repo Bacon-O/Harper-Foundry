@@ -15,13 +15,11 @@ fi
 
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
-KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
 CONFIG_FILE="${LATEST_BUILD_DIR}/kernel.config"
 
 # --- STAGE 1: CHEMICAL AUDIT (Configuration Check) ---
 echo "📊 Stage 1: Auditing Composition..."
 MISSING_CRITICAL=0
-
 # Part A: Critical Elements (Must Pass)
 echo "🛡️  Checking Critical Systems..."
 for CHECK in "${QA_CRITICAL_CHECKS[@]}"; do

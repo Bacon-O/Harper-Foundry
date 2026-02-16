@@ -3,12 +3,55 @@ set -e
 
 # 1. Load the Foundry Environment
 # This ensures we have access to QA_CRITICAL_CHECKS, QA_OPTIONAL_CHECKS, and HOST_OUTPUT_DIR
-source "$(dirname "$0")/env_setup.sh" "$@"
+source "$(dirname "$0")/../../env_setup.sh" "$@"
+
+# 2. Locate Latest Build Directory
+LATEST_BUILD_DIR=$(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" -printf "%T@ %p\n" | sort -n | tail -1 | cut -f2- -d" ")
+
+if [ -z "$LATEST_BUILD_DIR" ]; then
+    echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
+    exit 1
+fi
+
+echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
+
+KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
 
 # --- STAGE 3: STRESS TEST (QEMU) ---
 if [ "$ENABLE_QEMU_TESTS" == "true" ] && [ "$TEST_RUN_MODE" != "true" ]; then
     echo "🚀 Stage 3: Spawning Stress Test..."
-    echo "   (QEMU Logic Placeholder)"
+
+    if [ ! -f "$KERNEL_IMAGE" ]; then
+        echo "❌ ERROR: bzImage not found in $LATEST_BUILD_DIR"
+        exit 1
+    fi
+
+    if ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
+        echo "❌ ERROR: qemu-system-x86_64 not found in PATH"
+        exit 1
+    fi
+
+    VM_MEM="${VM_MEM:-1G}"
+    VM_CORES="${VM_CORES:-2}"
+    VM_TIMEOUT="${VM_TIMEOUT:-15s}"
+
+    QEMU_OUTPUT=$(timeout "$VM_TIMEOUT" \
+        qemu-system-x86_64 \
+        -m "$VM_MEM" \
+        -smp "$VM_CORES" \
+        -kernel "$KERNEL_IMAGE" \
+        -append "console=ttyS0 loglevel=4 panic=-1" \
+        -nographic \
+        -no-reboot \
+        2>&1 || true)
+
+    if echo "$QEMU_OUTPUT" | grep -q "Linux version"; then
+        echo "✅ QEMU boot check: kernel banner detected."
+    else
+        echo "❌ QEMU boot check failed: no kernel banner detected."
+        echo "$QEMU_OUTPUT" | tail -n 50
+        exit 1
+    fi
 else
     echo "⏩ Stage 3: Stress Test Bypassed."
 fi

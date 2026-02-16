@@ -20,7 +20,6 @@ scripts/
 **After:**
 ```
 scripts/
-├── ci-build.sh          # Symlink → alloymixtures/harper_alloy_deb13.sh (backward compat)
 ├── alloymixtures/       # NEW: Build script variants
 │   ├── README.md        # Documentation for all mixtures
 │   ├── harper_alloy_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
@@ -148,10 +147,10 @@ make test
 
 ### For Existing Users
 
-**No action required!** Backward compatibility is maintained:
-- `ci-build.sh` still exists (as a symlink)
-- `foundry.params` updated to use new path
-- All existing scripts and workflows continue to work
+**Action required:** `ci-build.sh` has been removed.
+- Update any custom scripts or containers that referenced `ci-build.sh`
+- Use `scripts/alloymixtures/harper_alloy_deb13.sh` instead
+- `foundry.params` already uses the new path
 
 ### For CI/CD Pipelines
 
@@ -290,10 +289,6 @@ All changes have been validated:
 ✅ All checks passed! Configuration is valid.
 
 # ✅ Backward compatibility
-ls -la scripts/ci-build.sh
-lrwxrwxrwx ... scripts/ci-build.sh -> alloymixtures/harper_alloy_deb13.sh
-
-# ✅ Permissions
 ls -la scripts/alloymixtures/*.sh
 -rwxr-xr-x ... alloymixtures/harper_alloy_deb13.sh
 -rwxr-xr-x ... alloymixtures/tinyconfig.sh
@@ -310,11 +305,9 @@ Updated files:
 
 ## Breaking Changes
 
-**None!** This refactoring is 100% backward compatible:
-- Existing scripts continue to work
-- Existing params files continue to work
-- `ci-build.sh` symlink maintains compatibility
-- All documented commands still valid
+**Yes.** The `ci-build.sh` symlink has been removed.
+- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_alloy_deb13.sh`
+- All documented commands in this guide already use the new path
 
 ## Recommendations
 

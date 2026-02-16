@@ -31,7 +31,8 @@ resolve_kernel_version() {
         latest|stable|"")
             # Query kernel.org API for latest stable release
             echo "[INFO] Querying kernel.org API for latest stable version..." >&2
-            local version=$(curl -s "$api_url" 2>/dev/null | grep -A2 latest_stable | grep version | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
+            local version
+            version=$(curl -s "$api_url" 2>/dev/null | grep -A2 latest_stable | grep version | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
             if [ -z "$version" ]; then
                 echo "[WARN] API query failed, using fallback version 6.12.8" >&2
@@ -44,7 +45,8 @@ resolve_kernel_version() {
         lts)
             # Query for latest LTS kernel (first longterm entry)
             echo "[INFO] Querying kernel.org API for latest LTS version..." >&2
-            local version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "longterm"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
+            local version
+            version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "longterm"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
             if [ -z "$version" ]; then
                 echo "[WARN] API query failed, using fallback LTS version 6.12.8" >&2
@@ -57,7 +59,8 @@ resolve_kernel_version() {
         rc)
             # Query for latest mainline/RC kernel
             echo "[INFO] Querying kernel.org API for latest mainline/RC version..." >&2
-            local version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "mainline"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
+            local version
+            version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "mainline"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
             if [ -z "$version" ]; then
                 echo "[WARN] API query failed, using fallback to latest stable" >&2

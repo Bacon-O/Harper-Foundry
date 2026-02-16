@@ -58,7 +58,8 @@ trigger_build() {
         log_info "Available trigger types:"
         for plugin in "$PLUGINS_DIR"/*.sh; do
             if [ "$plugin" != "$PLUGINS_DIR/runner.sh" ]; then
-                local plugin_name=$(basename "$plugin" .sh)
+                local plugin_name
+                plugin_name=$(basename "$plugin" .sh)
                 log_info "  - $plugin_name"
             fi
         done

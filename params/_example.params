@@ -23,7 +23,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="ci-build.sh"
+FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
 
 # --- Foundry Image Configuration ---
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")

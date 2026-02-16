@@ -6,7 +6,7 @@ This directory contains configuration files (params files) that define how a bui
 
 ### Full Desktop Kernel Configurations
 
-- **`harper_alloy_deb13.params`** - Complete desktop kernel build for Debian 13 (Trixie) with x86-64-v3 optimizations
+- **`harper_deb13.params`** - Complete desktop kernel build for Debian 13 (Trixie) with x86-64-v3 optimizations
   - Compiler: **CLANG/LLVM** (not GCC) for modern optimization capabilities
   - Target: x86_64 with AVX2, FMA, BMI2 (Haswell+)
   - Scheduler: BORE with EEVDF fallback
@@ -18,7 +18,7 @@ This directory contains configuration files (params files) that define how a bui
 ### Testing Configurations
 
 - **`_test_overrides.params`** - **Override Pattern** for CI/testing workflows
-  - Inherits from a full desktop kernel config (default: `harper_alloy_deb13.params`)
+  - Inherits from a full desktop kernel config (default: `harper_deb13.params`)
   - Overrides test-specific values (output directory, QA mode, etc.)
   - Use: GitHub workflows, preprod testing, CI builds
 
@@ -50,7 +50,7 @@ Use the `-o` flag to apply an override params file on top of a base config:
 
 ```bash
 # Base params + override params
-./start_build.sh -p params/harper_alloy_deb13.params -o params/_test_overrides.params
+./start_build.sh -p params/harper_deb13.params -o params/_test_overrides.params
 
 # Works with any combination
 ./start_build.sh -p params/foundry.params -o params/my_overrides.params
@@ -90,7 +90,7 @@ BYPASS_QA="false"
 
 **Usage:**
 ```bash
-PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+PRODUCTION_CONFIG=harper_deb13.params ./start_build.sh -p params/_test_overrides.params
 ```
 
 **How it works:**
@@ -141,7 +141,7 @@ workflow_dispatch:
       type: choice
       options:
         - 'tinyconfig.params'              # Fast validation (2-5 min)
-        - 'harper_alloy_deb13.params'      # Full desktop kernel (experimental)
+        - 'harper_deb13.params'      # Full desktop kernel (experimental)
         - 'foundry.params'                 # Template (needs customization)
     
     override_mode:
@@ -175,7 +175,7 @@ cp params/foundry.params params/my_build.params
 cat > params/my_test.params << 'EOF'
 #!/bin/bash
 # Source production config
-source "$(dirname "${BASH_SOURCE[0]}")/harper_alloy_deb13.params"
+source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 
 # Override for testing
 HOST_OUTPUT_DIR="/tmp/test-builds"
@@ -222,7 +222,7 @@ You can also override params via environment variables:
 export PRODUCTION_CONFIG="my_custom_base.params"
 ./start_build.sh -p params/_test_overrides.params
 
-# This sources my_custom_base.params instead of harper_alloy_deb13.params
+# This sources my_custom_base.params instead of harper_deb13.params
 ```
 
 **Note:** The `PRODUCTION_CONFIG` variable name refers to selecting a base configuration,

@@ -80,6 +80,7 @@ Other Linux distributions should work, but **no testing has been performed**. If
 *   **Docker** (20.10+)
 *   **Bash** (4.0+)
 *   **Disk Space:** 20GB+ free for build artifacts
+*   **ARM64 hosts (cross-compile):** `qemu-x86_64-static` (see [docs/QEMU_USER_EMULATION.md](docs/QEMU_USER_EMULATION.md))
 
 ### Installation
 
@@ -117,6 +118,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 - **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the project
 - **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Configuration Reference](#configuration)** - Detailed parameter documentation
+- **[QEMU User Emulation](docs/QEMU_USER_EMULATION.md)** - Why `qemu-x86_64-static` is required on ARM64 hosts
 
 ## 📂 Project Structure
 
@@ -216,10 +218,10 @@ make test
 **Apply override params on top of base config:**
 ```bash
 # Use -o flag for base + override pattern
-./start_build.sh -p params/harper_alloy_deb13.params -o params/_test_overrides.params
+./start_build.sh -p params/harper_deb13.params -o params/_test_overrides.params
 
 # Or use PRODUCTION_CONFIG environment variable
-PRODUCTION_CONFIG=harper_alloy_deb13.params ./start_build.sh -p params/_test_overrides.params
+PRODUCTION_CONFIG=harper_deb13.params ./start_build.sh -p params/_test_overrides.params
 ```
 
 See [params/README.md](params/README.md#configuration-override-patterns) for detailed override documentation.
@@ -482,7 +484,6 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 - **Discussions:** [GitHub Discussions](https://github.com/Bacon-O/Harper-Foundry/discussions)
 
 ## TODO
-* **test//document /usr/bin/qemu-x86_64-static** as its pure witchcraft 
 *   General testing
 *   Improve testing framework
 *   Create additional param files for other kernels/distro

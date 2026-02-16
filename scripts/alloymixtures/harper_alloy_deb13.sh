@@ -94,8 +94,8 @@ TIMESTAMP=$(date +%Y%m%d%M)
 KERNEL_VER=$(make -s kernelversion)
 
 # SCHED_PRIORITY is now set by the BORE patch plugin
-export LOCALVERSION="-${PROJECT}-${BUILD_ARCH_TAG}-${SCHEDULER_LABEL}"
-export KDEB_PKGVERSION="${KERNEL_VER}-${PROJECT}.${SCHED_PRIORITY}.${TIMESTAMP}"
+export LOCALVERSION="-${RELEASE_TAG}-${BUILD_ARCH_TAG}-${SCHEDULER_LABEL}"
+export KDEB_PKGVERSION="${KERNEL_VER}-${RELEASE_TAG}.${SCHED_PRIORITY}.${TIMESTAMP}"
 
 echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
 echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"

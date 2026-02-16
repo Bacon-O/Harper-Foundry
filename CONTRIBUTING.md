@@ -74,6 +74,16 @@ Before contributing, ensure you have:
    git commit -m "feat: add support for new architecture"
    ```
 
+### Pre-Commit Shellcheck
+
+To make commits fail on shellcheck issues:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The pre-commit hook requires `shellcheck` to be installed.
+
 ## Coding Standards
 
 ### Shell Scripts
@@ -241,7 +251,7 @@ Harper-Foundry/
 │   ├── plugins/      # Extensible plugins
 │   │   ├── foundrysetup/
 │   │   └── qatests/  # Quality assurance tests
-│   ├── ci-build.sh   # Container-internal build script
+│   ├── alloymixtures/  # Build script variants
 │   ├── env_setup.sh  # Environment setup and validation
 │   ├── furnace_*.sh  # Build orchestration scripts
 │   └── material_analysis.sh  # QA orchestration
@@ -253,7 +263,7 @@ Harper-Foundry/
 
 - `params/foundry.params` - Default build configuration
 - `scripts/env_setup.sh` - Environment variable definitions
-- `scripts/ci-build.sh` - Core build logic (runs in Docker)
+- `scripts/alloymixtures/harper_alloy_deb13.sh` - Core build logic (runs in Docker)
 - `scripts/material_analysis.sh` - QA test runner
 - `.github/workflows/kernel-factory.yml` - CI/CD pipeline
 

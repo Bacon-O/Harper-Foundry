@@ -14,7 +14,7 @@ on:
         default: 'tinyconfig.params'
         options:
           - 'tinyconfig.params'
-          - 'harper_alloy_deb13.params'
+          - 'harper_deb13.params'
       
       override_mode:
         description: 'Apply Override'
