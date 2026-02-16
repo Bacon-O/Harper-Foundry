@@ -4,8 +4,8 @@ set -e
 # ==============================================================================
 #  HARPER: DEBIAN 13 (TRIXIE) - ENTHUSIAST BUILD
 # ==============================================================================
-# Harper's primary kernel alloy, forged from Debian 13 (Trixie) backports.
-# This is NOT vanilla Debian—it's a custom Harper Forge kernel with:
+# Harper's primary, forged from Debian 13 (Trixie) backports.
+# This is NOT vanilla Debian—it's a custom kernel with:
 #   - BORE scheduler integration (with EEVDF fallback)
 #   - Custom tuning profiles
 #   - Complete .deb packaging
