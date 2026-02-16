@@ -1,6 +1,6 @@
 # Kernel Source Plugins
 
-This directory contains the kernel source fetching plugin system. It allows flexible, parameterized kernel source handling for different build types.
+This directory contains the kernel source fetching plugin system. It allows flexible, parameterized kernel source handling for different kernel sources.
 
 ## Overview
 
