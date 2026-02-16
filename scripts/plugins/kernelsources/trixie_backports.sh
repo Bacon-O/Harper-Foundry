@@ -89,11 +89,11 @@ apt-get update 2>&1 | grep -E "(Reading|Building)" || true
 
 # Pull kernel source from trixie-backports repository
 # The -t flag targets the backports suite specifically
-if ! apt-get source -t trixie-backports "linux-image${VERSION_CONSTRAINT}" 2>/dev/null; then
+if ! apt-get source -t trixie-backports "linux${VERSION_CONSTRAINT}" 2>/dev/null; then
     echo "[ERROR] Failed to fetch kernel source from trixie-backports" >&2
     echo "[ERROR] Hint: Ensure deb-src for trixie-backports is configured" >&2
     echo "[ERROR] Hint: Run 'apt-get update' after adding deb-src lines" >&2
-    echo "[ERROR] Hint: Verify kernel version exists in trixie-backports" >&2
+    echo "[ERROR] Hint: Verify the 'linux' source package exists in trixie-backports" >&2
     exit 1
 fi
 
