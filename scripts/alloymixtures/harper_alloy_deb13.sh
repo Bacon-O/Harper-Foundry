@@ -44,7 +44,7 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 
 # Use kernel source plugin runner to handle various source types
 source "${PLUGIN_DIR}/kernelsources/runner.sh"
-KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "${KERNEL_VERSION:-latest}" "$CONTAINER_BUILD_ROOT")
+KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "${KERNEL_VERSION:-latest}" "$CONTAINER_BUILD_ROOT" | tail -n1)
 cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1; }
 
 # 3️⃣ Apply BORE/EEVDF Patch
