@@ -1,6 +1,6 @@
 # Harper Foundry: Parameters Reference
 
-This directory contains configuration files (params files) that define how the Harper kernel should be built.
+This directory contains configuration files (params files) that define how a build should be executed.
 
 ## Available Configurations
 
