@@ -38,7 +38,7 @@ scripts/
 - `scripts/alloymixtures/tinyconfig.sh` - Quick test script
 
 **Modified Files:**
-- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_deb13..sh`
+- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_deb13.sh`
 - `Makefile` - `make test` now uses tinyconfig params
 - `README.md` - Added alloy mixtures section
 - `CONTRIBUTING.md` - Updated test instructions
@@ -46,7 +46,7 @@ scripts/
 
 ## The Two Mixtures
 
-### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_deb13..sh`)
+### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_deb13.sh`)
 
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists
 
@@ -149,7 +149,7 @@ make test
 
 **Action required:** `ci-build.sh` has been removed.
 - Update any custom scripts or containers that referenced `ci-build.sh`
-- Use `scripts/alloymixtures/harper_deb13..sh` instead
+- Use `scripts/alloymixtures/harper_deb13.sh` instead
 - `foundry.params` already uses the new path
 
 ### For CI/CD Pipelines
@@ -290,7 +290,7 @@ All changes have been validated:
 
 # ✅ Backward compatibility
 ls -la scripts/alloymixtures/*.sh
--rwxr-xr-x ... alloymixtures/harper_deb13..sh
+-rwxr-xr-x ... alloymixtures/harper_deb13.sh
 -rwxr-xr-x ... alloymixtures/tinyconfig.sh
 ```
 
@@ -306,7 +306,7 @@ Updated files:
 ## Breaking Changes
 
 **Yes.** The `ci-build.sh` symlink has been removed.
-- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_deb13..sh`
+- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_deb13.sh`
 - All documented commands in this guide already use the new path
 
 ## Recommendations

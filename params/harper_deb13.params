@@ -41,7 +41,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/harper_deb13..sh"
+FOUNDRY_EXEC="alloymixtures/harper_deb13.sh"
 INCREMENTAL_BUILD="false"
 
 

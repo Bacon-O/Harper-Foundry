@@ -4,7 +4,7 @@ This directory contains different "alloy mixtures" - build script variants optim
 
 ## 🎯 Available Mixtures
 
-### `harper_deb13..sh` - Harper Prime Alloy (Debian 13)
+### `harper_deb13.sh` - Harper Prime Alloy (Debian 13)
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists  
 **Build Time:** 30-60+ minutes (depending on hardware)  
 **Artifacts:** Full .deb packages, headers, bzImage  
@@ -33,10 +33,10 @@ This directory contains different "alloy mixtures" - build script variants optim
 **Usage:**
 ```bash
 # In params/foundry.params or custom params file:
-FOUNDRY_EXEC="alloymixtures/harper_deb13..sh"
+FOUNDRY_EXEC="alloymixtures/harper_deb13.sh"
 
 # Or via command line:
-./start_build.sh --exec alloymixtures/harper_deb13..sh
+./start_build.sh --exec alloymixtures/harper_deb13.sh
 ```
 
 ---
@@ -85,7 +85,7 @@ make test  # Uses tinyconfig by default
 
 ## 📊 Comparison Matrix
 
-| Feature | harper_deb13..sh | tinyconfig.sh |
+| Feature | harper_deb13.sh | tinyconfig.sh |
 |---------|---------|---------------|
 | Build Time | 30-60+ min | 2-5 min |
 | Config Base | Debian default | tinyconfig |
@@ -105,7 +105,7 @@ To add a new alloy mixture:
 
 1. **Create the script:**
    ```bash
-   cp alloymixtures/harper_deb13..sh alloymixtures/my-custom.sh
+   cp alloymixtures/harper_deb13.sh alloymixtures/my-custom.sh
    ```
 
 2. **Modify for your needs:**
