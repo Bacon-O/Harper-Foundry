@@ -3,9 +3,8 @@
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.github/workflows/kernel-factory.yml)
 
-The **Harper Foundry** is an extensible containerized build system. While currently configured for custom Debian Linux kernels with scheduler integration (BORE/EEVDF), tuning profiles, and automated QA, the foundry architecture can be extended to compile other programs. *(Note: Currently, only kernel build templates are available.)*
+The **Harper Foundry** is an extensible containerized build system. While currently configured for custom Debian Linux kernels, tuning profiles, and automated QA, the foundry architecture can be extended to compile other programs. *(Note: Currently, only kernel build templates are available.)*
 
-[!CAUTION]
 ## ⚠️ Early Stage Software
 
 **This project is still in early/enthusiast stage.** The logic works well for my specific use case, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
@@ -23,7 +22,7 @@ If you hit issues, bugs, or have suggestions, please open an issue. This feedbac
 
 ### The Backstory
 
-This project started as a hands-on way to master CI/CD pipelines. After switching from Windows to Debian, I fell down the rabbit hole of Linux kernel tuning. While I loved the concept of projects like [linux-tkg](https://github.com/Frogging-Family/linux-tkg), I wanted something automated and tailored specifically to my hardware.
+This project started as a hands-on way to get exposure to CI/CD pipelines. After switching from Windows to Debian, I fell down the rabbit hole of Linux kernel tuning. While I loved the concept of projects like [linux-tkg](https://github.com/Frogging-Family/linux-tkg), I wanted something automated and tailored for me.
 
 ### The Name
 
@@ -41,9 +40,9 @@ To help others find the right tools, here is the machinery under the hood:
 
 ### Was it worth the effort?
 
-Honestly? From a pure performance standpoint, probably not. Debian—and most major distributions—already ship incredibly stable, highly compatible, and well-patched kernels that are more than sufficient for 99% of use cases. If you are looking for a massive speed boost, you won't find a "magic pill" here. Seriously, that kernel that shipped with your distro is awesome—but if you want to tinker, you’ve found someone willing to listen.
+Honestly? From a pure performance standpoint, probably not. Debian—and most major distributions—already ship incredibly stable, highly compatible, and well-patched kernels that are more than sufficient for 99% of use cases. If you are looking for a massive speed boost, you won't find a "magic pill" here. Seriously, that kernel that shipped with your distro is awesome.
 
-However, from a "Builder's" standpoint? Absolutely. The value of Harper Foundry isn't just the resulting .deb file; it was the journey of fighting Debian packaging, mastering containerized cross-compilation, and orchestrating a complex CI/CD pipeline. It's about having a "forge" that you own, end-to-end.
+However, from a "Builder's" or "Tinker's" standpoint? Absolutely. The value of Harper Foundry isn't just the resulting .deb file; it was the journey of fighting Debian packaging, mastering containerized cross-compilation, kernel building, and orchestrating a complex CI/CD pipeline. It's about having a "forge" that you own, end-to-end.
 
 ### Who is this for?
 
@@ -61,7 +60,7 @@ That keeps my commit history clean and puts you entirely in the driver's seat fo
 
 *   **🐳 Containerized Build:** Isolated, reproducible builds using Docker
 *   **🔀 Cross-Compilation:** Automatic architecture detection and toolchain configuration (e.g., building x86_64 on ARM64)
-*   **⚡ Scheduler Integration:** Patch kernels with BORE scheduler, with automatic EEVDF fallback
+*   **⚡ Scheduler Integration:** Patch kernels with BORE scheduler, with automatic EEVDF fallback (only for specific kernel builds)
 *   **🛡️ Automated QA:** Extensible quality assurance framework validates configuration and binaries
 *   **🚀 CI/CD Ready:** GitHub Actions integration for automated builds
 *   **🎛️ Highly Configurable:** Fine-grained control via parameter files
@@ -474,7 +473,8 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 - **BORE Scheduler** - [firelzrd/bore-scheduler](https://github.com/firelzrd/bore-scheduler)
 - **Linux-TKG** - [Frogging-Family/linux-tkg](https://github.com/Frogging-Family/linux-tkg) - Inspiration for kernel tuning approaches
-- **Debian and the Debian kernel team** - [wiki.debian.org/Kernel](https://wiki.debian.org/Kernel) - Excellent reference for Debian kernel concepts
+- **Debian and the Debian kernel team** - [wiki.debian.org/Kernel](https://wiki.debian.org/Kernel) - Excellent reference for Debian kernel
+- **Linux Kernel** [The Linux Kernel Archive](https://kernel.org/) // [Kernel Build System](https://docs.kernel.org/kbuild/index.html)
 
 ## 📞 Support
 
