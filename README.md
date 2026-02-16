@@ -7,7 +7,7 @@ The **Harper Foundry** is an extensible containerized build system. While curren
 
 ## ⚠️ Early Stage Software
 
-**This project is still in early/enthusiast stage.** The logic works well for my specific use case, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
+**This project is still in early/enthusiast stage.** I have validated yhe logic for my specific use cae, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
 
 **Known Limitations:**
 - Limited testing on platforms beyond x86_64/arm64 with Debian 13
@@ -28,16 +28,6 @@ This project started as a hands-on way to get exposure to CI/CD pipelines. After
 
 I name all my home servers generic names. The build server for this project is named "Harper." During an early POC compile, the name got attached to the kernel; it had a nice ring to it, so it stuck. Harper Foundry was born: an automated forge that cross-compiles a tuned, x86-64-v3 Debian kernel from within a containerized environment.
 
-### Technical Stack (The Forge)
-
-To help others find the right tools, here is the machinery under the hood:
-
-- **CI/CD Orchestration:** GitHub Actions for fully automated builds
-- **Containerization:** Docker for a reproducible, isolated build environment
-- **Kernel Configuration:** Custom Kconfig optimizations (x86-64-v3) for modern CPU architectures
-- **Toolchain:** Debian Build-Essential & LLVM/Clang for cross-compiling
-- **Packaging:** Native .deb generation for easy installation on Debian-based systems
-
 ### Was it worth the effort?
 
 Honestly? From a pure performance standpoint, probably not. Debian—and most major distributions—already ship incredibly stable, highly compatible, and well-patched kernels that are more than sufficient for 99% of use cases. If you are looking for a massive speed boost, you won't find a "magic pill" here. Seriously, that kernel that shipped with your distro is awesome.
@@ -50,6 +40,16 @@ However, from a "Builder's" or "Tinker's" standpoint? Absolutely. The value of H
 - **Learners:** Anyone exploring CI/CD fundamentals and containerization
 - **Developers:** Those who want a clean base to fork and tailor to their own needs
 
+### Technical Stack (The Forge)
+
+To help others find the right tools, here is the machinery under the hood:
+
+- **CI/CD Orchestration:** GitHub Actions for fully automated builds
+- **Containerization:** Docker for a reproducible, isolated build environment
+- **Kernel Configuration:** Custom Kconfig configurations (x86-64-v3) for modern CPU architectures
+- **Toolchain:** Debian Build-Essential & LLVM/Clang for cross-compiling
+- **Packaging:** Native .deb generation for easy installation on Debian-based systems
+
 ### Public Reference Repo
 
 Right now, this public repo is just my clean "reference" setup, so the CI/CD actions are set to run manually. If you want to fire up the furnace and actually automate your own kernel builds, I highly recommend forking this project and setting up your own pipeline triggers.
@@ -60,7 +60,7 @@ That keeps my commit history clean and puts you entirely in the driver's seat fo
 
 *   **🐳 Containerized Build:** Isolated, reproducible builds using Docker
 *   **🔀 Cross-Compilation:** Automatic architecture detection and toolchain configuration (e.g., building x86_64 on ARM64)
-*   **⚡ Scheduler Integration:** Patch kernels with BORE scheduler, with automatic EEVDF fallback (only for specific kernel builds)
+*   **⚡ Scheduler Integration:** Patch kernels with BORE scheduler, with automatic EEVDF fallback (only for harper kernel)
 *   **🛡️ Automated QA:** Extensible quality assurance framework validates configuration and binaries
 *   **🚀 CI/CD Ready:** GitHub Actions integration for automated builds
 *   **🎛️ Highly Configurable:** Fine-grained control via parameter files
@@ -125,7 +125,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 *   `start_build.sh`: The main entry point for local builds.
 *   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
-    *   `env_setup.sh`: Argument parsing and environment hydration.
+    *   `env_setup.sh`: Argument parsing and environment setup.
     *   `furnace_ignite.sh`: Docker container launch logic.
     *   `alloymixtures/`: Build script variants (full, tinyconfig, etc.).
     *   `material_analysis.sh`: Post-build Quality Assurance.
@@ -160,11 +160,6 @@ Always validate your configuration before building:
 ```
 
 ## 💻 Usage
-
-### Prerequisites
-*   Docker installed and running
-*   Bash shell (4.0+)
-*   20GB+ free disk space
 
 ### Quick Start
 To start a build using the default configuration:
@@ -259,6 +254,7 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
 - ✅ Perfect for testing changes
 
 **Harper deb13 (Full Build):**
+- Based on Debian 13 Trixie Backports
 - 🏗️ 30-60+ minute builds
 - 🎯 Complete Harper kernel for enthusiasts
 - 📦 Complete .deb packages
