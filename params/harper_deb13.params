@@ -97,7 +97,7 @@ PARALLEL_JOBS=""
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
-TUNING_CONFIG="harper_deb13._tune.config"
+TUNING_CONFIG="harper_deb13_tune.config"
 
 # --- Scheduler Patch ---
 BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
