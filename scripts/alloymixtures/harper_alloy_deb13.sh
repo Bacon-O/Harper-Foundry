@@ -20,14 +20,16 @@ set -e
 # Running as non-root 'builder' user inside container for security.
 # Files are created with correct ownership matching the host user.
 
+# Standardized container internal paths (constants defined by the Docker image)
+readonly CONTAINER_BUILD_ROOT="/build"
+readonly CONTAINER_OUTPUT_DIR="/opt/factory/output"
+readonly CONTAINER_CONFIG_DIR="/opt/factory/configs"
+
 # 1️⃣ Load Environment
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
-    CONTAINER_BUILD_ROOT="/build"
-    CONTAINER_OUTPUT_DIR="/opt/factory/output"
-    CONTAINER_CONFIG_DIR="/opt/factory/configs"
     KERNEL_SOURCE="linux-source"
     TARGET_ARCH="x86_64"
     FINAL_JOBS=$(nproc)

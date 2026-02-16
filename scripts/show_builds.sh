@@ -11,6 +11,7 @@ PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry.params}"
 # Load configuration
 if [ -f "$PARAMS_FILE" ]; then
     set -a
+    # shellcheck source=/dev/null
     source "$PARAMS_FILE"
     set +a
 else
@@ -31,7 +32,7 @@ if [ ! -d "$HOST_OUTPUT_DIR" ]; then
 fi
 
 # Find all build directories
-BUILD_DIRS=($(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" | sort -r))
+mapfile -t BUILD_DIRS < <(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" | sort -r)
 
 if [ ${#BUILD_DIRS[@]} -eq 0 ]; then
     echo "📂 Output directory: $HOST_OUTPUT_DIR"

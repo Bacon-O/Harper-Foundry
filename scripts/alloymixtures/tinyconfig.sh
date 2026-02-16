@@ -9,13 +9,15 @@ set -e
 # Typical build time: 2-5 minutes vs 30-60+ minutes for full build.
 # Running as non-root 'builder' user inside container for security.
 
+# Standardized container internal paths (constants defined by the Docker image)
+readonly CONTAINER_BUILD_ROOT="/build"
+readonly CONTAINER_OUTPUT_DIR="/opt/factory/output"
+
 # 1️⃣ Load Environment
 if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
-    CONTAINER_BUILD_ROOT="/build"
-    CONTAINER_OUTPUT_DIR="/opt/factory/output"
     TARGET_ARCH="x86_64"
     FINAL_JOBS=$(nproc)
 fi

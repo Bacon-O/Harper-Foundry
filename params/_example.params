@@ -10,8 +10,8 @@
 
 # --- Pathing & Identity ---
 # Host paths for build data, repository root, and distribution output.
-# @PROMPT "CONTAINER_PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-CONTAINER_PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. Use fast storage (SSD/NVMe) for best performance. This is mounted as /build in the container."
+BUILD_WORKSPACE_DIR="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
 # @PROMPT "HOST_REPO_ROOT: The absolute path to the root of this repository on your host machine. This is used by host-side scripts."
 HOST_REPO_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
@@ -29,13 +29,6 @@ FOUNDRY_EXEC="alloymixtures/harper_alloy_deb13.sh"
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
 FOUNDRY_IMAGE="docker/docker_arm64_x86_cross_full_auto.dockerfile"
 IMAGE_NAME="debian-harper-worker"
-
-# --- Container Internal Paths (Do not change unless Dockerfile changes) ---
-# These paths reflect the internal structure of the Docker container.
-CONTAINER_BUILD_ROOT="/build"
-CONTAINER_OUTPUT_DIR="/opt/factory/output"
-CONTAINER_CONFIG_DIR="/opt/factory/configs"
-CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION

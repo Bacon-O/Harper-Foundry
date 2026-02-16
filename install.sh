@@ -160,6 +160,16 @@ if [ -f "${REPO_ROOT}/scripts/validate_params.sh" ]; then
 fi
 
 echo ""
+echo "🔧 Configuring git hooks..."
+if git config --local core.hooksPath .githooks 2>/dev/null; then
+    echo "✅ Git hooks configured to use .githooks directory"
+    echo "   Pre-commit hook will run shellcheck on *.sh files (if shellcheck is installed)"
+    echo "   Note: shellcheck is optional for regular users, required for contributors"
+else
+    echo "ℹ️  Skipping git hooks setup (not in a git repository or git not available)"
+fi
+
+echo ""
 echo "==================================================="
 echo "🎉 Setup Complete!"
 echo "==================================================="

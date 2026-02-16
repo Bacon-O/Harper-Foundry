@@ -76,13 +76,32 @@ Before contributing, ensure you have:
 
 ### Pre-Commit Shellcheck
 
-To make commits fail on shellcheck issues:
+The repository includes a pre-commit hook that runs shellcheck on all shell scripts.
 
-```bash
-git config core.hooksPath .githooks
-```
+**For regular users (non-contributors):**
+- The hook is installed automatically by `install.sh`
+- Shellcheck issues are shown but **do not block commits**
+- This allows you to customize the repo without strict linting requirements
 
-The pre-commit hook requires `shellcheck` to be installed.
+**For contributors:**
+- Enable strict mode to block commits with shellcheck issues:
+  ```bash
+  git config --local foundry.strictLint true
+  ```
+- Install shellcheck:
+  ```bash
+  # Debian/Ubuntu
+  sudo apt install shellcheck
+  
+  # macOS
+  brew install shellcheck
+  ```
+- Run manual checks:
+  ```bash
+  make lint
+  ```
+
+The hook automatically excludes `*.params` files since they are configuration files, not executable scripts.
 
 ## Coding Standards
 

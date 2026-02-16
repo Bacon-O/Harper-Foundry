@@ -66,12 +66,12 @@ if [ "$SHELL_MODE" == "true" ]; then
     CONTAINER_CMD="bash"
 else
     DOCKER_FLAGS="-i"
-    CONTAINER_CMD="bash \"${CONTAINER_SCRIPTS_DIR}/${FOUNDRY_EXEC}\" \"\$@\""
+    # Standardized container paths - these are constants defined by the Docker image
+    CONTAINER_CMD="bash \"/opt/factory/scripts/${FOUNDRY_EXEC}\" \"\$@\""
 fi
 
 eval "docker run $DOCKER_FLAGS --rm \
-    -e CONTAINER_OUTPUT_DIR=\"$CONTAINER_OUTPUT_DIR\" \
-    -e CONTAINER_PLUGINS_DIR=\"/opt/factory/plugins\" \
+    -e CONTAINER_OUTPUT_DIR=\"/opt/factory/output\" \
     -e GITHUB_RUN_ID=\"$GITHUB_RUN_ID\" \
     -e INCREMENTAL_BUILD=\"$INCREMENTAL_BUILD\" \
     -e ARCH=\"$TARGET_ARCH\" \
@@ -81,12 +81,11 @@ eval "docker run $DOCKER_FLAGS --rm \
     -e PRODUCTION_CONFIG=\"$PRODUCTION_CONFIG\" \
     -e OVERRIDE_PARAMS=\"$OVERRIDE_PARAMS\" \
     -v \"${HOST_QEMU_STATIC=}\":/usr/bin/qemu-x86_64-static:ro \
-    -v \"${CONTAINER_PROJECT_ROOT}:/build\" \
-    -v \"${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro\" \
-    -v \"${REPO_ROOT}/scripts/plugins:/opt/factory/plugins:ro\" \
-    -v \"${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro\" \
+    -v "${BUILD_WORKSPACE_DIR}:/build" \
+    -v \"${REPO_ROOT}/scripts:/opt/factory/scripts:ro\" \
+    -v \"${REPO_ROOT}/configs:/opt/factory/configs:ro\" \
     -v \"${REPO_ROOT}/params:/opt/factory/params:ro\" \
-    -v \"${CURRENT_DIST_DIR}:/opt/factory/output\" \
+    -v "${BUILD_OUTPUT_DIR}:/opt/factory/output" \
     -w \"/build\" \
     \"$CONTAINER_IMAGE_NAME\" \
     $CONTAINER_CMD"

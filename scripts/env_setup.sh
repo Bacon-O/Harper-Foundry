@@ -124,10 +124,10 @@ if [ -f "$PARAMS_FILE" ]; then
     # 4.5. Container Path Adjustments
     # If running inside a container, translate host paths to container paths
     if [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
-        # Inside container: plugins are mounted at /opt/factory/plugins
-        export PLUGIN_DIR="/opt/factory/plugins/"
-        export TEST_FUNCTIONS_DIR="/opt/factory/plugins/qatests/tests/"
-        export TEST_PACKAGE_DIR="/opt/factory/plugins/qatests/packages/"
+        # Inside container: plugins are mounted at /opt/factory/scripts/plugins
+        export PLUGIN_DIR="/opt/factory/scripts/plugins/"
+        export TEST_FUNCTIONS_DIR="/opt/factory/scripts/plugins/qatests/tests/"
+        export TEST_PACKAGE_DIR="/opt/factory/scripts/plugins/qatests/packages/"
     fi
 
     # 5. Apply Overrides (CLI Arguments > Params File)
@@ -191,12 +191,12 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         export BUILD_ID
     fi
 
-    export CURRENT_DIST_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
+    export BUILD_OUTPUT_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
     
     # Only create output directory on host, not inside container (it's already mounted)
     if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
-        mkdir -p "$CURRENT_DIST_DIR"
-        echo "📂 Artifact Target: $CURRENT_DIST_DIR"
+        mkdir -p "$BUILD_OUTPUT_DIR"
+        echo "📂 Artifact Target: $BUILD_OUTPUT_DIR"
     else
         echo "📂 Running in container - output mounted at /opt/factory/output"
     fi    

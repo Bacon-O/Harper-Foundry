@@ -24,8 +24,8 @@
 
 # --- Pathing & Identity ---
 # Host paths for build data, repository root, and distribution output.
-# @PROMPT "CONTAINER_PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-CONTAINER_PROJECT_ROOT="/mnt/build-data/harper_deb13/"
+# @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. Use fast storage (SSD/NVMe) for best performance. This is mounted as /build in the container."
+BUILD_WORKSPACE_DIR="/mnt/build-data/harper_deb13/"
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 HOST_OUTPUT_DIR="/mnt/build-data/dist/release/harper-deb13/"
 
@@ -43,13 +43,6 @@ INCREMENTAL_BUILD="false"
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
 DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
-
-# --- Container Internal Paths (Do not change unless Dockerfile changes) ---
-# These paths reflect the internal structure of the Docker container.
-CONTAINER_BUILD_ROOT="/build"
-CONTAINER_OUTPUT_DIR="/opt/factory/output"
-CONTAINER_CONFIG_DIR="/opt/factory/configs"
-CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION
@@ -107,11 +100,6 @@ BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/p
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
 # ==============================================================================
-PLUGIN_DIR="$CONTAINER_PROJECT_ROOT/scripts/plugins/"
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
-TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
-
-
 # --- QA Flags ---
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"

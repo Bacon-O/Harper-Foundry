@@ -10,7 +10,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Find all params files, excluding templates (starting with _)
-params_files=($(find "${REPO_ROOT}/params" -maxdepth 1 -name "*.params" -type f | grep -v "/_" | sort))
+mapfile -t params_files < <(find "${REPO_ROOT}/params" -maxdepth 1 -name "*.params" -type f | grep -v "/_" | sort)
 
 if [ ${#params_files[@]} -eq 0 ]; then
     echo "❌ No param files found in ${REPO_ROOT}/params/"
@@ -64,4 +64,3 @@ echo "   ./start_build.sh --shell -p params/foundry.params"
 echo "   ./start_build.sh --shell-menu"
 echo "   ./start_build.sh -p params/tinyconfig.params -t"
 echo ""
-myvar="thisshouldnotbeempty"

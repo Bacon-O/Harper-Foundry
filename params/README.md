@@ -189,7 +189,7 @@ EOF
 ## Parameter Categories
 
 ### Core Setup (Required)
-- `CONTAINER_PROJECT_ROOT` - Repository path mounted as /build
+- `BUILD_WORKSPACE_DIR` - Build workspace on host (use fast storage like SSD/NVMe), mounted as /build
 - `HOST_OUTPUT_DIR` - Where .deb files go
 - `DOCKERFILE_PATH` - Docker image to use
 - `FOUNDRY_EXEC` - Script to run inside container

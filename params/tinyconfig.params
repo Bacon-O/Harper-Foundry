@@ -10,7 +10,7 @@
 # ==============================================================================
 
 # --- Pathing & Identity ---
-CONTAINER_PROJECT_ROOT="/mnt/build-data/tinyconfig/"
+BUILD_WORKSPACE_DIR="/mnt/build-data/tinyconfig/"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
@@ -25,12 +25,6 @@ INCREMENTAL_BUILD="false"
 # --- Foundry Image Configuration ---
 DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
-
-# --- Container Internal Paths ---
-CONTAINER_BUILD_ROOT="/build"
-CONTAINER_OUTPUT_DIR="/opt/factory/output"
-CONTAINER_CONFIG_DIR="/opt/factory/configs"
-CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION
@@ -88,9 +82,6 @@ BORE_PATCH_URL=""
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
 # ==============================================================================
-PLUGIN_DIR="$CONTAINER_PROJECT_ROOT/scripts/plugins/"
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
-TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 
 # --- QA Flags ---
 # For quick tests, we only do minimal validation

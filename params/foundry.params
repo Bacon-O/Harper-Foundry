@@ -21,7 +21,7 @@
 
 # --- Pathing & Identity ---
 # ⚠️  REQUIRED: Set these to your actual paths!
-CONTAINER_PROJECT_ROOT="EDIT_ME_HOST_REPO_PATH"
+BUILD_WORKSPACE_DIR="EDIT_ME_HOST_REPO_PATH"
 HOST_OUTPUT_DIR="EDIT_ME_HOST_OUTPUT_PATH"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
@@ -37,13 +37,6 @@ INCREMENTAL_BUILD="false"
 # ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
 DOCKERFILE_PATH="EDIT_ME_DOCKER_IMAGE_PATH"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
-
-# --- Container Internal Paths (Do not change unless Dockerfile changes) ---
-# These paths reflect the internal structure of the Docker container.
-CONTAINER_BUILD_ROOT="/build"
-CONTAINER_OUTPUT_DIR="/opt/factory/output"
-CONTAINER_CONFIG_DIR="/opt/factory/configs"
-CONTAINER_SCRIPTS_DIR="/opt/factory/scripts"
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION
@@ -120,9 +113,6 @@ TUNING_CONFIG="EDIT_ME_TUNING_CONFIG"
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
 # ==============================================================================
-PLUGIN_DIR="$CONTAINER_PROJECT_ROOT/scripts/plugins/"
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
-TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 
 # --- QA Flags ---
 BYPASS_QA="false"

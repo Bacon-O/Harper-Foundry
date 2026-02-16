@@ -140,7 +140,7 @@ The build is configured via files in the `params/` directory. The default is `pa
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `CONTAINER_PROJECT_ROOT` | Absolute path to repository on host (mounted as /build) | `/path/to/project/root` |
+| `BUILD_WORKSPACE_DIR` | Build workspace on host, mounted as /build | `/mnt/build-data/workspace` |
 | `HOST_OUTPUT_DIR` | Where build artifacts are stored | `/mnt/build-data/dist/release` |
 | `TARGET_ARCH` | Target CPU architecture | `x86_64`, `aarch64` |
 | `KERNEL_SOURCE` | Kernel source plugin to use | `kernel.org`, `debian`, `debian/trixie-backports` |

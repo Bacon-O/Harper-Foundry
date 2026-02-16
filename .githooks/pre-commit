@@ -1,13 +1,21 @@
 #!/bin/bash
-set -euo pipefail
-
-if ! command -v shellcheck >/dev/null 2>&1; then
-    echo "❌ shellcheck not found. Install it to commit."
-    exit 1
-fi
-
+# Pre-commit hook for Harper Foundry
 # Note: *.params files are intentionally excluded from linting.
 # They are configuration files (VAR=value assignments), not executable scripts.
+
+set -eo pipefail
+
+# Contributors can enable strict mode by setting: git config --local foundry.strictLint true
+STRICT_MODE=$(git config --local --get foundry.strictLint 2>/dev/null || echo "false")
+
+if ! command -v shellcheck >/dev/null 2>&1; then
+    if [ "$STRICT_MODE" = "true" ]; then
+        echo "❌ shellcheck not found - install it to commit in strict mode"
+        exit 1
+    fi
+    exit 0
+fi
+
 mapfile -t files < <(git ls-files "*.sh")
 
 if [ "${#files[@]}" -eq 0 ]; then
@@ -15,4 +23,17 @@ if [ "${#files[@]}" -eq 0 ]; then
 fi
 
 echo "🔎 Running shellcheck on ${#files[@]} shell scripts..."
-shellcheck -x "${files[@]}"
+
+if [ "$STRICT_MODE" = "true" ]; then
+    # Strict mode: fail on any issues
+    shellcheck -x "${files[@]}"
+else
+    # Regular mode: show issues but don't block commits
+    if ! shellcheck -x "${files[@]}"; then
+        echo ""
+        echo "⚠️  Shellcheck found issues (not blocking commit)"
+        echo "   For contributors: enable strict mode with:"
+        echo "   git config --local foundry.strictLint true"
+    fi
+    exit 0
+fi
