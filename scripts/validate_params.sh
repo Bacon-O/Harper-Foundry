@@ -32,7 +32,7 @@ WARNINGS=0
 echo "🔎 Checking Required Variables..."
 
 REQUIRED_VARS=(
-    "PROJECT_ROOT"
+    "CONTAINER_PROJECT_ROOT"
     "HOST_OUTPUT_DIR"
     "FOUNDRY_EXEC"
     "DOCKERFILE_PATH"

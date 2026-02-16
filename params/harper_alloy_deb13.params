@@ -24,8 +24,8 @@
 
 # --- Pathing & Identity ---
 # Host paths for build data, repository root, and distribution output.
-# @PROMPT "PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
-PROJECT_ROOT="/mnt/build-data/github_work/Debian-Harper/Debian-Harper"
+# @PROMPT "CONTAINER_PROJECT_ROOT: The absolute path to the root of this repository on your host machine. This path will be mounted inside the Docker container."
+CONTAINER_PROJECT_ROOT="/mnt/build-data/harper_deb13/"
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 HOST_OUTPUT_DIR="/mnt/build-data/dist/release/harper-deb13/"
 
@@ -107,7 +107,7 @@ BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/p
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
 # ==============================================================================
-PLUGIN_DIR="$PROJECT_ROOT/scripts/plugins/"
+PLUGIN_DIR="$CONTAINER_PROJECT_ROOT/scripts/plugins/"
 TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"
 TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"
 

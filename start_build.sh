@@ -113,7 +113,7 @@ if [ "$SHELL_MODE" == "true" ]; then
     echo "📂 Working directory: /build"
     echo "📦 Params: $PARAMS_FILE"
     echo "🔌 Mounted volumes:"
-    echo "   • /build → $PROJECT_ROOT"
+    echo "   • /build → $CONTAINER_PROJECT_ROOT"
     echo "   • /opt/factory/plugins → $REPO_ROOT/scripts/plugins"
     echo "   • /opt/factory/configs → $REPO_ROOT/configs"
     echo "   • /opt/factory/output → $CURRENT_DIST_DIR"

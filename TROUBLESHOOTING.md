@@ -246,9 +246,9 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
 ```
 
 **Solutions:**
-1. Verify `PROJECT_ROOT` path exists and is accessible:
+1. Verify `CONTAINER_PROJECT_ROOT` path exists and is accessible:
    ```bash
-   ls -ld "$PROJECT_ROOT"
+   ls -ld "$CONTAINER_PROJECT_ROOT"
    ```
 
 2. Check volume mount paths in `furnace_ignite.sh`

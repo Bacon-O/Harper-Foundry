@@ -81,7 +81,7 @@ eval "docker run $DOCKER_FLAGS --rm \
     -e PRODUCTION_CONFIG=\"$PRODUCTION_CONFIG\" \
     -e OVERRIDE_PARAMS=\"$OVERRIDE_PARAMS\" \
     -v \"${HOST_QEMU_STATIC=}\":/usr/bin/qemu-x86_64-static:ro \
-    -v \"${PROJECT_ROOT}:/build\" \
+    -v \"${CONTAINER_PROJECT_ROOT}:/build\" \
     -v \"${REPO_ROOT}/scripts:${CONTAINER_SCRIPTS_DIR}:ro\" \
     -v \"${REPO_ROOT}/scripts/plugins:/opt/factory/plugins:ro\" \
     -v \"${REPO_ROOT}/configs:${CONTAINER_CONFIG_DIR}:ro\" \

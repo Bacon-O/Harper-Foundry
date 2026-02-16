@@ -189,7 +189,7 @@ EOF
 ## Parameter Categories
 
 ### Core Setup (Required)
-- `PROJECT_ROOT` - Repository path
+- `CONTAINER_PROJECT_ROOT` - Repository path mounted as /build
 - `HOST_OUTPUT_DIR` - Where .deb files go
 - `DOCKERFILE_PATH` - Docker image to use
 - `FOUNDRY_EXEC` - Script to run inside container
