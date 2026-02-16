@@ -20,9 +20,9 @@
 #   - custom or none  : User implements custom logic in their ci-build script
 # ==============================================================================
 
-# Ensure we from the plugin directory
-PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$PLUGIN_DIR/../../.." && pwd)"
+# Ensure we are in the kernel source plugin directory
+KERNELSOURCES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$KERNELSOURCES_DIR/../../.." && pwd)"
 
 # ============================================================================
 #  MAIN FUNCTION: fetch_kernel_source
@@ -79,15 +79,15 @@ fetch_kernel_source() {
     case "$source_type" in
         kernel.org|kernel-org)
             # Use official kernel.org vanilla sources
-            "$PLUGIN_DIR/kernel_org.sh" "$kernel_version" "$build_root"
+            "$KERNELSOURCES_DIR/kernel_org.sh" "$kernel_version" "$build_root"
             ;;
         debian|debian-source)
             # Use Debian apt-get source (includes Debian patches)
-            "$PLUGIN_DIR/debian.sh" "$kernel_version" "$build_root"
+            "$KERNELSOURCES_DIR/debian.sh" "$kernel_version" "$build_root"
             ;;
         debian/trixie-backports|trixie-backports|trixie)
             # Use Debian Trixie Backports for newer kernels with Debian patches
-            "$PLUGIN_DIR/trixie_backports.sh" "$kernel_version" "$build_root"
+            "$KERNELSOURCES_DIR/trixie_backports.sh" "$kernel_version" "$build_root"
             ;;
         custom|none|"")
             # Skip automatic source fetching
@@ -108,7 +108,7 @@ fetch_kernel_source() {
 #  HELPER: Check if plugin exists and is executable
 # ============================================================================
 check_plugin_exists() {
-    local plugin_file="$PLUGIN_DIR/$1.sh"
+    local plugin_file="$KERNELSOURCES_DIR/$1.sh"
     if [ ! -x "$plugin_file" ]; then
         echo "[ERROR] Plugin not found or not executable: $plugin_file" >&2
         return 1
@@ -129,5 +129,5 @@ log_kernel_source() {
 export -f fetch_kernel_source
 export -f check_plugin_exists
 export -f log_kernel_source
-export PLUGIN_DIR
+export KERNELSOURCES_DIR
 export REPO_ROOT
