@@ -69,6 +69,10 @@ deep-clean:
 	./scripts/furnace_clean.sh --deep
 
 # Development tools (optional)
+SHFMT_FLAGS := $(shell cat .shfmt 2>/dev/null)
+
+# Note: *.params files are intentionally excluded from linting.
+# They are configuration files (VAR=value assignments), not executable scripts.
 lint:
 	@echo "🔍 Linting shell scripts..."
 	@if command -v shellcheck >/dev/null 2>&1; then \
@@ -78,12 +82,19 @@ lint:
 		echo "❌ shellcheck not installed. Install with: apt install shellcheck"; \
 		exit 1; \
 	fi
+	@if command -v shfmt >/dev/null 2>&1; then \
+		find scripts -name "*.sh" -exec shfmt -d $(SHFMT_FLAGS) {} +; \
+		shfmt -d $(SHFMT_FLAGS) install.sh start_build.sh; \
+	else \
+		echo "❌ shfmt not installed. Install with: go install mvdan.cc/sh/v3/cmd/shfmt@latest"; \
+		exit 1; \
+	fi
 
 format:
 	@echo "✨ Formatting shell scripts..."
 	@if command -v shfmt >/dev/null 2>&1; then \
-		find scripts -name "*.sh" -exec shfmt -w -i 4 {} +; \
-		shfmt -w -i 4 install.sh start_build.sh; \
+		find scripts -name "*.sh" -exec shfmt -w $(SHFMT_FLAGS) {} +; \
+		shfmt -w $(SHFMT_FLAGS) install.sh start_build.sh; \
 	else \
 		echo "❌ shfmt not installed. Install with: go install mvdan.cc/sh/v3/cmd/shfmt@latest"; \
 		exit 1; \

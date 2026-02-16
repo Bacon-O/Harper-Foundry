@@ -22,6 +22,7 @@ fi
 
 # Load the params file
 set -a
+# shellcheck source=/dev/null
 source "$PARAMS_FILE"
 set +a
 
@@ -99,7 +100,7 @@ echo "🧪 Checking Architecture Configuration..."
 
 # --- Architecture Consistency ---
 VALID_ARCHES=("x86_64" "aarch64" "arm64" "armv7l")
-if [[ ! " ${VALID_ARCHES[@]} " =~ " ${TARGET_ARCH} " ]]; then
+if [[ ! " ${VALID_ARCHES[*]} " =~ ${TARGET_ARCH} ]]; then
     echo "  ⚠️  WARNING: Unusual TARGET_ARCH: $TARGET_ARCH"
     ((WARNINGS++))
 else

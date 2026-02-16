@@ -26,11 +26,34 @@ on:
           - 'testing.params (test output dir)'
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+
+      # Note: *.params files are intentionally excluded from linting.
+      # They are configuration files (VAR=value assignments), not executable scripts.
+      - name: Shellcheck
+        run: |
+          mapfile -t files < <(git ls-files "*.sh")
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          shellcheck -x "${files[@]}"
+
   preheat:
+    needs: lint
     runs-on: self-hosted
     outputs:
       args: ${{ steps.set-args.outputs.args }}
-      env_vars: ${{ steps.set-args.outputs.env_vars }}
+      production_config: ${{ steps.set-args.outputs.production_config }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -38,7 +61,7 @@ jobs:
       - name: Configure Arguments
         id: set-args
         run: |
-          ENV_VARS=""
+          PROD_CONFIG=""
           
           # Manual dispatch is the only trigger for this public reference repo
           # Use dual dropdown selection: base params + optional override
@@ -53,7 +76,7 @@ jobs:
           if [[ "$OVERRIDE_MODE" == "testing.params"* ]]; then
             # Use _test_overrides.params with PRODUCTION_CONFIG env var
             FILE="params/_test_overrides.params"
-            ENV_VARS="PRODUCTION_CONFIG=$BASE_PARAMS"
+            PROD_CONFIG="$BASE_PARAMS"
             echo "🧪 Applying testing overrides to $BASE_PARAMS"
             echo "   → Output: /mnt/build-data/dist/testing"
             echo "   → QA Mode: ENFORCED"
@@ -65,11 +88,13 @@ jobs:
           
           echo "🚀 Selected Blueprint: $FILE"
           echo "args=--params-file $FILE" >> $GITHUB_OUTPUT
-          echo "env_vars=$ENV_VARS" >> $GITHUB_OUTPUT
+          echo "production_config=$PROD_CONFIG" >> $GITHUB_OUTPUT
       
       - name: Charge Audit
+        env:
+          PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
         run: |
-          ${{ steps.set-args.outputs.env_vars }} bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
+          bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
 
   smelt:
     needs: preheat
@@ -78,8 +103,10 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Ignition
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
         run: |
-          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
 
   analysis:
     needs: [preheat, smelt]
@@ -89,8 +116,10 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Material QA
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
         run: |
-          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
 
   cleanup:
     needs: [preheat, analysis]
@@ -100,5 +129,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Purge Slag
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
         run: |
-          ${{ needs.preheat.outputs.env_vars }} bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}

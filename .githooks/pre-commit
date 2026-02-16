@@ -6,6 +6,8 @@ if ! command -v shellcheck >/dev/null 2>&1; then
     exit 1
 fi
 
+# Note: *.params files are intentionally excluded from linting.
+# They are configuration files (VAR=value assignments), not executable scripts.
 mapfile -t files < <(git ls-files "*.sh")
 
 if [ "${#files[@]}" -eq 0 ]; then
