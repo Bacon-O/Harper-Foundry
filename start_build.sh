@@ -94,7 +94,7 @@ if [ "$SHELL_MENU" == "true" ]; then
     PS3="Select a config (enter number): "
     select selected_param in "${params_list[@]}"; do
         if [[ -n "$selected_param" ]]; then
-            BUILD_ARGS+=("-c" "params/$selected_param")
+            BUILD_ARGS+=("-p" "params/$selected_param")
             echo "✅ Selected: $selected_param"
             break
         else
