@@ -482,6 +482,7 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 - **Discussions:** [GitHub Discussions](https://github.com/Bacon-O/Harper-Foundry/discussions)
 
 ## TODO
+* **test//document /usr/bin/qemu-x86_64-static** as its pure witchcraft 
 *   General testing
 *   Improve testing framework
 *   Create additional param files for other kernels/distro
