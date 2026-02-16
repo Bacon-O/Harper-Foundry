@@ -2,7 +2,8 @@
 # HARPER FOUNDRY: HARPER DEB13 - x86_64v3 Build
 # ==============================================================================
 # This is a COMPLETE, WORKING example configuration for building the Harper
-# kernel for Debian 13 (Trixie) with x86-64-v3 optimizations (AVX2, FMA, BMI2).
+# kernel based Debian 13 (Trixie) backports 
+# with x86-64-v3 optimizations (AVX2, FMA, BMI2).
 #
 # Optimizations from base Debian config:
 #   • Architecture: x86-64-v3 baseline (modern CPU instructions)
