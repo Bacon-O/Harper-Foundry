@@ -72,7 +72,7 @@ fi
 # Check if apt-get is available
 if ! command -v apt-get &>/dev/null; then
     echo "[ERROR] apt-get not found. Trixie Backports plugin requires Debian/Ubuntu." >&2
-    return 1
+    exit 1
 fi
 
 # Verify deb-src is configured for trixie-backports
@@ -83,6 +83,10 @@ if ! grep -q "deb-src.*trixie-backports" /etc/apt/sources.list* 2>/dev/null; the
     echo "[WARNING] Then run: apt-get update" >&2
 fi
 
+# Ensure package indices are up-to-date
+echo "[INFO] Updating package indices..." >&2
+apt-get update 2>&1 | grep -E "(Reading|Building)" || true
+
 # Pull kernel source from trixie-backports repository
 # The -t flag targets the backports suite specifically
 if ! apt-get source -t trixie-backports "linux-image${VERSION_CONSTRAINT}" 2>/dev/null; then
@@ -90,7 +94,7 @@ if ! apt-get source -t trixie-backports "linux-image${VERSION_CONSTRAINT}" 2>/de
     echo "[ERROR] Hint: Ensure deb-src for trixie-backports is configured" >&2
     echo "[ERROR] Hint: Run 'apt-get update' after adding deb-src lines" >&2
     echo "[ERROR] Hint: Verify kernel version exists in trixie-backports" >&2
-    return 1
+    exit 1
 fi
 
 # Find the extracted directory (apt-get source creates linux-* directory)
@@ -98,7 +102,7 @@ KERNEL_DIR=$(find . -maxdepth 1 -type d -name "linux-*" | head -1)
 
 if [ -z "$KERNEL_DIR" ] || [ ! -d "$KERNEL_DIR" ]; then
     echo "[ERROR] Kernel source extraction failed: no linux-* directory found" >&2
-    return 1
+    exit 1
 fi
 
 echo "[INFO] Trixie Backports kernel source ready: $BUILD_ROOT/${KERNEL_DIR#./}" >&2
