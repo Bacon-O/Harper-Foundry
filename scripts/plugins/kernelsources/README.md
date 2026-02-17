@@ -2,6 +2,21 @@
 
 This directory contains the kernel source fetching plugin system. It allows flexible, parameterized kernel source handling for different kernel sources.
 
+## Directory Structure
+
+```
+kernelsources/
+├── kernel_org.sh              # Fetch from kernel.org
+├── debian.sh                  # Fetch from Debian sources
+├── trixie_backports.sh        # Fetch from Trixie Backports
+├── custom.sh                  # Template for custom sources
+├── runner.sh                  # Plugin router/dispatcher
+└── README.md                  # This file
+
+plugins.d/kernelsources/       # User custom plugins (not in git)
+└── (your custom plugins here)
+```
+
 ## Overview
 
 Instead of hardcoding kernel source logic in build scripts, the plugin system maps the `KERNEL_SOURCE` parameter to specific source-fetching implementations:
@@ -245,20 +260,61 @@ KERNEL_DIR=$(fetch_kernel_source "kernel.org" "6.10.5")
 KERNEL_DIR=$(fetch_kernel_source "debian" "" "/tmp/build")
 ```
 
-## Adding New Plugins
+## Creating Custom Kernel Source Plugins
 
-To create a new kernel source plugin:
+### Option 1: User Custom Plugins (Recommended)
 
-1. Create `plugins/kernelsources/mysource.sh`
-2. Implement the plugin to:
+To add a custom kernel source plugin without modifying the project files:
+
+1. Create a plugin in `scripts/plugins/plugins.d/kernelsources/`:
+   ```bash
+   cat > scripts/plugins/plugins.d/kernelsources/myrepo.sh << 'EOF'
+   #!/bin/bash
+   set -e
+   
+   KERNEL_VERSION="${1:-6.11.8}"
+   BUILD_ROOT="${2:-.}"
+   
+   mkdir -p "$BUILD_ROOT"
+   cd "$BUILD_ROOT"
+   
+   # Your custom kernel fetch logic here
+   git clone https://my-kernel-repo.com/kernel.git kernel
+   cd kernel
+   git checkout v"$KERNEL_VERSION"
+   
+   echo "[INFO] Kernel ready: $BUILD_ROOT/kernel" >&2
+   echo "$BUILD_ROOT/kernel"
+   EOF
+   chmod +x scripts/plugins.d/kernelsources/myrepo.sh
+   ```
+
+2. Use in your params file:
+   ```bash
+   KERNEL_SOURCE="myrepo"
+   KERNEL_VERSION="6.11.8"
+   ```
+
+**Benefits**:
+- ✅ Keeps custom logic separate from project code
+- ✅ Easy to share different kernel sources across teams
+- ✅ Safe from git conflicts during updates
+
+### Option 2: Add to Project (Contributors)
+
+If you want to contribute a new kernel source to Harper Foundry:
+
+1. Create `scripts/plugins/kernelsources/yourcustomsource.sh`
+2. Implement the plugin interface:
    - Accept `$1` = kernel_version, `$2` = build_root
    - Create/extract kernel source
    - Print path to kernel directory to stdout
    - Exit with 0 on success, non-zero on failure
-3. Add case statement to `runner.sh` with your source type
+3. Update `runner.sh` case statement with your source type
 4. Document usage in this README
+5. Submit a pull request
 
-**Minimal plugin template**:
+**Plugin template**:
 ```bash
 #!/bin/bash
 set -e
@@ -269,11 +325,11 @@ BUILD_ROOT="${2:-.}"
 mkdir -p "$BUILD_ROOT"
 cd "$BUILD_ROOT"
 
-# Download/extract kernel source here
-# ...
+# Your kernel fetch logic here
+# (Download, clone, mirror, etc.)
 
-echo "[INFO] Kernel source ready: $BUILD_ROOT/kernel-dir" >&2
-echo "$BUILD_ROOT/kernel-dir"
+echo "[INFO] Kernel source ready: $BUILD_ROOT/linux" >&2
+echo "$BUILD_ROOT/linux"
 ```
 
 ## Adding to Tinyconfig Build

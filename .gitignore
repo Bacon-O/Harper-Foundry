@@ -12,6 +12,7 @@ linux-*/
 
 # Temporary Files
 params/*.tmp
+params/params.d/        # User customizations
 *.config.old
 *.patch
 *.orig
@@ -43,3 +44,6 @@ desktop.ini
 
 # Test Scripts (local only)
 .tests/
+
+# Plugin Customizations (user extensions)
+scripts/plugins/plugins.d/

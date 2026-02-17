@@ -1,0 +1,20 @@
+#!/bin/bash
+# Environment Extensions
+#
+# Purpose:
+#   This directory contains official/project environment extensions that
+#   can be layered on top of the core env_setup.sh.
+#
+# Pattern:
+#   Check order: plugins.d/env_extensions/ (user custom) → plugins/env_extensions/ (official)
+#
+#   This allows users to:
+#   1. Use official project extensions (from this directory)
+#   2. Override with their own custom extensions (in plugins.d/env_extensions/)
+#   3. Create entirely new extensions without git conflicts
+#
+# User Custom Extensions:
+#   For your own extensions WITHOUT git conflicts, create scripts in:
+#   scripts/plugins/plugins.d/env_extensions/
+#
+# See plugins/env_extensions/README.md for documentation.

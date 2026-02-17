@@ -124,3 +124,12 @@ QA_OPTIONAL_CHECKS=(
 QA_VM_MEMORY="512M"
 QA_VM_CORES="2"
 QA_VM_TIMEOUT="15s"
+
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()

@@ -76,6 +76,17 @@ fetch_kernel_source() {
     # Normalize source type to lowercase
     source_type=$(echo "$source_type" | tr '[:upper:]' '[:lower:]')
     
+    # Convert slash notation to hyphen for file lookup (e.g., "debian/trixie-backports" -> "debian-trixie-backports")
+    local source_file="${source_type//\//-}"
+    
+    # Check for custom plugin first (in plugins.d/kernelsources/)
+    local custom_plugin="${KERNELSOURCES_DIR}/../plugins.d/kernelsources/${source_file}.sh"
+    if [ -x "$custom_plugin" ]; then
+        log_kernel_source "INFO" "Using custom kernel source plugin: $source_file"
+        "$custom_plugin" "$kernel_version" "$build_root"
+        return $?
+    fi
+    
     case "$source_type" in
         kernel.org|kernel-org)
             # Use official kernel.org vanilla sources
@@ -99,6 +110,7 @@ fetch_kernel_source() {
         *)
             echo "[ERROR] Unknown KERNEL_SOURCE type: '$source_type'" >&2
             echo "[ERROR] Supported types: kernel.org, debian, debian/trixie-backports, custom, none" >&2
+            echo "[ERROR] Custom sources can be added to: scripts/plugins/kernelsources.d/" >&2
             return 1
             ;;
     esac

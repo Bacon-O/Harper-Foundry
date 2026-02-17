@@ -123,3 +123,16 @@ QA_OPTIONAL_CHECKS=(
 QA_VM_MEMORY="1G"
 QA_VM_CORES="4"
 QA_VM_TIMEOUT="30s"
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify environment extensions to load (in order).
+# Extensions are sourced from plugins.d/env_extensions/ (custom) or plugins/env_extensions/ (official).
+# Leave unset or empty () to load no extensions.
+# Examples:
+#   ENV_EXTENSIONS=("container_optimized.sh" "debug_mode.sh")  # Load these in order
+#   ENV_EXTENSIONS=("my_custom.sh")                            # Load only this one
+#   ENV_EXTENSIONS=()                                           # Load none (default)
+ENV_EXTENSIONS=()

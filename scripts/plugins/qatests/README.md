@@ -6,14 +6,17 @@ This directory contains the Quality Assurance (QA) test framework for the Harper
 
 ```
 qatests/
-├── tests/          # Individual QA test scripts
+├── tests/           # Individual QA test scripts
 │   ├── debpackage.sh
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
-└── packages/       # Test package definition files (.lst)
+└── packages/        # Project test package definition files (.lst)
     ├── harper.lst
     └── minimal.lst
+
+plugins.d/qatests/              # User custom test packages (not in git)
+└── (your custom .lst files here)
 ```
 
 ## Test Types
@@ -89,8 +92,20 @@ BYPASS_QA="true"
 
 ### Individual Test Script
 
-1. Create executable bash script in `tests/`
-2. Add to `QA_TESTS` array in params file
+**Smart Lookup**: The system automatically searches for custom tests without requiring explicit paths!
+
+1. Create executable bash script in **either**:
+   - `scripts/plugins/qatests/tests/` (project tests)
+   - `scripts/plugins/plugins.d/qatests/` (custom tests - **recommended for users**)
+
+2. Add to `QA_TESTS` array in params file using **just the filename**:
+   ```bash
+   QA_TESTS=(
+       "custom_example.sh"     # System finds it automatically!
+       "filesexists.sh"        # Can mix custom and project tests
+   )
+   ```
+
 3. Use standard test functions:
    ```bash
    #!/bin/bash
@@ -106,9 +121,18 @@ BYPASS_QA="true"
    exit 0
    ```
 
+**Path Lookup Order** (transparent to user):
+1. Check `scripts/plugins/plugins.d/qatests/` (custom - takes precedence)
+2. Fall back to `scripts/plugins/qatests/tests/` (project)
+
 ### Test Package
 
-1. Create a `.lst` file in `packages/` (e.g., `custom.lst`)
+**Smart Lookup**: The system automatically finds test packages with just the name!
+
+1. Create a `.lst` file in **either**:
+   - `scripts/plugins/qatests/packages/` (project packages)
+   - `scripts/plugins/plugins.d/qatests/` (custom packages - **recommended for users**)
+
 2. List test names to run, one per line:
    ```
    # Full test suite
@@ -121,12 +145,31 @@ BYPASS_QA="true"
    - Tests are resolved and executed automatically
    - Lines starting with `#` are treated as comments
    - Empty lines are ignored
-3. Add package name (without `.lst`) to `QA_TEST_PACKAGE` array in params file:
+
+3. Add package name (without `.lst`) to `QA_TEST_PACKAGE` array in params file using **just the name**:
    ```bash
    QA_TEST_PACKAGE=(
-       "custom"
+       "custom"       # System finds custom.lst automatically!
+       "harper"       # Can mix custom and project packages
    )
    ```
+
+**Path Lookup Order** (transparent to user):
+1. Check `scripts/plugins/plugins.d/qatests/` (custom - takes precedence)
+2. Fall back to `scripts/plugins/qatests/packages/` (project)
+
+**Benefits of using `scripts/plugins/plugins.d/qatests/`:**
+- ✅ No git conflicts during updates
+- ✅ Keeps custom tests separate from project
+- ✅ Easy to maintain multiple test profiles
+- ✅ Safe to do `git pull`
+- ✅ **No need to know the full path** - just use the filename!
+
+## Contributing Tests to Harper Foundry
+
+For tests you want to contribute back:
+
+1. Create `.sh` script in `qatests/tests/` or `.lst` file in `packages/`
 
 ## Test Execution Order
 

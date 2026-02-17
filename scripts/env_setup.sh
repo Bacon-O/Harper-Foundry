@@ -260,6 +260,44 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         echo "📂 Running in container - output mounted at /opt/factory/output"
     fi    
     echo "✅ Environment configured for $TARGET_ARCH build."
+    
+    # 6. Load Environment Extensions
+    # Allow users to extend/customize environment variables after core setup
+    # Logic:
+    #   - If ENV_EXTENSIONS is unset or empty: Load no extensions
+    #   - If ENV_EXTENSIONS has names: Load only those specified (in order)
+    # Lookup order: plugins.d/env_extensions/ (custom) → plugins/env_extensions/ (official)
+    custom_ext_dir="${REPO_ROOT}/scripts/plugins/plugins.d/env_extensions"
+    project_ext_dir="${REPO_ROOT}/scripts/plugins/env_extensions"
+    
+    # Load specified extensions (if any)
+    if [ -v ENV_EXTENSIONS ] && [ ${#ENV_EXTENSIONS[@]} -gt 0 ]; then
+        # Load specified extensions in order
+        for ext_name in "${ENV_EXTENSIONS[@]}"; do
+            # Normalize: add .sh extension if not present
+            ext_file="${ext_name%.sh}.sh"
+            ext_found=false
+            
+            # Try custom location first (takes precedence)
+            if [ -f "$custom_ext_dir/$ext_file" ] && [ -x "$custom_ext_dir/$ext_file" ]; then
+                echo "🔧 Loading extension: $ext_file (custom)"
+                # shellcheck source=/dev/null
+                source "$custom_ext_dir/$ext_file"
+                ext_found=true
+            # Fall back to official location
+            elif [ -f "$project_ext_dir/$ext_file" ] && [ -x "$project_ext_dir/$ext_file" ]; then
+                echo "🔧 Loading extension: $ext_file (official)"
+                # shellcheck source=/dev/null
+                source "$project_ext_dir/$ext_file"
+                ext_found=true
+            fi
+            
+            # Warn if extension not found
+            if [ "$ext_found" = false ]; then
+                echo "⚠️  Warning: ENV_EXTENSIONS references unknown extension: $ext_name"
+            fi
+        done
+    fi
 else
     echo "❌ Error: $PARAMS_FILE not found!"
     exit 1

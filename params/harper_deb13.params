@@ -206,3 +206,11 @@ QA_OPTIONAL_CHECKS=(
 VM_MEM="1G"
 VM_CORES="4"
 VM_TIMEOUT="30s"
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()

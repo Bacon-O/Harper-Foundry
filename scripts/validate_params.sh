@@ -159,11 +159,17 @@ if [ ${#QA_TESTS[@]} -gt 0 ]; then
     done
 fi
 
-# Check QA test packages
+# Check QA test packages (.lst files)
 if [ ${#QA_TEST_PACKAGE[@]} -gt 0 ]; then
     for package in "${QA_TEST_PACKAGE[@]}"; do
-        pkg_path="${REPO_ROOT}/scripts/plugins/qatests/packages/${package}"
-        if [ -d "$pkg_path" ] || [ -f "$pkg_path" ]; then
+        # Check custom packages first (plugins.d/qatests/)
+        custom_pkg="${REPO_ROOT}/scripts/plugins/plugins.d/qatests/${package}.lst"
+        # Then check project packages
+        pkg_path="${REPO_ROOT}/scripts/plugins/qatests/packages/${package}.lst"
+        
+        if [ -f "$custom_pkg" ]; then
+            echo "  ✅ QA test package exists (custom): $package"
+        elif [ -f "$pkg_path" ]; then
             echo "  ✅ QA test package exists: $package"
         else
             echo "  ❌ ERROR: QA test package missing: $package"

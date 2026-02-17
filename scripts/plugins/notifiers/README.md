@@ -2,6 +2,19 @@
 
 Plugin-based notification and monitoring integration system.
 
+## Directory Structure
+
+```
+notifiers/
+├── harper_checkmk.sh           # CheckMK monitoring plugin
+├── harper_checkmk_wrapper.sh   # CheckMK agent wrapper
+├── runner.sh                   # Plugin router/dispatcher
+└── README.md                   # This file
+
+plugins.d/notifiers/            # User custom notifiers (not in git)
+└── (your custom notifiers here)
+```
+
 ## Overview
 
 The notifiers system provides integrations with monitoring platforms, notification services, and other external systems. Plugins follow a standard interface for consistent integration.
@@ -214,6 +227,73 @@ slack_check() {
         "$webhook_url"
 }
 ```
+
+## Creating Custom Notifiers
+
+### User Custom Notifiers (Recommended)
+
+To add a custom notifier plugin without modifying project files:
+
+1. Create a plugin in `scripts/plugins/plugins.d/notifiers/`:
+   ```bash
+   cat > scripts/plugins/plugins.d/notifiers/my_service.sh << 'EOF'
+   #!/bin/bash
+   
+   my_service_check() {
+       local profile="${1:-harper_deb13}"
+       
+       # Load version tracking
+       source "$REPO_ROOT/version_tracking/${profile}_latest_kernel.txt"
+       
+       # Send notification to your service
+       curl -X POST https://my-service.com/builds \
+           -d "kernel=$KERNEL_VERSION&status=$BUILD_STATUS"
+       
+       # Return CheckMK exit code: 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
+       return 0
+   }
+   EOF
+   chmod +x scripts/plugins.d/notifiers/my_service.sh
+   ```
+
+2. Use in your build workflow:
+   ```bash
+   source scripts/plugins/notifiers/runner.sh
+   notify my_service --profile harper_deb13
+   ```
+
+**Benefits**:
+- ✅ Keeps custom logic separate from project code
+- ✅ Easy to share different notification integrations
+- ✅ Safe from git conflicts during updates
+
+### Plugin Interface
+
+Custom notifiers must implement:
+
+**Function signature:**
+```bash
+{plugin_name}_check() {
+    # $1 = profile name (optional, defaults to "harper_deb13")
+    local profile="${1:-harper_deb13}"
+    
+    # Your notification logic here
+    # ...
+    
+    # Return CheckMK exit code
+    return 0  # 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
+}
+```
+
+**Available functions:**
+- `log_info()` - Informational message
+- `log_ok()` - Success message
+- `log_warn()` - Warning message
+- `log_error()` - Error message
+
+**Available variables:**
+- `$REPO_ROOT` - Repository root directory
+- `$PLUGINS_DIR` - Notifiers plugin directory
 
 ## Cron Integration
 

@@ -28,8 +28,8 @@
 # Note: REPO_ROOT is auto-detected - no configuration needed
 #
 # ⚠️  REQUIRED: Set these to your actual paths!
-BUILD_WORKSPACE_DIR="EDIT_ME_HOST_REPO_PATH"
-HOST_OUTPUT_DIR="EDIT_ME_HOST_OUTPUT_PATH"
+BUILD_WORKSPACE_DIR=""
+HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
 #       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
@@ -150,3 +150,12 @@ QA_OPTIONAL_CHECKS=(
 QA_VM_MEMORY="1G"
 QA_VM_CORES="4"
 QA_VM_TIMEOUT="30s"
+
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()

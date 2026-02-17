@@ -40,6 +40,45 @@ This directory contains configuration files (params files) that define how a bui
   - Shows all available parameters with documentation
   - Use: Reference, copy as starting point
 
+## User Customizations (`params/params.d/`)
+
+**To avoid git conflicts when updating, store your custom params files in the `params/params.d/` directory.**
+
+```
+params/
+├── foundry.params          # Project-maintained templates
+├── harper_deb13.params     # Project-maintained
+├── tinyconfig.params       # Project-maintained
+└── params.d/               # Your custom configs (not in git)
+    ├── my_custom_build.params
+    └── fedora_42.params
+```
+
+### Why `params/params.d/`?
+
+- ✅ **No Git Conflicts**: The `params/params.d/` directory is gitignored
+- ✅ **Safe Updates**: You can `git pull` without overwriting your customizations
+- ✅ **Clear Separation**: Project configs stay in `params/`, user configs in `params/params.d/`
+- ✅ **Familiar Pattern**: Similar to `/etc/something.d/` on Linux systems
+
+### Workflow
+
+1. **Create your custom config** in `params/params.d/`:
+   ```bash
+   cp params/harper_deb13.params params/params.d/my_fedora_build.params
+   # Edit params/params.d/my_fedora_build.params as needed
+   ```
+
+2. **Run with your custom config** using the `-p` flag:
+   ```bash
+   ./start_build.sh -p params/params.d/my_fedora_build.params
+   ```
+
+3. **Update Harper Foundry** without worry:
+   ```bash
+   git pull  # Safe - your params/params.d/ files are untouched
+   ```
+
 ## Configuration Override Patterns
 
 Harper Foundry provides **two methods** to override params files. Both accomplish the same goal with different approaches:

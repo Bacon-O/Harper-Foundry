@@ -55,9 +55,19 @@ Before contributing, ensure you have:
    git checkout -b feature/your-feature-name
    ```
 
-2. Make your changes following the coding standards below
+2. **For testing with custom parameters**, use `params.d/`:
+   ```bash
+   # Create development params without git conflicts
+   cp params/harper_deb13.params params.d/dev_custom.params
+   # Edit and test as needed
+   ./start_build.sh --params-file params.d/dev_custom.params
+   
+   # The params/params.d/ folder is gitignored - your custom params won't conflict
+   ```
 
-3. Test your changes:
+3. Make your changes following the coding standards below
+
+4. Test your changes:
    ```bash
    # Run a quick test build (2-5 minutes)
    ./start_build.sh --params-file params/tinyconfig.params
@@ -69,7 +79,7 @@ Before contributing, ensure you have:
    ./scripts/validate_params.sh
    ```
 
-4. Commit your changes with descriptive messages:
+5. Commit your changes with descriptive messages:
    ```bash
    git commit -m "feat: add support for new architecture"
    ```

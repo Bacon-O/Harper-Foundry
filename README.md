@@ -148,7 +148,9 @@ The build is configured via files in the `params/` directory. The default is `pa
 | `TUNING_CONFIG` | Additional config overlay | `harper_deb13_tune.config` |
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
 | `QA_MODE` | QA strictness | `RELAXED`, `ENFORCED` |
-More information can be found in the example params file. Alao supports any additional custom variables required for your workflow aa all variables get exported correctly for the environment whem env_setuo.sh is called.
+
+
+More information can be found in the example params file. Also supports any additional custom variables required for your workflow aa all variables get exported correctly for the environment whem env_setuo.sh is called.
 ### Validation
 
 Always validate your configuration before building:
@@ -208,6 +210,19 @@ make test
 ```bash
 ./start_build.sh --params-file params/experimental.params
 ```
+
+**Create and use a custom params file (avoiding git conflicts):**
+```bash
+# Copy a template to params/params.d/ for your customizations
+cp params/harper_deb13.params params/params.d/my_custom_build.params
+# Edit params/params.d/my_custom_build.params as needed
+./start_build.sh --params-file params/params.d/my_custom_build.params
+
+# Your custom configs stay safe - git pull won't conflict them
+git pull  # Safe!
+```
+
+See [params/README.md](params/README.md#user-customizations-paramsd) for detailed customization patterns.
 
 **Apply override params on top of base config:**
 ```bash

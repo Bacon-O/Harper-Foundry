@@ -55,6 +55,7 @@ notify() {
         log_info "Usage: notify <notifier_name> [options...]"
         log_info ""
         log_info "Available notifiers:"
+        # Show project notifiers
         for plugin in "$PLUGINS_DIR"/*.sh; do
             if [ "$plugin" != "$PLUGINS_DIR/runner.sh" ]; then
                 local plugin_name
@@ -62,18 +63,36 @@ notify() {
                 log_info "  - $plugin_name"
             fi
         done
+        # Show custom notifiers
+        if [ -d "$PLUGINS_DIR/../plugins.d/notifiers" ]; then
+            for plugin in "$PLUGINS_DIR/../plugins.d/notifiers"/*.sh; do
+                if [ -f "$plugin" ]; then
+                    local plugin_name
+                    plugin_name=$(basename "$plugin" .sh)
+                    log_info "  - $plugin_name (custom)"
+                fi
+            done
+        fi
         return 1
     fi
     
-    local plugin_file="$PLUGINS_DIR/${tool_name}.sh"
-    
-    if [ ! -f "$plugin_file" ]; then
-        log_error "Notifier plugin not found: $tool_name"
-        log_error "Expected: $plugin_file"
-        return 1
+    # Check custom plugins first (plugins.d/notifiers/)
+    local custom_plugin="$PLUGINS_DIR/../plugins.d/notifiers/${tool_name}.sh"
+    if [ -f "$custom_plugin" ]; then
+        log_info "Loading custom notifier: $tool_name"
+        plugin_file="$custom_plugin"
+    else
+        # Fall back to project plugins
+        local plugin_file="$PLUGINS_DIR/${tool_name}.sh"
+        if [ ! -f "$plugin_file" ]; then
+            log_error "Notifier plugin not found: $tool_name"
+            log_error "Searched:"
+            log_error "  - $custom_plugin"
+            log_error "  - $plugin_file"
+            return 1
+        fi
+        log_info "Loading notifier: $tool_name"
     fi
-    
-    log_info "Loading notifier: $tool_name"
     
     # Source and execute the plugin
     # shellcheck disable=SC1090
