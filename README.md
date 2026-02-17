@@ -148,7 +148,7 @@ The build is configured via files in the `params/` directory. The default is `pa
 | `TUNING_CONFIG` | Additional config overlay | `harper_deb13_tune.config` |
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
 | `QA_MODE` | QA strictness | `RELAXED`, `ENFORCED` |
-
+More information can be found in the example params file. Alao supports any additional custom variables required for your workflow aa all variables get exported correctly for the environment whem env_setuo.sh is called.
 ### Validation
 
 Always validate your configuration before building:
