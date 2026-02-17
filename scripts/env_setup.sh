@@ -34,12 +34,16 @@ while [[ "$#" -gt 0 ]]; do
                 echo "❌ Error: Argument for $1 is missing"
                 exit 1
             fi
-            if [[ -f "$2" ]]; then
-                PARAMS_FILE="$(realpath "$2")"
-            elif [[ -f "${REPO_ROOT}/$2" ]]; then
+            # Check relative to REPO_ROOT first (for paths like params/tinyconfig.params)
+            if [[ -f "${REPO_ROOT}/$2" ]]; then
                 PARAMS_FILE="${REPO_ROOT}/$2"
+            # Then check if it's an absolute path or relative to CWD
+            elif [[ -f "$2" ]]; then
+                PARAMS_FILE="$(realpath "$2")"
             else
                 echo "❌ Error: Specified config file '$2' not found."
+                echo "   Searched: ${REPO_ROOT}/$2"
+                echo "   And: $2 (relative to $(pwd))"
                 exit 1
             fi
             shift 
@@ -49,12 +53,16 @@ while [[ "$#" -gt 0 ]]; do
                 echo "❌ Error: Argument for $1 is missing"
                 exit 1
             fi
-            if [[ -f "$2" ]]; then
-                OVERRIDE_PARAMS="$(realpath "$2")"
-            elif [[ -f "${REPO_ROOT}/$2" ]]; then
+            # Check relative to REPO_ROOT first
+            if [[ -f "${REPO_ROOT}/$2" ]]; then
                 OVERRIDE_PARAMS="${REPO_ROOT}/$2"
+            # Then check if it's an absolute path or relative to CWD
+            elif [[ -f "$2" ]]; then
+                OVERRIDE_PARAMS="$(realpath "$2")"
             else
                 echo "❌ Error: Specified override file '$2' not found."
+                echo "   Searched: ${REPO_ROOT}/$2"
+                echo "   And: $2 (relative to $(pwd))"
                 exit 1
             fi
             shift
