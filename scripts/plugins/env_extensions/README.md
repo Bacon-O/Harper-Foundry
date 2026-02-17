@@ -51,17 +51,6 @@ This directory allows you to **extend and customize environment variables after 
 - ✅ Per-build profiles: Different params files = different extension stacks
 - ✅ Smart lookup: Custom (`scripts/scripts.d/plugins/`) takes precedence over official (`scripts/plugins/`)
 
-### Auto-Discovery Mode
-
-**Or let the system auto-discover all available extensions** (leave ENV_EXTENSIONS empty):
-
-```bash
-# params/harper_deb13.params
-ENV_EXTENSIONS=()  # Empty = auto-load all in alphabetical order
-```
-
-Then all executable `.sh` files in both custom and official directories load automatically.
-
 ### Create a Custom Setup
 
 1. **Create a new script:**
