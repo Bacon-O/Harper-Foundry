@@ -48,7 +48,6 @@ jobs:
             echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
             
             # Execute build with tinyconfig for CI testing
-            export HOST_OUTPUT_DIR="${GITHUB_WORKSPACE}/output"
             if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
               # Update tracking via plugin callback
