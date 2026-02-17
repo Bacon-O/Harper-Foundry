@@ -38,22 +38,28 @@ done
 # --- Phase 2: Package-Level Bundles ---
 log_info "Phase 2: Executing Host-Native Package Suites..."
 for package in "${QA_TEST_PACKAGE[@]}"; do
-    pkg_path="${TEST_PACKAGE_DIR}/${package}"
+    list_file="${TEST_PACKAGE_DIR}/${package}.lst"
     
-    if [[ -d "$pkg_path" ]]; then
+    if [[ -f "$list_file" ]]; then
         log_info "Opening QA Bundle: $package"
-        # Logic: Discover and execute all executable scripts within the folder
-        for subtest in "$pkg_path"/*; do
-            if [[ -x "$subtest" ]]; then
-                test_name=$(basename "$subtest")
+        
+        # Read tests from .lst file and execute each one
+        while IFS= read -r test_name; do
+            # Skip empty lines and comments
+            [[ -z "$test_name" || "$test_name" == \#* ]] && continue
+            
+            test_path="${TEST_FUNCTIONS_DIR}/${test_name}"
+            if [[ -x "$test_path" ]]; then
                 log_info "  -> Executing: $test_name"
-                if ! "$subtest" "$@"; then
+                if ! "$test_path" "$@"; then
                     handle_failure "$package/$test_name"
                 fi
+            else
+                log_warn "Test not found or not executable: $test_path"
             fi
-        done
+        done < "$list_file"
     else
-        log_warn "QA Package directory not found: $pkg_path"
+        log_warn "QA Package list not found: $list_file"
     fi
 done
 

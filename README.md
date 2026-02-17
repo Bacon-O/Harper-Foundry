@@ -338,8 +338,9 @@ qatests/
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
-└── packages/       # QA test package bundles
-    └── harperbase/ # Base test package
+└── packages/       # Test package definition files (.lst)
+    ├── harper.lst
+    └── minimal.lst
 ```
 
 ### Individual Tests
@@ -352,8 +353,9 @@ Located in `scripts/plugins/qatests/tests/`:
 
 ### Test Packages
 
-Collections of related tests in `scripts/plugins/qatests/packages/`:
-- `harperbase` - Core validation suite
+Test package definitions in `scripts/plugins/qatests/packages/` (.lst files):
+- `harper.lst` - Full validation suite (all 4 tests)
+- `minimal.lst` - Minimal suite (quick validation)
 
 For more details, see [QA Tests Documentation](scripts/plugins/qatests/README.md).
 
@@ -370,7 +372,7 @@ QA_TESTS=(
 
 # Test packages
 QA_TEST_PACKAGE=(
-    "harperbase"
+    "harper"
 )
 
 # QA behavior

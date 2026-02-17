@@ -11,10 +11,9 @@ qatests/
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
-└── packages/       # QA test package bundles
-    └── harperbase/ # Base test package
-        ├── .testlist
-        └── linuxconfig.sh
+└── packages/       # Test package definition files (.lst)
+    ├── harper.lst
+    └── minimal.lst
 ```
 
 ## Test Types
@@ -32,11 +31,13 @@ Individual tests are referenced in the `QA_TESTS` array in params files.
 
 ### Test Packages (`packages/`)
 
-Bundled test suites that group related tests together:
+Bundled test suites defined as `.lst` files that reference tests from `tests/`:
 
-- **`harperbase/`**: Base test package for Harper builds
-  - Contains `.testlist` file specifying which tests to run
-  - May include package-specific test scripts
+- **`harper.lst`**: Full test package for Harper builds
+  - Lists test names to run from `TEST_FUNCTIONS_DIR`
+  - One test per line
+  - Supports comments (lines starting with `#`)
+  - No symlinks required
 
 Test packages are referenced in the `QA_TEST_PACKAGE` array in params files.
 
@@ -61,9 +62,9 @@ QA_TESTS=(
     "linuxconfig.sh"
 )
 
-# Test packages to run
+# Test packages to run (references .lst files in packages/)
 QA_TEST_PACKAGE=(
-    "harperbase"
+    "harper"
 )
 ```
 
@@ -107,15 +108,25 @@ BYPASS_QA="true"
 
 ### Test Package
 
-1. Create directory in `packages/`
-2. Add `.testlist` file listing tests to run:
+1. Create a `.lst` file in `packages/` (e.g., `custom.lst`)
+2. List test names to run, one per line:
    ```
+   # Full test suite
    filesexists.sh
    linuxconfig.sh
    debpackage.sh
+   qemuboot.sh
    ```
-3. Optionally add package-specific test scripts
-4. Add package name to `QA_TEST_PACKAGE` array
+   - Each line references a test script from `TEST_FUNCTIONS_DIR`
+   - Tests are resolved and executed automatically
+   - Lines starting with `#` are treated as comments
+   - Empty lines are ignored
+3. Add package name (without `.lst`) to `QA_TEST_PACKAGE` array in params file:
+   ```bash
+   QA_TEST_PACKAGE=(
+       "custom"
+   )
+   ```
 
 ## Test Execution Order
 
@@ -123,3 +134,12 @@ BYPASS_QA="true"
 2. **Phase 2**: Package bundles (from `QA_TEST_PACKAGE` array)
 
 All tests run on the host system after the Docker build completes.
+
+## Design Notes
+
+Test packages use simple `.lst` files instead of directories. This design choice:
+
+- **Reduces complexity**: One file instead of a directory tree
+- **Eliminates duplication**: No symlinks or file copying needed
+- **Improves maintainability**: Clear separation between test definitions and implementations
+- **Enables flexibility**: Easy to create new test bundles without directory management

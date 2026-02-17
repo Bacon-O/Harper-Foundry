@@ -127,7 +127,7 @@ QA_TESTS=(
 
 # A list of QA packages to run /plugins/qatests/testpackages
 QA_TEST_PACKAGE=(
-    "harperbase"
+    "harper"
 )
 
 # --- Chemical Audit: Critical (Must Pass) ---

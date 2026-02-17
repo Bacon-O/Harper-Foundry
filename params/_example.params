@@ -103,7 +103,7 @@ QA_TESTS=(
 )
 
 QA_TEST_PACKAGE=(
-    "harperbase"
+    "minimal"
 )
 
 # --- Chemical Audit: Critical (Must Pass) ---
