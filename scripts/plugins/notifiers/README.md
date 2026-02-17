@@ -221,7 +221,7 @@ Run checks periodically:
 
 ```bash
 # Add to crontab
-*/5 * * * * cd /path/to/Debian-Harper && source scripts/plugins/notifiers/runner.sh && notify harper_checkmk
+*/5 * * * * cd /path/to/repo && source scripts/plugins/notifiers/runner.sh && notify harper_checkmk
 ```
 
 Or use dedicated wrapper scripts for each notifier.

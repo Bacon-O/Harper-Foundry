@@ -182,7 +182,7 @@ Execute immediately:
 ### Option 3: Remote SSH Build
 Delegate to a build server:
 ```bash
-ssh buildserver 'cd /path/to/harper && \
+ssh buildserver 'cd /path/to/repo && \
   ./start_build.sh --params-file params/harper_deb13.params'
 ```
 

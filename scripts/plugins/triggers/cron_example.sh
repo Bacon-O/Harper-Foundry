@@ -9,7 +9,7 @@
 #   1. Copy this file and customize for your environment
 #   2. Make executable: chmod +x cron_example.sh
 #   3. Add to crontab: crontab -e
-#      Example: 0 */6 * * * /path/to/harper/scripts/plugins/triggers/cron_example.sh
+#      Example: 0 */6 * * * /path/to/repo/scripts/plugins/triggers/cron_example.sh
 #
 # IMPORTANT: Cron jobs need explicit environment variables and full paths!
 # ==============================================================================
@@ -21,8 +21,12 @@ set -euo pipefail
 # ==============================================================================
 # Cron runs with minimal environment - set everything explicitly
 
-# Repository root (CHANGE THIS to your Harper installation path)
-export REPO_ROOT="/home/matthew@int.faushaus.net/devel/Debian-Harper"
+# Repository root - auto-detect from script location
+# Script is in: scripts/plugins/triggers/cron_example.sh
+# Repo root is: ../../../ from script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+export REPO_ROOT
 
 # Change to repo directory
 cd "$REPO_ROOT" || exit 1
