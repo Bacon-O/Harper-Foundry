@@ -8,7 +8,7 @@
 # (This is the official project directory)
 #
 # For your own custom extensions WITHOUT git conflicts, use:
-# scripts/plugins/plugins.d/env_extensions/
+# scripts/scripts.d/plugins/env_extensions/
 
 # Example: Override Docker memory limit for larger builds
 if [ -z "$DOCKER_MEMORY_LIMIT" ]; then

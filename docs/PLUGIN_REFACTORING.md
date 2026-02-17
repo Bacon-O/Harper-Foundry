@@ -115,4 +115,4 @@ Consider adding additional patch plugins:
 
 - [Patches Plugin Docs](scripts/plugins/patches/README.md)
 - [QA Tests Docs](scripts/plugins/qatests/README.md)
-- [Alloy Mixtures Docs](scripts/alloymixtures/README.md)
+- [Compile Scripts Docs](scripts/compile_scripts/README.md)

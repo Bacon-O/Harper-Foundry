@@ -11,12 +11,14 @@ qatests/
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
-└── packages/        # Project test package definition files (.lst)
-    ├── harper.lst
-    └── minimal.lst
+├── packages/        # Official test package definitions
+│   ├── harperbase/
+│   └── README.md
 
-plugins.d/qatests/              # User custom test packages (not in git)
-└── (your custom .lst files here)
+scripts.d/plugins/qatests/      # Your custom tests (gitignored)
+├── tests/           # Your custom test scripts
+└── packages/        # Your custom test package definitions
+    └── mytest/
 ```
 
 ## Test Types
@@ -96,7 +98,7 @@ BYPASS_QA="true"
 
 1. Create executable bash script in **either**:
    - `scripts/plugins/qatests/tests/` (project tests)
-   - `scripts/plugins/plugins.d/qatests/` (custom tests - **recommended for users**)
+   - `scripts/scripts.d/plugins/qatests/tests/` (custom tests - **recommended for users**)
 
 2. Add to `QA_TESTS` array in params file using **just the filename**:
    ```bash
@@ -122,7 +124,7 @@ BYPASS_QA="true"
    ```
 
 **Path Lookup Order** (transparent to user):
-1. Check `scripts/plugins/plugins.d/qatests/` (custom - takes precedence)
+1. Check `scripts/scripts.d/plugins/qatests/` (custom - takes precedence)
 2. Fall back to `scripts/plugins/qatests/tests/` (project)
 
 ### Test Package
@@ -131,7 +133,7 @@ BYPASS_QA="true"
 
 1. Create a `.lst` file in **either**:
    - `scripts/plugins/qatests/packages/` (project packages)
-   - `scripts/plugins/plugins.d/qatests/` (custom packages - **recommended for users**)
+   - `scripts/scripts.d/plugins/qatests/packages/` (custom packages - **recommended for users**)
 
 2. List test names to run, one per line:
    ```
@@ -155,10 +157,10 @@ BYPASS_QA="true"
    ```
 
 **Path Lookup Order** (transparent to user):
-1. Check `scripts/plugins/plugins.d/qatests/` (custom - takes precedence)
+1. Check `scripts/scripts.d/plugins/qatests/` (custom - takes precedence)
 2. Fall back to `scripts/plugins/qatests/packages/` (project)
 
-**Benefits of using `scripts/plugins/plugins.d/qatests/`:**
+**Benefits of using `scripts/scripts.d/plugins/qatests/`:**
 - ✅ No git conflicts during updates
 - ✅ Keeps custom tests separate from project
 - ✅ Easy to maintain multiple test profiles

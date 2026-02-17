@@ -8,7 +8,7 @@ This directory contains plugins for applying patches to the Linux kernel source 
 patches/
 ├── README.md                   # This file
 
-plugins.d/patches/              # User custom patches (not in git)
+scripts.d/plugins/patches/      # Your custom patches (gitignored)
 └── (your custom patches here)
 ```
 
@@ -16,7 +16,7 @@ plugins.d/patches/              # User custom patches (not in git)
 
 For user custom patches (recommended):
 
-1. Create a new script in `scripts/plugins/plugins.d/patches/` (e.g., `scripts/plugins/plugins.d/patches/my-realtime.sh`)
+1. Create a new script in `scripts/scripts.d/plugins/patches/` (e.g., `scripts/scripts.d/plugins/patches/my-realtime.sh`)
 2. Follow this template:
 
 ```bash
@@ -44,18 +44,18 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
 fi
 ```
 
-3. Make it executable: `chmod +x scripts/plugins/plugins.d/patches/my-realtime.sh`
-4. Source it in your alloy mixture script:
+3. Make it executable: `chmod +x scripts/scripts.d/plugins/patches/my-realtime.sh`
+4. Source it in your compile script:
    ```bash
    # From custom patches
-   source "${REPO_ROOT}/scripts/plugins/plugins.d/patches/my-realtime.sh`
+   source "${REPO_ROOT}/scripts/scripts.d/plugins/patches/my-realtime.sh`
    ```
 5. Add configuration to params file:
    ```bash
    MY_PATCH_URL="https://example.com/my-patch.patch"
    ```
 
-**Benefits of using `scripts/plugins/plugins.d/patches/`:**
+**Benefits of using `scripts/scripts.d/plugins/patches/`:**
 - ✅ No git conflicts during updates
 - ✅ Keeps custom patches separate from project
 - ✅ Easy to maintain multiple patch sets

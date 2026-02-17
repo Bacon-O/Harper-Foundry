@@ -31,7 +31,7 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="alloymixtures/tinyconfig.sh"
+FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
 INCREMENTAL_BUILD="false"
 
 # --- Foundry Image Configuration ---

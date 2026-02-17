@@ -11,7 +11,7 @@ notifiers/
 ├── runner.sh                   # Plugin router/dispatcher
 └── README.md                   # This file
 
-plugins.d/notifiers/            # User custom notifiers (not in git)
+scripts.d/plugins/notifiers/    # Your custom notifiers (gitignored)
 └── (your custom notifiers here)
 ```
 
@@ -234,9 +234,9 @@ slack_check() {
 
 To add a custom notifier plugin without modifying project files:
 
-1. Create a plugin in `scripts/plugins/plugins.d/notifiers/`:
+1. Create a plugin in `scripts/scripts.d/plugins/notifiers/`:
    ```bash
-   cat > scripts/plugins/plugins.d/notifiers/my_service.sh << 'EOF'
+   cat > scripts/plugins/notifiers/my_service.sh << 'EOF'
    #!/bin/bash
    
    my_service_check() {
@@ -253,7 +253,7 @@ To add a custom notifier plugin without modifying project files:
        return 0
    }
    EOF
-   chmod +x scripts/plugins.d/notifiers/my_service.sh
+   chmod +x scripts/scripts.d/plugins/notifiers/my_service.sh
    ```
 
 2. Use in your build workflow:

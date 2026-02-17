@@ -97,13 +97,22 @@ if [ -n "$TUNING_CONFIG" ]; then
     fi
 fi
 
-# Check if foundry script exists
-if [ -f "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
-    echo "  ✅ Foundry exec script found: scripts/$FOUNDRY_EXEC"
+# Check if foundry script exists (smart lookup: scripts.d/ first, then scripts/)
+foundry_found=false
+if [ -f "${REPO_ROOT}/scripts/scripts.d/$FOUNDRY_EXEC" ]; then
+    echo "  ✅ Foundry exec script found (custom): scripts/scripts.d/$FOUNDRY_EXEC"
+    foundry_found=true
+elif [ -f "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
+    echo "  ✅ Foundry exec script found (official): scripts/$FOUNDRY_EXEC"
+    foundry_found=true
 elif [ -L "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
     echo "  ✅ Foundry exec script found (symlink): scripts/$FOUNDRY_EXEC"
-else
-    echo "  ❌ ERROR: Foundry exec script not found: scripts/$FOUNDRY_EXEC"
+    foundry_found=true
+fi
+
+if [ "$foundry_found" = false ]; then
+    echo "  ❌ ERROR: Foundry exec script not found: $FOUNDRY_EXEC"
+    echo "     Checked: scripts/scripts.d/$FOUNDRY_EXEC, scripts/$FOUNDRY_EXEC"
     ((ERRORS++))
 fi
 
@@ -162,8 +171,8 @@ fi
 # Check QA test packages (.lst files)
 if [ ${#QA_TEST_PACKAGE[@]} -gt 0 ]; then
     for package in "${QA_TEST_PACKAGE[@]}"; do
-        # Check custom packages first (plugins.d/qatests/)
-        custom_pkg="${REPO_ROOT}/scripts/plugins/plugins.d/qatests/${package}.lst"
+        # Check custom packages first (scripts.d/plugins/qatests/packages/) - takes precedence
+        custom_pkg="${REPO_ROOT}/scripts/scripts.d/plugins/qatests/packages/${package}.lst"
         # Then check project packages
         pkg_path="${REPO_ROOT}/scripts/plugins/qatests/packages/${package}.lst"
         

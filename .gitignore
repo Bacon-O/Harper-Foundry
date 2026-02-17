@@ -45,5 +45,5 @@ desktop.ini
 # Test Scripts (local only)
 .tests/
 
-# Plugin Customizations (user extensions)
-scripts/plugins/plugins.d/
+# Custom Scripts (user customizations)
+scripts/scripts.d/        # Custom compile scripts and utilities

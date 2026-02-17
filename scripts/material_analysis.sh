@@ -23,14 +23,13 @@ handle_failure() {
 # --- Phase 1: Function-Level Plugins ---
 log_info "Phase 1: Executing Host-Native QA Plugins..."
 for test_script in "${QA_TESTS[@]}"; do
-    # Check custom tests first (plugins.d/qatests/)
-    # Go up two levels from tests/ to plugins/ then down to plugins.d/qatests/
-    custom_test="${TEST_FUNCTIONS_DIR}/../../plugins.d/qatests/${test_script}"
+    # Check custom tests first (scripts.d/plugins/qatests/tests/) - takes precedence
+    custom_test="${REPO_ROOT}/scripts/scripts.d/plugins/qatests/tests/${test_script}"
     if [[ -x "$custom_test" ]]; then
         full_path="$custom_test"
         log_info "Running custom plugin: $test_script"
     else
-        # Fall back to project tests
+        # Fall back to official plugins
         full_path="${TEST_FUNCTIONS_DIR}/${test_script}"
         if [[ -x "$full_path" ]]; then
             log_info "Running plugin: $test_script"
@@ -48,14 +47,13 @@ done
 # --- Phase 2: Package-Level Bundles ---
 log_info "Phase 2: Executing Host-Native Package Suites..."
 for package in "${QA_TEST_PACKAGE[@]}"; do
-    # Check custom packages first (plugins.d/qatests/)
-    # Go up two levels from tests/ to plugins/ then down to plugins.d/qatests/
-    custom_list="${TEST_FUNCTIONS_DIR}/../../plugins.d/qatests/${package}.lst"
+    # Check custom packages first (scripts.d/plugins/qatests/packages/) - takes precedence
+    custom_list="${REPO_ROOT}/scripts/scripts.d/plugins/qatests/packages/${package}.lst"
     if [[ -f "$custom_list" ]]; then
         list_file="$custom_list"
         log_info "Opening custom QA Bundle: $package"
     else
-        # Fall back to project packages
+        # Fall back to official packages
         list_file="${TEST_PACKAGE_DIR}/${package}.lst"
         if [[ ! -f "$list_file" ]]; then
             log_warn "QA Package list not found: $list_file"

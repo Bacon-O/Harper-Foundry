@@ -12,8 +12,11 @@ kernelsources/
 ├── custom.sh                  # Template for custom sources
 ├── runner.sh                  # Plugin router/dispatcher
 └── README.md                  # This file
+```
 
-plugins.d/kernelsources/       # User custom plugins (not in git)
+**Custom kernel sources go in:**
+```
+scripts/scripts.d/plugins/kernelsources/  # Your custom plugins (gitignored)
 └── (your custom plugins here)
 ```
 
@@ -266,9 +269,9 @@ KERNEL_DIR=$(fetch_kernel_source "debian" "" "/tmp/build")
 
 To add a custom kernel source plugin without modifying the project files:
 
-1. Create a plugin in `scripts/plugins/plugins.d/kernelsources/`:
+1. Create a plugin in `scripts/scripts.d/plugins/kernelsources/`:
    ```bash
-   cat > scripts/plugins/plugins.d/kernelsources/myrepo.sh << 'EOF'
+   cat > scripts/scripts.d/plugins/kernelsources/myrepo.sh << 'EOF'
    #!/bin/bash
    set -e
    
@@ -286,7 +289,7 @@ To add a custom kernel source plugin without modifying the project files:
    echo "[INFO] Kernel ready: $BUILD_ROOT/kernel" >&2
    echo "$BUILD_ROOT/kernel"
    EOF
-   chmod +x scripts/plugins.d/kernelsources/myrepo.sh
+   chmod +x scripts/scripts.d/plugins/kernelsources/myrepo.sh
    ```
 
 2. Use in your params file:
@@ -334,7 +337,7 @@ echo "$BUILD_ROOT/linux"
 
 ## Adding to Tinyconfig Build
 
-See [scripts/alloymixtures/README.md](../alloymixtures/README.md) for how tinyconfig.sh integrates the kernel source plugin system.
+See [scripts/compile_scripts/README.md](../compile_scripts/README.md) for how tinyconfig.sh integrates the kernel source plugin system.
 
 ## Troubleshooting
 

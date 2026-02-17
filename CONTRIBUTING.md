@@ -276,11 +276,20 @@ Harper-Foundry/
 ├── configs/           # Kernel configuration fragments
 ├── docker/           # Dockerfiles for build environments
 ├── params/           # Build parameter files
+│   └── params.d/     # Your custom parameters (gitignored)
 ├── scripts/          # Build and utility scripts
+│   ├── compile_scripts/  # Official build script variants
 │   ├── plugins/      # Extensible plugins
-│   │   ├── foundrysetup/
-│   │   └── qatests/  # Quality assurance tests
-│   ├── alloymixtures/  # Build script variants
+│   │   ├── kernelsources/
+│   │   ├── notifiers/
+│   │   ├── patches/
+│   │   ├── qatests/  # Quality assurance tests
+│   │   ├── tools/
+│   │   ├── triggers/
+│   │   └── env_extensions/
+│   ├── scripts.d/    # Your custom scripts (gitignored)
+│   │   ├── compile_scripts/
+│   │   └── plugins/
 │   ├── env_setup.sh  # Environment setup and validation
 │   ├── furnace_*.sh  # Build orchestration scripts
 │   └── material_analysis.sh  # QA orchestration
@@ -292,9 +301,16 @@ Harper-Foundry/
 
 - `params/foundry.params` - Default build configuration
 - `scripts/env_setup.sh` - Environment variable definitions
-- `scripts/alloymixtures/harper_deb13.sh` - Core build logic (runs in Docker)
+- `scripts/compile_scripts/harper_deb13.sh` - Core build logic (runs in Docker)
 - `scripts/material_analysis.sh` - QA test runner
 - `.github/workflows/kernel-factory.yml` - CI/CD pipeline
+
+### Customization Directories (All Gitignored)
+
+- `params/params.d/` - Your custom build configurations
+- `scripts/scripts.d/` - Your custom compile scripts and utilities
+  - `compile_scripts/` - Custom build variants
+  - `plugins/` - Custom plugin implementations (kernelsources, notifiers, qatests, etc.)
 
 ## Questions or Issues?
 

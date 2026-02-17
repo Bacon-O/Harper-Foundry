@@ -28,13 +28,13 @@ This directory allows you to **extend and customize environment variables after 
 
 2. **Create your custom extensions:**
    ```bash
-   cat > scripts/plugins/plugins.d/env_extensions/container_optimized.sh << 'EOF'
+   cat > scripts/scripts.d/plugins/env_extensions/container_optimized.sh << 'EOF'
    #!/bin/bash
    export PARALLEL_JOBS=16
    export DOCKER_MEMORY_LIMIT="8g"
    echo "🐳 Container optimizations enabled"
    EOF
-   chmod +x scripts/plugins/plugins.d/env_extensions/container_optimized.sh
+   chmod +x scripts/scripts.d/plugins/env_extensions/container_optimized.sh
    ```
 
 3. **Run the build** - your specified extensions load in order:
@@ -49,7 +49,7 @@ This directory allows you to **extend and customize environment variables after 
 - ✅ Explicit control: Specify exactly which extensions load
 - ✅ Ordered execution: Load extension A before B (dependencies work)
 - ✅ Per-build profiles: Different params files = different extension stacks
-- ✅ Smart lookup: Custom (`plugins.d/`) takes precedence over official (`plugins/`)
+- ✅ Smart lookup: Custom (`scripts/scripts.d/plugins/`) takes precedence over official (`scripts/plugins/`)
 
 ### Auto-Discovery Mode
 
@@ -66,7 +66,7 @@ Then all executable `.sh` files in both custom and official directories load aut
 
 1. **Create a new script:**
    ```bash
-   cat > scripts/plugins/plugins.d/env_extensions/my_custom_setup.sh << 'EOF'
+   cat > scripts/scripts.d/plugins/env_extensions/my_custom_setup.sh << 'EOF'
    #!/bin/bash
    # My custom environment setup
    export PARALLEL_JOBS=32
@@ -77,7 +77,7 @@ Then all executable `.sh` files in both custom and official directories load aut
 
 2. **Make it executable:**
    ```bash
-   chmod +x scripts/plugins/plugins.d/env_extensions/my_custom_setup.sh
+   chmod +x scripts/scripts.d/plugins/env_extensions/my_custom_setup.sh
    ```
 
 3. **Run env_setup.sh** - your script loads automatically:
@@ -200,9 +200,9 @@ ENV_EXTENSIONS=(
 Use numeric prefixes to ensure your scripts run in a specific order:
 
 ```bash
-./scripts/plugins/plugins.d/env_extensions/10_base_customization.sh
-./scripts/plugins/plugins.d/env_extensions/20_ci_specific.sh
-./scripts/plugins/plugins.d/env_extensions/30_debug_options.sh
+./scripts/scripts.d/plugins/env_extensions/10_base_customization.sh
+./scripts/scripts.d/plugins/env_extensions/20_ci_specific.sh
+./scripts/scripts.d/plugins/env_extensions/30_debug_options.sh
 ```
 
 They'll source in that order regardless of alphabetical filename.
@@ -312,7 +312,7 @@ ENABLE_CCACHE=true ./start_build.sh
 ## Troubleshooting
 
 ### Script not running?
-- Check it's executable: `ls -l scripts/plugins/plugins.d/env_setup/`
+- Check it's executable: `ls -l scripts/scripts.d/plugins/env_extensions/`
 - Verify the filename ends with `.sh`
 - Ensure `chmod +x` was applied
 - Check for syntax errors: `bash -n your_script.sh`

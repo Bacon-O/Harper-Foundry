@@ -43,13 +43,13 @@ FOUNDRY_GID=""
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
-FOUNDRY_EXEC="EDIT_ME_EXECUTION_SCRIPT"
+FOUNDRY_EXEC=""
 INCREMENTAL_BUILD="false"
 
 # --- Foundry Image Configuration ---
 # ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
-DOCKERFILE_PATH="EDIT_ME_DOCKER_IMAGE_PATH"
-CONTAINER_IMAGE_NAME="debian-harper-worker"
+DOCKERFILE_PATH=""
+CONTAINER_IMAGE_NAME=""
 
 # ==============================================================================
 # TARGET KERNEL DEFINITION
@@ -57,16 +57,16 @@ CONTAINER_IMAGE_NAME="debian-harper-worker"
 # ==============================================================================
 
 # --- Versioning & Tagging ---
-BUILD_ARCH_TAG="EDIT_ME_ARCH_TAG"
-RELEASE_TAG="EDIT_ME_PROJECT_TAG"
+BUILD_ARCH_TAG=""
+RELEASE_TAG=""
 
 # --- Target Specifications ---
 # ⚠️  REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
-TARGET_ARCH="EDIT_ME_TARGET_ARCH"
+TARGET_ARCH=""
 
-KERNEL_CFLAGS="EDIT_ME_KERNEL_CFLAGS"
-CROSS_COMPILE_PREFIX="EDIT_ME_CROSS_COMPILE"
-DEBIAN_PACKAGE_NAME="EDIT_ME_KDEB_NAME"
+KERNEL_CFLAGS=""
+CROSS_COMPILE_PREFIX=""
+DEBIAN_PACKAGE_NAME=""
 
 # --- Kernel Source Strategy (Plugin-based) ---
 # The kernel source plugin system maps KERNEL_SOURCE to specific fetching methods.
@@ -77,7 +77,7 @@ DEBIAN_PACKAGE_NAME="EDIT_ME_KDEB_NAME"
 #   - "custom"      : Skip auto-fetch; implement your own logic in ci-build
 #   - "none"        : Skip auto-fetch; implement your own logic in ci-build
 # See: scripts/plugins/kernelsources/README.md
-KERNEL_SOURCE="EDIT_ME_KERNEL_SOURCE"
+KERNEL_SOURCE=""
 # KERNEL_VERSION supports semantic aliases (source-aware interpretation):
 #   - "" (empty) or omitted: Uses source defaults (kernel.org → 6.11.8, debian → latest, etc.)
 #   - "latest": Latest stable/available from source
@@ -92,15 +92,15 @@ KERNEL_SOURCE="EDIT_ME_KERNEL_SOURCE"
 #   KERNEL_VERSION="6.11.8"            # Pin to specific version
 KERNEL_VERSION=""
 
-DEB_HOST_ARCH="EDIT_ME_DEB_TARGET_ARCH"
+DEB_HOST_ARCH=""
 HOST_QEMU_STATIC="/usr/bin/qemu-EDIT_ME_ARCH-static"
 
-BUILD_DEB_BUILD_ARCH="EDIT_ME_BUILD_ARCH"
-BUILD_DEB_TARGET_ARCH="EDIT_ME_TARGET_ARCH"
-BUILD_CC="EDIT_ME_C_COMPILER"
-BUILD_HOSTLD="EDIT_ME_HOSTLD"
-BUILD_HOSTCFLAGS="EDIT_ME_HOSTCFLAGS"
-BUILD_HOSTLDFLAGS="EDIT_ME_HOSTLDFLAGS"
+BUILD_DEB_BUILD_ARCH=""
+BUILD_DEB_TARGET_ARCH=""
+BUILD_CC=""
+BUILD_HOSTLD=""
+BUILD_HOSTCFLAGS=""
+BUILD_HOSTLDFLAGS=""
 BUILD_LLVM="1"
 
 # ==============================================================================
@@ -114,8 +114,8 @@ PARALLEL_JOBS=""
 
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
-BASE_CONFIG="EDIT_ME_BASE_CONFIG"
-TUNING_CONFIG="EDIT_ME_TUNING_CONFIG"
+BASE_CONFIG=""
+TUNING_CONFIG=""
 
 # Note: KERNEL_VERSION is used by kernel source plugins to determine which kernel
 # version to fetch. It's optional - see KERNEL_VERSION documentation above.

@@ -124,7 +124,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment setup.
     *   `furnace_ignite.sh`: Docker container launch logic.
-    *   `alloymixtures/`: Build script variants (full, tinyconfig, etc.).
+    *   `compile_scripts/`: Build script variants (full, tinyconfig, etc.).
     *   `material_analysis.sh`: Post-build Quality Assurance.
 *   `configs/`: Kernel configuration fragments (base configs and tuning overlays).
 *   `docker/`: Dockerfiles defining the build environment.
@@ -235,7 +235,7 @@ See [params/README.md](params/README.md#configuration-override-patterns) for det
 
 **Use a specific build mixture:**
 ```bash
-./start_build.sh --exec alloymixtures/tinyconfig.sh
+./start_build.sh --exec compile_scripts/tinyconfig.sh
 ```
 
 **Force rebuild of Docker image:**
@@ -254,7 +254,7 @@ The foundry supports different "alloy mixtures" - build configurations optimized
 | **harper_deb13.sh** | 30-60+ min | Enthusiast/hobbyist builds ⚠️ | Full .deb packages, optimized for desktop/gaming (compiled with CLANG/LLVM) |
 | **tinyconfig.sh** | 2-5 min | Quick testing | bzImage only |
 
-See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detailed information.
+See [scripts/compile_scripts/README.md](scripts/compile_scripts/README.md) for detailed information.
 
 ### Quick Test vs Full Build
 
@@ -407,7 +407,7 @@ git pull
 ```bash
 # Your customizations are protected
 params/params.d/           # Your custom params (gitignored ✅)
-scripts/plugins/plugins.d/ # Your custom plugins (gitignored ✅)
+scripts/scripts.d/       # Your custom scripts (gitignored ✅)
 
 # Safe to update
 git pull  # Your custom files untouched
@@ -427,49 +427,77 @@ Harper Foundry uses a modular, extensible plugin architecture. All plugins follo
 
 **Directory Structure:**
 ```
-scripts/plugins/
-├── kernelsources/              ← Official kernel source plugins
-│   └── plugins.d/              ← Your custom kernel sources (gitignored)
-├── notifiers/                  ← Official notification plugins
-│   └── plugins.d/              ← Your custom notifiers (gitignored)
-├── patches/                    ← Official kernel patches
-│   └── plugins.d/              ← Your custom patches (gitignored)
-├── qatests/                    ← Official QA tests
-│   └── plugins.d/              ← Your custom tests (gitignored)
-└── env_extensions/             ← Official environment extensions
-    └── plugins.d/              ← Your custom extensions (gitignored)
+scripts/
+├── compile_scripts/            ← Official build script variants
+│   └── (harper_deb13.sh, tinyconfig.sh)
+├── plugins/                    ← Official plugin types
+│   ├── kernelsources/
+│   ├── notifiers/
+│   ├── patches/
+│   ├── qatests/
+│   ├── tools/
+│   ├── triggers/
+│   └── env_extensions/
+└── scripts.d/                  ← Your custom scripts (gitignored)
+    ├── compile_scripts/        ← Your custom build variants
+    └── plugins/                ← Your custom plugins (same structure as official)
+        ├── kernelsources/
+        ├── notifiers/
+        ├── patches/
+        ├── qatests/
+        ├── tools/
+        ├── triggers/
+        └── env_extensions/
 ```
 
 **How It Works:**
-- Plugin system checks `plugins.d/` (your custom implementations) first
-- Falls back to official versions if custom not found
-- **All custom plugins are gitignored** - safe to pull updates without conflicts
+- Smart lookup: Checks `scripts/scripts.d/` (your custom implementations) first
+- Falls back to official versions in `scripts/plugins/` if custom not found
+- **All custom implementations are gitignored** - safe to pull updates without conflicts
 - Use the same interface as official plugins
 
 **Available Plugin Types:**
 
-| Plugin | Purpose | Documentation |
-|--------|---------|----------------|
-| **kernelsources** | Fetch kernel from different sources | [Kernel Sources](scripts/plugins/kernelsources/README.md) |
-| **notifiers** | Integrate with monitoring/alerting systems | [Notifiers](scripts/plugins/notifiers/README.md) |
-| **patches** | Apply custom kernel patches | [Patches](scripts/plugins/patches/README.md) |
-| **qatests** | Add quality assurance tests | [QA Tests](scripts/plugins/qatests/README.md) |
-| **env_extensions** | Customize build environment variables | [Environment Extensions](scripts/plugins/env_extensions/README.md) |
+| Plugin | Purpose | Custom Location | Documentation |
+|--------|---------|-----------------|----------------|
+| **compile_scripts** | Build variants (full, tinyconfig, etc.) | `scripts/scripts.d/compile_scripts/` | [Compile Scripts](scripts/compile_scripts/README.md) |
+| **kernelsources** | Fetch kernel from different sources | `scripts/scripts.d/plugins/kernelsources/` | [Kernel Sources](scripts/plugins/kernelsources/README.md) |
+| **notifiers** | Integration with monitoring/alerting systems | `scripts/scripts.d/plugins/notifiers/` | [Notifiers](scripts/plugins/notifiers/README.md) |
+| **patches** | Apply custom kernel patches | `scripts/scripts.d/plugins/patches/` | [Patches](scripts/plugins/patches/README.md) |
+| **qatests** | Add quality assurance tests | `scripts/scripts.d/plugins/qatests/` | [QA Tests](scripts/plugins/qatests/README.md) |
+| **tools** | Utility scripts and helpers | `scripts/scripts.d/plugins/tools/` | [Tools](scripts/plugins/tools/README.md) |
+| **triggers** | Scheduling and automation | `scripts/scripts.d/plugins/triggers/` | [Triggers](scripts/plugins/triggers/README.md) |
+| **env_extensions** | Customize build environment variables | `scripts/scripts.d/plugins/env_extensions/` | [Environment Extensions](scripts/plugins/env_extensions/README.md) |
+
+**Quick Example - Custom Compile Script:**
+```bash
+# Create your custom build variant
+cat > scripts/scripts.d/compile_scripts/minimal.sh << 'EOF'
+#!/bin/bash
+# My minimal embedded kernel build
+# (copy and customize from official compile_scripts/tinyconfig.sh)
+EOF
+chmod +x scripts/scripts.d/compile_scripts/minimal.sh
+
+# Use it
+./start_build.sh --exec minimal.sh
+```
 
 **Quick Example - Custom Kernel Source:**
 ```bash
 # Create your custom kernel source plugin
-cat > scripts/plugins/kernelsources/plugins.d/my_source.sh << 'EOF'
+cat > scripts/scripts.d/plugins/kernelsources/my_source.sh << 'EOF'
 #!/bin/bash
 # My custom kernel source logic
-download_kernel() {
+fetch_kernel() {
     # Your implementation here
 }
 EOF
-chmod +x scripts/plugins/kernelsources/plugins.d/my_source.sh
+chmod +x scripts/scripts.d/plugins/kernelsources/my_source.sh
 
 # Use it in params
 KERNEL_SOURCE="my_source"
+ENV_EXTENSIONS=("kernelsources/my_source.sh")
 ```
 
 ### Safe Customization Pattern (`.d/` Directories)
@@ -477,7 +505,9 @@ KERNEL_SOURCE="my_source"
 All customizations follow the **Unix `.d/` pattern** to protect your changes from git conflicts:
 
 - **`params/params.d/`** - Your custom build configurations (gitignored)
-- **`scripts/plugins/plugins.d/`** - Your custom plugin implementations (gitignored)
+- **`scripts/scripts.d/`** - Your custom compile scripts and utilities (gitignored)
+  - `compile_scripts/` - Custom build variants alongside official ones
+  - `plugins/` - Custom plugin implementations (mirrors official plugin structure)
 
 **Why this matters:**
 ```bash
@@ -485,23 +515,29 @@ All customizations follow the **Unix `.d/` pattern** to protect your changes fro
 git pull
 
 # Your files stay put
-ls params/params.d/        # Still there! ✅
-ls scripts/plugins/plugins.d/  # Still there! ✅
+ls params/params.d/              # Still there! ✅
+ls scripts/scripts.d/            # Still there! ✅
+ls scripts/scripts.d/    # Still there! ✅
 
 # Update the project fearlessly
 git pull
 ```
 
-**Pattern applies to:**
-- Parameters: `params/params.d/my_build.params`
-- Kernel sources: `scripts/plugins/kernelsources/plugins.d/my_source.sh`
-- QA tests: `scripts/plugins/qatests/plugins.d/my_test.sh`
-- Patches: `scripts/plugins/patches/plugins.d/my_patch.patch`
-- Notifiers: `scripts/plugins/notifiers/plugins.d/my_notifier.sh`
-- Environment extensions: `scripts/plugins/env_extensions/plugins.d/my_env.sh`
+**Customization locations:**
+
+- **Build Configurations:** `params/params.d/my_build.params`
+- **Compile Scripts:** `scripts/scripts.d/compile_scripts/myconfig.sh`
+- **Kernel Sources:** `scripts/scripts.d/plugins/kernelsources/my_source.sh`
+- **QA Tests:** `scripts/scripts.d/plugins/qatests/my_test/`
+- **Patches:** `scripts/scripts.d/plugins/patches/my.patch`
+- **Notifiers:** `scripts/scripts.d/plugins/notifiers/my_notifier.sh`
+- **Utilities:** `scripts/scripts.d/plugins/tools/my_tool.sh`
+- **Triggers:** `scripts/scripts.d/plugins/triggers/my_trigger.sh`
+- **Environment Extensions:** `scripts/scripts.d/plugins/env_extensions/my_env.sh`
 
 For detailed customization examples, see:
 - [params/README.md](params/README.md#user-customizations-paramsd) - Parameter customization
+- [scripts/scripts.d/README.md](scripts/scripts.d/README.md) - Compile scripts and utilities customization
 - [scripts/plugins/README.md](scripts/plugins/README.md) - Plugin customization
 
 ### Incremental Builds

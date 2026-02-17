@@ -1,8 +1,8 @@
-# Alloy Mixtures Refactoring Summary
+# Compile Scripts Refactoring Summary
 
 ## Overview
 
-The build system has been refactored to support multiple "alloy mixtures" - different build configurations optimized for specific purposes. This provides better organization and enables fast testing workflows.
+The build system has been refactored to support multiple compile scripts - different build configurations optimized for specific purposes. This provides better organization and enables fast testing workflows.
 
 ## What Changed
 
@@ -20,8 +20,8 @@ scripts/
 **After:**
 ```
 scripts/
-├── alloymixtures/       # NEW: Build script variants
-│   ├── README.md        # Documentation for all mixtures
+├── compile_scripts/     # NEW: Build script variants
+│   ├── README.md        # Documentation for all scripts
 │   ├── harper_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
 │   └── tinyconfig.sh    # Quick tests (2-5 min)
 ├── env_setup.sh
@@ -33,20 +33,20 @@ scripts/
 
 **New Files:**
 - `params/tinyconfig.params` - Fast test configuration
-- `scripts/alloymixtures/README.md` - Alloy mixtures documentation
-- `scripts/alloymixtures/harper_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
-- `scripts/alloymixtures/tinyconfig.sh` - Quick test script
+- `scripts/compile_scripts/README.md` - Compile scripts documentation
+- `scripts/compile_scripts/harper_deb13.sh` - Harper Debian 13 enthusiast build script (⚠️ experimental)
+- `scripts/compile_scripts/tinyconfig.sh` - Quick test script
 
 **Modified Files:**
-- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `alloymixtures/harper_deb13.sh`
+- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `compile_scripts/harper_deb13.sh`
 - `Makefile` - `make test` now uses tinyconfig params
-- `README.md` - Added alloy mixtures section
+- `README.md` - Added compile scripts section
 - `CONTRIBUTING.md` - Updated test instructions
-- `scripts/validate_params.sh` - Enhanced to handle alloymixtures paths
+- `scripts/validate_params.sh` - Enhanced to handle compile_scripts paths
 
-## The Two Mixtures
+## The Two Compile Scripts
 
-### 1. Harper Prime Alloy - Debian 13 (`alloymixtures/harper_deb13.sh`)
+### 1. Harper Prime - Debian 13 (`compile_scripts/harper_deb13.sh`)
 
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists
 
@@ -104,7 +104,7 @@ Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 
 ---
 
-### 2. Tinyconfig Quick Test (`alloymixtures/tinyconfig.sh`)
+### 2. Tinyconfig Quick Test (`compile_scripts/tinyconfig.sh`)
 
 **Purpose:** Fast pipeline validation and testing
 
@@ -126,7 +126,7 @@ Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 make test
 
 # Explicit
-./start_build.sh --exec alloymixtures/tinyconfig.sh
+./start_build.sh --exec compile_scripts/tinyconfig.sh
 ```
 
 **Outputs:**
@@ -148,7 +148,7 @@ make test
 
 **Action required:** `ci-build.sh` has been removed.
 - Update any custom scripts or containers that referenced `ci-build.sh`
-- Use `scripts/alloymixtures/harper_deb13.sh` instead
+- Use `scripts/compile_scripts/harper_deb13.sh` instead
 - `foundry.params` already uses the new path
 
 ### For CI/CD Pipelines
@@ -201,7 +201,7 @@ make build
 
 ### 2. **Better Organization**
 - Clear separation of build types
-- Easy to add new mixtures
+- Easy to add new scripts
 - Self-documenting structure
 
 ### 3. **Resource Optimization**
@@ -210,7 +210,7 @@ make build
 - Better CI/CD efficiency
 
 ### 4. **Extensibility**
-- Easy to add new mixtures:
+- Easy to add new compile scripts:
   - `minimal.sh` - Embedded systems
   - `debug.sh` - Development with symbols
   - `rt.sh` - Real-time kernels
@@ -232,7 +232,7 @@ make build
 
 ### Environment Variable Handling
 
-Both mixtures respect the same environment variables:
+Both scripts respect the same environment variables:
 - `FINAL_JOBS` - Parallelism
 - `TARGET_ARCH` - Architecture
 - `INCREMENTAL_BUILD` - Clean vs incremental
@@ -241,12 +241,12 @@ Both mixtures respect the same environment variables:
 
 ### Artifact Location
 
-Both mixtures output to the same location:
+Both scripts output to the same location:
 ```
 $HOST_OUTPUT_DIR/build_$BUILD_ID/
 ```
 
-This ensures consistent artifact handling regardless of mixture used.
+This ensures consistent artifact handling regardless of script used.
 
 ### QA Integration
 
@@ -260,7 +260,7 @@ This ensures consistent artifact handling regardless of mixture used.
 - QA_MODE=RELAXED (warnings only)
 - Skips package/module validation
 
-## Future Mixtures
+## Future Scripts
 
 Potential additions:
 
@@ -272,7 +272,7 @@ Potential additions:
 6. **`server.sh`** - Server workload optimized
 7. **`desktop.sh`** - Desktop/workstation tuned
 
-See `scripts/alloymixtures/README.md` for how to create new mixtures.
+See `scripts/compile_scripts/README.md` for how to create new scripts.
 
 ## Testing
 
@@ -288,24 +288,24 @@ All changes have been validated:
 ✅ All checks passed! Configuration is valid.
 
 # ✅ Backward compatibility
-ls -la scripts/alloymixtures/*.sh
--rwxr-xr-x ... alloymixtures/harper_deb13.sh
--rwxr-xr-x ... alloymixtures/tinyconfig.sh
+ls -la scripts/compile_scripts/*.sh
+-rwxr-xr-x ... compile_scripts/harper_deb13.sh
+-rwxr-xr-x ... compile_scripts/tinyconfig.sh
 ```
 
 ## Documentation Updates
 
 Updated files:
-- ✅ README.md - Added alloy mixtures section
+- ✅ README.md - Added compile scripts section
 - ✅ CONTRIBUTING.md - Updated test commands
 - ✅ CHANGELOG.md - Documented changes
 - ✅ Makefile - Updated test target
-- ✅ scripts/alloymixtures/README.md - Comprehensive guide
+- ✅ scripts/compile_scripts/README.md - Comprehensive guide
 
 ## Breaking Changes
 
 **Yes.** The `ci-build.sh` symlink has been removed.
-- If you referenced `ci-build.sh`, update to `scripts/alloymixtures/harper_deb13.sh`
+- If you referenced `ci-build.sh`, update to `scripts/compile_scripts/harper_deb13.sh`
 - All documented commands in this guide already use the new path
 
 ## Recommendations
@@ -342,4 +342,4 @@ make build
 
 ---
 
-**The alloy mixtures system provides the flexibility to choose the right build for the job while maintaining the simplicity and reliability of the Harper Foundry.**
+**The compile scripts system provides the flexibility to choose the right build for the job while maintaining the simplicity and reliability of the Harper Foundry.**

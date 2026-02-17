@@ -266,8 +266,8 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     # Logic:
     #   - If ENV_EXTENSIONS is unset or empty: Load no extensions
     #   - If ENV_EXTENSIONS has names: Load only those specified (in order)
-    # Lookup order: plugins.d/env_extensions/ (custom) → plugins/env_extensions/ (official)
-    custom_ext_dir="${REPO_ROOT}/scripts/plugins/plugins.d/env_extensions"
+    # Lookup order: scripts.d/plugins/env_extensions/ (custom) → plugins/env_extensions/ (official)
+    custom_ext_dir="${REPO_ROOT}/scripts/scripts.d/plugins/env_extensions"
     project_ext_dir="${REPO_ROOT}/scripts/plugins/env_extensions"
     
     # Load specified extensions (if any)

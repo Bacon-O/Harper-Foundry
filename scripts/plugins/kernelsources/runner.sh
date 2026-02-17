@@ -79,8 +79,8 @@ fetch_kernel_source() {
     # Convert slash notation to hyphen for file lookup (e.g., "debian/trixie-backports" -> "debian-trixie-backports")
     local source_file="${source_type//\//-}"
     
-    # Check for custom plugin first (in plugins.d/kernelsources/)
-    local custom_plugin="${KERNELSOURCES_DIR}/../plugins.d/kernelsources/${source_file}.sh"
+    # Check for custom plugin first (in scripts/scripts.d/plugins/kernelsources/) - takes precedence
+    local custom_plugin="${REPO_ROOT}/scripts/scripts.d/plugins/kernelsources/${source_file}.sh"
     if [ -x "$custom_plugin" ]; then
         log_kernel_source "INFO" "Using custom kernel source plugin: $source_file"
         "$custom_plugin" "$kernel_version" "$build_root"
@@ -110,7 +110,7 @@ fetch_kernel_source() {
         *)
             echo "[ERROR] Unknown KERNEL_SOURCE type: '$source_type'" >&2
             echo "[ERROR] Supported types: kernel.org, debian, debian/trixie-backports, custom, none" >&2
-            echo "[ERROR] Custom sources can be added to: scripts/plugins/kernelsources.d/" >&2
+            echo "[ERROR] Custom sources can be added to: scripts/scripts.d/plugins/kernelsources/" >&2
             return 1
             ;;
     esac
