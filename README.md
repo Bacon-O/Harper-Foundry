@@ -26,7 +26,7 @@ This project started as a hands-on way to get exposure to CI/CD pipelines. After
 
 ### The Name
 
-I name all my home servers generic names. The build server for this project is named "Harper." During an early POC compile, the name got attached to the kernel; it had a nice ring to it, so it stuck. Harper Foundry was born: an automated forge that cross-compiles a tuned, x86-64-v3 Debian kernel from within a containerized environment.
+I name all my home servers generic names. The build server for this project is named "Harper." During an early POC compile, the name got attached to the kernel; it had a nice ring to it, so it stuck. Harper Foundry was born: an automated forge that cross-compiles a tuned, amd64v3 Debian kernel from within a containerized environment.
 
 ### Was it worth the effort?
 
