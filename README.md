@@ -63,7 +63,7 @@ That keeps my commit history clean and puts you entirely in the driver's seat fo
 *   **🛡️ Automated QA:** Extensible quality assurance framework validates configuration and binaries
 *   **🚀 CI/CD Ready:** GitHub Actions integration for automated builds
 *   **🎛️ Highly Configurable:** Fine-grained control via parameter files
-*   **🔧 Incremental Builds:** Optional fast rebuilds for development ## 🚀 Quick Start
+*   **🔧 Incremental Builds:** Optional fast rebuilds for development for 🚀 Quick Start
 
 ### Tested Platforms
 
