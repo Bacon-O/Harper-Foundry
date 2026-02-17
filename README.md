@@ -54,7 +54,7 @@ To help others find the right tools, here is the machinery under the hood:
 
 Right now, this public repo is just my clean "reference" setup, so the CI/CD actions are set to run manually. If you want to fire up the furnace and actually automate your own kernel builds, I highly recommend forking this project and setting up your own pipeline triggers.
 
-That keeps my commit history clean and puts you entirely in the driver's seat for your own build schedule. I’ve provided the templates and tools for development—everything from a clean shell/CLI compile environment to cron jobs and GitHub Actions. I am open to suggestions for improvements; there is still more on my list, but I think this is a good starting point to make this repo public.
+That keeps my commit history clean and puts you entirely in the driver's seat for your own build schedule. I’ve provided the templates and tools for development—everything from a clean shell/CLI compile environment to cron jobs and GitHub Actions. I am open to suggestions for improvements; there is still more on my to do list, but I think this is a good starting point to make this repo public.
 
 ## ✨ Features
 
