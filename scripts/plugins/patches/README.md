@@ -2,46 +2,6 @@
 
 This directory contains plugins for applying patches to the Linux kernel source tree during the build process.
 
-## Available Patches
-
-### BORE Scheduler (`bore.sh`)
-
-Applies the **BORE (Burst-Oriented Response Enhancer)** scheduler patch to improve interactive performance and responsiveness.
-
-#### Configuration
-
-Set in your params file:
-
-```bash
-# BORE Scheduler Patch (optional)
-BORE_PATCH_URL="https://github.com/firelzrd/bore-scheduler/releases/download/6.18.y-bore5.9.9/6.18.y-bore5.9.9.patch"
-```
-
-If `BORE_PATCH_URL` is not set or empty, the default EEVDF scheduler will be used.
-
-#### Exports
-
-The plugin sets these environment variables:
-
-- `SCHEDULER_LABEL`: Either `"bore"` or `"eevdf"`
-- `SCHED_PRIORITY`: `"2"` for BORE, `"1"` for EEVDF (used in package versioning)
-
-#### Behavior
-
-1. Downloads patch from `BORE_PATCH_URL`
-2. Applies patch with `patch -p1 -F3`
-3. On success: Sets `SCHEDULER_LABEL="bore"` and `SCHED_PRIORITY="2"`
-4. On failure: Falls back to EEVDF scheduler with warning
-
-#### Usage
-
-The plugin is automatically sourced by alloy mixture scripts:
-
-```bash
-# In scripts/alloymixtures/harper_deb13.sh
-source "${PLUGIN_DIR}/patches/bore.sh"
-```
-
 ## Creating New Patch Plugins
 
 To add a new kernel patch:

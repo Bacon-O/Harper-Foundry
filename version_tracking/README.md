@@ -10,11 +10,7 @@ This directory tracks the last successfully compiled kernel versions for each bu
     KERNEL_VERSION=6.11.8
     LAST_BUILD_DATE=2026-02-15
     BUILD_STATUS=success
-    SCHED_PRIORITY=2
     ```
-  - `SCHED_PRIORITY`: 1=EEVDF (fallback), 2=BORE (successfully patched)
-  - Trigger builds new versions only - does NOT retry same version hoping for BORE
-  - New kernel versions may have BORE patches even if previous version didn't
   - Updated after successful build completion
   - Used by trigger jobs to detect new releases
 

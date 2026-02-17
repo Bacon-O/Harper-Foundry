@@ -156,6 +156,10 @@ if [ -f "$PARAMS_FILE" ]; then
         fi
         export FINAL_JOBS
         echo "🔥 Using default: $FINAL_JOBS core(s)."
+    elif [ "$PARALLEL_JOBS" == "ALL" ] || [ "$PARALLEL_JOBS" == "all" ]; then
+        FINAL_JOBS=$(nproc)
+        export FINAL_JOBS
+        echo "🔥 Using all available cores: $FINAL_JOBS."
     else
         export FINAL_JOBS="$PARALLEL_JOBS"
         echo "🔥 Using restricted furnace power: $FINAL_JOBS cores."

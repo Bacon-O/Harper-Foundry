@@ -6,7 +6,6 @@ set -e
 # ==============================================================================
 # Harper's primary, forged from Debian 13 (Trixie) backports.
 # This is NOT vanilla Debian—it's a custom kernel with:
-#   - BORE scheduler integration (with EEVDF fallback)
 #   - Custom tuning profiles
 #   - Complete .deb packaging
 #
@@ -53,9 +52,7 @@ if [ -z "$KERNEL_DIR" ]; then
 fi
 cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1; }
 
-# 3️⃣ Apply BORE/EEVDF Patch
-source "${PLUGIN_DIR}/patches/bore.sh"
-
+# 3️⃣ Initialize Pristine .config
 #Checking directory contents for debugging
 echo "🔍 Current directory contents:"
 pwd
@@ -95,9 +92,10 @@ make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 TIMESTAMP=$(date +%Y%m%d%M)
 KERNEL_VER=$(make -s kernelversion)
 
-# SCHED_PRIORITY is now set by the BORE patch plugin
-export LOCALVERSION="-${RELEASE_TAG}-${BUILD_ARCH_TAG}-${SCHEDULER_LABEL}"
-export KDEB_PKGVERSION="${KERNEL_VER}-${RELEASE_TAG}.${SCHED_PRIORITY}.${TIMESTAMP}"
+# Set default scheduler values
+
+export LOCALVERSION="-${RELEASE_TAG}-${BUILD_ARCH_TAG}"
+export KDEB_PKGVERSION="${KERNEL_VER}-${RELEASE_TAG}.${TIMESTAMP}"
 
 echo "🏷️  Kernel Release (uname -r): ${KERNEL_VER}${LOCALVERSION}"
 echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"

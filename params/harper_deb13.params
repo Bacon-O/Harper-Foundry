@@ -1,5 +1,5 @@
 # ==============================================================================
-# HARPER FOUNDRY: HARPER DEB13 - x86_64v3 Build
+# HARPER FOUNDRY: HARPER DEB13 - amd64v3 Build
 # ==============================================================================
 # This is a COMPLETE, WORKING example configuration for building the Harper
 # kernel based Debian 13 (Trixie) backports 
@@ -7,7 +7,7 @@
 #
 # Optimizations from base Debian config:
 #   • Architecture: x86-64-v3 baseline (modern CPU instructions)
-#   • Scheduler: BORE (Burst-Oriented Response Enhancer) with EEVDF fallback
+#   • Scheduler: Linux default (EEVDF)
 #   • Timer: 1000Hz (vs Debian's 250Hz) for reduced latency
 #   • Preemption: Full preemption for lower response times
 #   • CPU Frequency: Intel & AMD P-State with schedutil governor
@@ -57,7 +57,7 @@ CONTAINER_IMAGE_NAME="debian-harper-worker"
 # ==============================================================================
 # --- Target Specifications ----
 # Versioning & Tagging
-BUILD_ARCH_TAG="x86_64v3"
+BUILD_ARCH_TAG="amd64v3"
 RELEASE_TAG="harper"
 
 # --- Target Specifications ---
@@ -100,9 +100,6 @@ PARALLEL_JOBS=""
 BASE_CONFIG="defconfig"
 TUNING_CONFIG="harper_deb13_tune.config"
 
-# --- Scheduler Patch ---
-BORE_PATCH_URL="https://raw.githubusercontent.com/firelzrd/bore-scheduler/main/patches/stable/linux-6.18-bore/0001-linux6.18.3-bore-6.6.1.patch"
-
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
@@ -133,7 +130,6 @@ QA_CRITICAL_CHECKS=(
 )
 # --- Chemical Audit: Optional (Warn Only) ---
 # If these are missing, a warning is logged but the kernel is still shipped.
-# This supports fallback strategies (e.g., BORE -> EEVDF).
 QA_OPTIONAL_CHECKS=(
     "CONFIG_ACPI="
     "CONFIG_ATA="
@@ -189,7 +185,6 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_PROC_FS="
     "CONFIG_SATA_AHCI="
     "CONFIG_SCHED_AUTOGROUP="
-    "CONFIG_SCHED_BORE="
     "CONFIG_STACK_VALIDATION=n"
     "CONFIG_SYSFS="
     "CONFIG_TMPFS="

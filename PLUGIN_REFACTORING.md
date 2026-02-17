@@ -6,30 +6,11 @@
 ## Overview
 
 Refactored the Harper Foundry plugin system to improve modularity and organization:
-1. Extracted BORE patch logic into a dedicated plugin
-2. Reorganized QA tests into logical subdirectories
+1. Reorganized QA tests into logical subdirectories
 
 ## Changes Made
 
-### 1. BORE Patch Plugin
-
-**Created**: `scripts/plugins/patches/bore.sh`
-- Modular plugin for applying BORE scheduler patches
-- Exports `SCHEDULER_LABEL` and `SCHED_PRIORITY` variables
-- Automatic fallback to EEVDF on patch failure
-- Clean separation of concerns
-
-**Created**: `scripts/plugins/patches/README.md`
-- Comprehensive documentation for patch plugins
-- Template for creating new patch plugins
-- Usage examples and best practices
-
-**Modified**: `scripts/alloymixtures/harper_deb13.sh`
-- Removed inline BORE patching code (lines 36-46)
-- Now sources the BORE plugin: `source "${PLUGIN_DIR}/patches/bore.sh"`
-- Simplified versioning logic (removed redundant scheduler check)
-
-### 2. QA Test Reorganization
+### 1. QA Test Reorganization
 
 **Directory Structure**:
 ```
@@ -67,15 +48,14 @@ scripts/plugins/qatests/
 **Modified**: `README.md`
 - Updated QA section with new directory structure
 - Added Plugin System section under Advanced Usage
-- Documented BORE scheduler plugin
 - Added links to plugin documentation
 
 ## Benefits
 
 ### Modularity
-- BORE patching is now a self-contained, reusable plugin
-- Easy to add new patch plugins (RT-patch, custom patches, etc.)
-- Clear separation between patch logic and build logic
+- QA tests are logically grouped in a plugin architecture
+- Easy to add new QA test plugins
+- Clear separation between test logic and build logic
 
 ### Organization
 - QA tests are logically grouped
@@ -99,7 +79,6 @@ scripts/plugins/qatests/
 All existing functionality preserved:
 - ✅ Both params files validate successfully
 - ✅ QA test execution unchanged
-- ✅ BORE patching behavior identical
 - ✅ All path references updated
 
 ### File Moves
@@ -107,7 +86,6 @@ All existing functionality preserved:
 - `scripts/plugins/qatests/testpackages/` → `scripts/plugins/qatests/packages/`
 
 ### New Files
-- `scripts/plugins/patches/bore.sh` (executable)
 - `scripts/plugins/patches/README.md`
 - `scripts/plugins/qatests/README.md`
 
@@ -135,7 +113,6 @@ Consider adding additional patch plugins:
 
 ## References
 
-- [BORE Scheduler](https://github.com/firelzrd/bore-scheduler)
 - [Patches Plugin Docs](scripts/plugins/patches/README.md)
 - [QA Tests Docs](scripts/plugins/qatests/README.md)
 - [Alloy Mixtures Docs](scripts/alloymixtures/README.md)

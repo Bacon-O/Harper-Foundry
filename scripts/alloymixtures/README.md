@@ -17,7 +17,6 @@ This directory contains different "alloy mixtures" - build script variants optim
 - Base Configuration: Debian kernel (`defconfig`) with tuning overlays
 - Architecture Optimization: x86-64-v3 baseline (replaces generic 2004-era CPU baseline)
   - Enables AVX2, FMA, BMI2 instruction sets for modern CPUs (Zen 3+, Haswell+)
-- Scheduler: BORE (Burst-Oriented Response Enhancer) with automatic fallback to EEVDF
   - Optimized for gaming and desktop responsiveness
 - Timer Frequency: 1000Hz (vs Debian's 250Hz) for reduced latency
 - CPU & Memory Tuning:

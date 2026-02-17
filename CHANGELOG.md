@@ -60,7 +60,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Core build system with Docker containerization
 - Cross-compilation support (ARM64 host → x86_64 target)
-- BORE scheduler patch integration with EEVDF fallback
 - Configurable kernel tuning system
 - Quality assurance framework
 - GitHub Actions CI/CD integration

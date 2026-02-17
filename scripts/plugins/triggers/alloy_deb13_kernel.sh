@@ -119,7 +119,6 @@ EOF
     log_ok "Last compiled version: $last_compiled_version"
     log_ok "Last build date: $last_build_date"
     log_ok "Build status: $build_status"
-    log_ok "Scheduler priority: $last_sched_priority (1=EEVDF, 2=BORE)"
     
     # ==========================================================================
     # STEP 4: Compare Versions and Determine if Build is Needed
@@ -136,18 +135,13 @@ EOF
         build_reason="forced"
     elif [ "$latest_upstream_version" != "$last_compiled_version" ]; then
         log_warn "New version detected: $latest_upstream_version (previously: $last_compiled_version)"
-        log_info "New kernel version may have BORE patch available - triggering build"
+        log_info "Triggering build for new kernel version"
         build_needed=true
         build_reason="new_version"
     else
-        # Same version - check scheduler status
-        if [ "$last_sched_priority" = "2" ]; then
-            log_ok "BORE already compiled for version $last_compiled_version - no action needed"
-        else
-            log_ok "Version $last_compiled_version already built with EEVDF (priority=$last_sched_priority)"
-            log_info "Not retrying same version - BORE patch likely unavailable for this kernel"
-            log_info "Will build automatically when new kernel version is released"
-        fi
+        # Same version - no action needed
+        log_ok "Version $last_compiled_version already built"
+        log_info "Will build automatically when new kernel version is released"
         build_needed=false
     fi
     
@@ -164,10 +158,8 @@ EOF
         cat << 'EXECUTION_PLACEHOLDER'
 
     ╔════════════════════════════════════════════════════════════════════════════╗
-    ║                      BUILD TRIGGER PLACEHOLDER                             ║
-    ╠════════════════════════════════════════════════════════════════════════════╣
-    ║ New kernel version detected. Build trigger would execute here.             ║
-    ║                                                                            ║
+    ║ Build trigger placeholder for new kernel versions.
+    ║
     ║ Implementation options:                                                    ║
     │ 1. GitHub Actions: Use workflow_dispatch to trigger CI pipeline            ║
     │    gh workflow run ci-build.yml -f kernel_version=<version>                ║
@@ -180,19 +172,16 @@ EOF
     │                                                                            ║
     │ 4. Queue: Add to job queue for batch processing                            ║
     │                                                                            ║
-    ║ NOTE: After successful build, capture SCHED_PRIORITY from bore.sh plugin   ║
-    ║       (1=EEVDF fallback, 2=BORE successfully applied)                      ║
     ╚════════════════════════════════════════════════════════════════════════════╝
 
 EXECUTION_PLACEHOLDER
 
         # After successful build, update version tracking file:
-        # IMPORTANT: Capture SCHED_PRIORITY from build output (exported by bore.sh)
         # cat > "$VERSION_TRACKING_FILE" << EOF
         # KERNEL_VERSION=$latest_upstream_version
         # LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
         # BUILD_STATUS=success
-        # SCHED_PRIORITY=<captured from build - 1 for EEVDF, 2 for BORE>
+        # EOF
         # EOF
         
         log_ok "Build trigger executed (placeholder)"

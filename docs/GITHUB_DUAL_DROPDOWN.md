@@ -101,7 +101,7 @@ Apply Override: testing.params (test output dir + enforced QA)
 ```
 
 **Result:** Full production build → preprod location
-- All production settings (BORE, x86-64-v3, 1000Hz)
+- All production settings (x86-64-v3, 1000Hz)
 - Debian Trixie Backports source
 - Output to `/testing` directory (not `/release`)
 - ENFORCED QA mode (stricter than production)

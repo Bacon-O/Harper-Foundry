@@ -57,7 +57,6 @@ scripts/
 - Kernel source will be based on Debian backports 
 - Base: Debian (`defconfig`) with custom tuning applied
 - Architecture: **x86-64-v3** (AVX2, FMA, BMI2 optimizations for modern CPUs)
-- Scheduler: **BORE/EEVDF** - Burst-Oriented Response Enhancer for gaming/desktop responsiveness (reverts to EEVDF if BORE unavailable)
 - Timer Frequency: **1000Hz** - Reduced latency for responsive desktop (vs Debian's 250Hz)
 - CPU Frequency Scaling: Intel P-State & AMD P-State enabled
 - Preemption: Full preemption enabled for lower latency
@@ -92,7 +91,6 @@ Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 | Optimization | Debian Default | Harper | Reason |
 |---|---|---|---|
 | **CPU Baseline** | Generic (2004-era compatible) | x86-64-v3 | Enables modern CPU instructions (AVX2, FMA, BMI2) |
-| **Scheduler** | EEVDF | BORE (→ EEVDF fallback) | Burst responsiveness for games, desktop interactivity |
 | **Timer Tick** | 250 Hz | 1000 Hz | Reduced latency, smoother interaction |
 | **Preemption** | Voluntary | Full | Lower response times for user input |
 | **CPU Governor** | Performance/Powersave | Schedutil | Coordinates frequency scaling with task scheduler |

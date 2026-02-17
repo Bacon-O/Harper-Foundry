@@ -82,7 +82,7 @@ BYPASS_QA="false"
 ```
 
 **Result:**
-- ✅ Inherits all kernel settings from production (BORE patches, x86-64-v3, 1000Hz, etc.)
+- ✅ Inherits all kernel settings from production (x86-64-v3, 1000Hz, etc.)
 - ✅ Overrides output directory to `/path/to/output/testing`
 - ✅ Enforces stricter QA mode for testing builds
 - ✅ Easy to maintain - update production config once, testing inherits changes
@@ -295,7 +295,7 @@ config_file:
 - Testing/staging/preprod all inherit automatically
 
 ### Easy Maintenance
-- Update BORE patch URL → all environments get it
+- Update scheduler settings → all environments get it
 - Change kernel version → update one file
 - Modify kernel config → propagates to all override files
 

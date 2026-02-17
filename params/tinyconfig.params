@@ -34,7 +34,7 @@ CONTAINER_IMAGE_NAME="debian-harper-worker"
 # ==============================================================================
 
 # Versioning & Tagging
-BUILD_ARCH_TAG="x86_64v3"
+BUILD_ARCH_TAG="amd64v3"
 RELEASE_TAG="harper-test"
 
 # --- Target Specifications ---

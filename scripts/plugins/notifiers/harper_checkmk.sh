@@ -14,13 +14,11 @@
 #
 # Exit Codes (CheckMK standard):
 #   0 - OK       : New build successful or no changes
-#   1 - WARNING  : Build succeeded but BORE patch failed to apply
 #   2 - CRITICAL : Build failed completely
 #   3 - UNKNOWN  : Unable to determine status
 #
 # Notification Logic:
 #   - New version built: Notify once (OK status)
-#   - BORE failed: WARNING until manually cleared or new build with BORE
 #   - Build failed: CRITICAL until fixed
 #
 # Environment:
@@ -126,22 +124,11 @@ harper_checkmk_check() {
             should_update_state=true
         fi
     
-    # WARNING: Build succeeded but BORE patch didn't apply
-    elif [ "$build_status" = "success" ] && [ "$sched_priority" = "1" ]; then
-        status=1
-        status_text="WARNING"
-        message="Build succeeded but BORE patch NOT applied - using EEVDF fallback (kernel $kernel_version)"
-        
-        # Notify if this is a new version or state changed
-        if [ "$last_notified_version" != "$kernel_version" ] || [ "$last_notified_priority" != "1" ]; then
-            should_update_state=true
-        fi
-    
-    # OK: Build succeeded with BORE
-    elif [ "$build_status" = "success" ] && [ "$sched_priority" = "2" ]; then
+    # OK: Build succeeded
+    elif [ "$build_status" = "success" ]; then
         status=0
         status_text="OK"
-        message="Build successful with BORE scheduler (kernel $kernel_version, date: $build_date)"
+        message="Build successful (kernel $kernel_version, date: $build_date)"
         
         # Notify only if this is a NEW version (don't spam on re-checks)
         if [ "$last_notified_version" != "$kernel_version" ]; then

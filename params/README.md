@@ -6,10 +6,9 @@ This directory contains configuration files (params files) that define how a bui
 
 ### Full Desktop Kernel Configurations
 
-- **`harper_deb13.params`** - Complete desktop kernel baed on Debian 13 (Trixie) backports with x86-64-v3 optimizations
+- **`harper_deb13.params`** - Complete desktop kernel based on Debian 13 (Trixie) backports with x86-64-v3 optimizations
   - Compiler: **CLANG/LLVM** (not GCC) for modern optimization capabilities
   - Target: x86_64 with AVX2, FMA, BMI2 (Haswell+)
-  - Scheduler: BORE with EEVDF fallback
   - Timer: 1000Hz for low latency
   - Source: Debian Trixie Backports
   - Status: ⚠️ EXPERIMENTAL - Use at your own risk
@@ -204,7 +203,6 @@ EOF
 ### Build Strategy
 - `BASE_CONFIG` - Starting kernel config (defconfig, tinyconfig)
 - `TUNING_CONFIG` - Additional config fragment
-- `BORE_PATCH_URL` - BORE scheduler patch
 - `PARALLEL_JOBS` - Build jobs if left blank defaults to nproc-1 (min 1)
 
 ### Quality Assurance

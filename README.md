@@ -60,7 +60,6 @@ That keeps my commit history clean and puts you entirely in the driver's seat fo
 
 *   **🐳 Containerized Build:** Isolated, reproducible builds using Docker
 *   **🔀 Cross-Compilation:** Automatic architecture detection and toolchain configuration (e.g., building x86_64 on ARM64)
-*   **⚡ Scheduler Integration:** Patch kernels with BORE scheduler, with automatic EEVDF fallback (only for harper kernel)
 *   **🛡️ Automated QA:** Extensible quality assurance framework validates configuration and binaries
 *   **🚀 CI/CD Ready:** GitHub Actions integration for automated builds
 *   **🎛️ Highly Configurable:** Fine-grained control via parameter files
@@ -261,7 +260,7 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
 - 🔨 Compiled with CLANG/LLVM for modern optimizations
 - 🚀 Optimized for desktop/gaming workloads:
   - x86-64-v3 CPU baseline (AVX2, FMA, BMI2)
-  - BORE (preferred) scheduler or EEVDF denpending on avaliability
+  - Linux default scheduler (EEVDF)
   - 1000Hz timer frequency (vs Debian's 250Hz)
   - Full preemption for lower latency
   - Intel/AMD P-State frequency scaling
@@ -387,11 +386,6 @@ The Foundry uses a modular plugin architecture:
 
 #### Kernel Patches (`scripts/plugins/patches/`)
 
-**BORE Scheduler Plugin**:
-- Applies [BORE scheduler](https://github.com/firelzrd/bore-scheduler) patches for improved responsiveness
-- Automatically falls back to EEVDF if patch fails
-- Configure via `BORE_PATCH_URL` in params file
-
 See [Patches Plugin Documentation](scripts/plugins/patches/README.md) for creating custom patch plugins.
 
 #### QA Test Plugins (`scripts/plugins/qatests/`)
@@ -470,7 +464,6 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 
 ## 🙏 Acknowledgments
 
-- **BORE Scheduler** - [firelzrd/bore-scheduler](https://github.com/firelzrd/bore-scheduler)
 - **Linux-TKG** - [Frogging-Family/linux-tkg](https://github.com/Frogging-Family/linux-tkg) - Inspiration for kernel tuning approaches
 - **Debian and the Debian kernel team** - [wiki.debian.org/Kernel](https://wiki.debian.org/Kernel) - Excellent reference for Debian kernel
 - **Linux Kernel** [The Linux Kernel Archive](https://kernel.org/) // [Kernel Build System](https://docs.kernel.org/kbuild/index.html)

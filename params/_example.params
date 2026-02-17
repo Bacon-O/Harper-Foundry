@@ -37,7 +37,7 @@ CONTAINER_IMAGE_NAME="debian-harper-worker"
 # ==============================================================================
 
 # Versioning & Tagging
-BUILD_ARCH_TAG="x86_64v3"
+BUILD_ARCH_TAG="amd64v3"
 RELEASE_TAG="example"
 
 # --- Target Specifications ---
@@ -107,7 +107,6 @@ QA_CRITICAL_CHECKS=(
 
 # --- Chemical Audit: Optional (Warn Only) ---
 QA_OPTIONAL_CHECKS=(
-    "CONFIG_SCHED_BORE=y"
     "CONFIG_NTSYNC=y"
     "CONFIG_HZ_500=y"
     "CONFIG_PREEMPT=y"

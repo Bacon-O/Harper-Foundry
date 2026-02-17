@@ -56,34 +56,6 @@ ls -lh /path/to/HOST_OUTPUT_DIR/
 
 3. Try a different Debian mirror in the Dockerfile
 
-### Issue: Patch Application Fails
-
-**Symptoms:**
-```
-⚠️ Patch failed. Using fallback EEVDF scheduler.
-```
-
-**Causes:**
-- Kernel version mismatch with patch
-- Patch URL is incorrect or unreachable
-- Patch format is incompatible
-
-**Solutions:**
-1. Verify the patch URL is accessible:
-   ```bash
-   curl -I "$BORE_PATCH_URL"
-   ```
-
-2. Check kernel version compatibility:
-   - Ensure the patch matches your kernel version
-   - Update `BORE_PATCH_URL` to a compatible version
-
-3. Test patch locally:
-   ```bash
-   curl -fLo /tmp/bore.patch "$BORE_PATCH_URL"
-   patch -p1 --dry-run < /tmp/bore.patch
-   ```
-
 ### Issue: Compilation Errors
 
 **Symptoms:**

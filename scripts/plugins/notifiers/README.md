@@ -15,7 +15,7 @@ The notifiers system provides integrations with monitoring platforms, notificati
 
 **Available Plugins:**
 - `harper_checkmk.sh` - CheckMK local check monitoring **specifically for Harper Deb13 builds**
-  - Monitors: Build status, BORE scheduler priority (Harper-specific)
+  - Monitors: Build status and kernel version updates (Harper-specific)
   - Notifications: One-time on new builds, persistent warnings/criticals
   - Exit codes: 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
 
@@ -58,14 +58,8 @@ The CheckMK plugin implements smart notification logic to avoid spam:
 ### Status Levels
 
 **OK (0):**
-- Build succeeded with BORE scheduler (`SCHED_PRIORITY=2`)
-- Build succeeded with other scheduler
+- Build succeeded
 - **Notification:** One-time when new version is built
-
-**WARNING (1):**
-- Build succeeded but BORE patch failed to apply (`SCHED_PRIORITY=1`)
-- Falls back to EEVDF scheduler
-- **Notification:** Persists until addressed (new build with BORE or manual clear)
 
 **CRITICAL (2):**
 - Build failed completely (`BUILD_STATUS=failed`)
@@ -83,7 +77,6 @@ version_tracking/.notification_state/
 └── harper_deb13_notified.txt
     ├── NOTIFIED_VERSION=6.11.8
     ├── NOTIFIED_STATUS=success
-    ├── NOTIFIED_PRIORITY=1
     └── NOTIFIED_DATE=2026-02-15
 ```
 
@@ -106,7 +99,7 @@ rm version_tracking/.notification_state/harper_deb13_notified.txt
 Or rebuild kernel to address the issue:
 
 ```bash
-# For BORE warning: Trigger rebuild when BORE patch is available
+# Trigger rebuild when new kernel version is available
 source ./scripts/plugins/triggers/runner.sh
 trigger_build harper_deb13_kernel --force
 
@@ -179,15 +172,11 @@ prometheus_check() {
     source "$version_file"
     
     # Output Prometheus text format
-    # Note: SCHED_PRIORITY is Harper-specific (1=EEVDF fallback, 2=BORE applied)
+    # Note: Build outcomes tracked via NOTIFIED_STATUS
     cat << EOF
-# HELP harper_build_status Build status (0=unknown, 1=success, 2=failed)
+# HELP harper_build_status Build status (0=failed, 1=success)
 # TYPE harper_build_status gauge
-harper_build_status{profile="$profile",version="$KERNEL_VERSION"} $([ "$BUILD_STATUS" = "success" ] && echo 1 || echo 2)
-
-# HELP harper_scheduler_priority Scheduler priority (1=EEVDF, 2=BORE) - Harper Deb13 specific
-# TYPE harper_scheduler_priority gauge
-harper_scheduler_priority{profile="$profile",version="$KERNEL_VERSION"} $SCHED_PRIORITY
+harper_build_status{profile="$profile",version="$KERNEL_VERSION"} $([ "$BUILD_STATUS" = "success" ] && echo 1 || echo 0)
 EOF
     
     return 0
@@ -210,17 +199,14 @@ slack_check() {
     local message=""
     local color="good"
     
-    # Note: SCHED_PRIORITY is Harper Deb13 specific
-    # 1 = EEVDF fallback (BORE patch failed)
-    # 2 = BORE successfully applied
+    # Build status tracking
+    # 1 = Success
+    # 0 = Failed
     if [ "$BUILD_STATUS" = "failed" ]; then
         message="🚨 Harper Build FAILED for kernel $KERNEL_VERSION"
         color="danger"
-    elif [ "$SCHED_PRIORITY" = "1" ]; then
-        message="⚠️  Harper build succeeded but BORE patch not applied (kernel $KERNEL_VERSION) - using EEVDF fallback"
-        color="warning"
     else
-        message="✅ Harper build successful with BORE scheduler (kernel $KERNEL_VERSION)"
+        message="✅ Harper build successful (kernel $KERNEL_VERSION)"
     fi
     
     curl -X POST -H 'Content-type: application/json' \
