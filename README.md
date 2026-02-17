@@ -14,8 +14,7 @@ The **Harper Foundry** is an extensible containerized build system. While curren
 - Not recommended for production systems or mission-critical workloads
 - Expect rough edges, bugs, and breaking changes as the project evolves
 - The Harper kernel itself is experimental—use Debian's official kernels for stability
-
-If you hit issues, bugs, or have suggestions, please open an issue. This feedback helps improve the project.
+- Update functionality is not yet implemented. See [Updates](#updates) for the current approach
 
 
 ## Motivation
@@ -394,19 +393,116 @@ QA_MODE="RELAXED"       # RELAXED = warn, ENFORCED = fail build
 BYPASS_QA="false"       # Set true to skip QA entirely
 ```
 
+### Updates
+
+⚠️ **No built-in update manager exists.** Harper Foundry relies on **git pull** for updates:
+
+```bash
+# Update to latest changes
+git pull
+```
+
+**I acknowledge git is not an update manager**, but this is still early/stage beta software. If you keep all your custom configurations in **`.d/` directories** (gitignored), `git pull` is safe:
+
+```bash
+# Your customizations are protected
+params/params.d/           # Your custom params (gitignored ✅)
+scripts/plugins/plugins.d/ # Your custom plugins (gitignored ✅)
+
+# Safe to update
+git pull  # Your custom files untouched
+```
+
+**Best Practice:** Keep all your custom configurations in `.d/` directories. That way, you can update fearlessly with `git pull` without losing your changes.
+
+If you hit issues, bugs, or have suggestions, please open an issue. This feedback helps improve the project.
+
+
+
 ## 🔧 Advanced Usage
 
 ### Plugin System
 
-The Foundry uses a modular plugin architecture:
+Harper Foundry uses a modular, extensible plugin architecture. All plugins follow the Unix **`.d/` pattern** for custom user implementations:
 
-#### Kernel Patches (`scripts/plugins/patches/`)
+**Directory Structure:**
+```
+scripts/plugins/
+├── kernelsources/              ← Official kernel source plugins
+│   └── plugins.d/              ← Your custom kernel sources (gitignored)
+├── notifiers/                  ← Official notification plugins
+│   └── plugins.d/              ← Your custom notifiers (gitignored)
+├── patches/                    ← Official kernel patches
+│   └── plugins.d/              ← Your custom patches (gitignored)
+├── qatests/                    ← Official QA tests
+│   └── plugins.d/              ← Your custom tests (gitignored)
+└── env_extensions/             ← Official environment extensions
+    └── plugins.d/              ← Your custom extensions (gitignored)
+```
 
-See [Patches Plugin Documentation](scripts/plugins/patches/README.md) for creating custom patch plugins.
+**How It Works:**
+- Plugin system checks `plugins.d/` (your custom implementations) first
+- Falls back to official versions if custom not found
+- **All custom plugins are gitignored** - safe to pull updates without conflicts
+- Use the same interface as official plugins
 
-#### QA Test Plugins (`scripts/plugins/qatests/`)
+**Available Plugin Types:**
 
-See the [Quality Assurance](#-quality-assurance) section above for QA plugin details.
+| Plugin | Purpose | Documentation |
+|--------|---------|----------------|
+| **kernelsources** | Fetch kernel from different sources | [Kernel Sources](scripts/plugins/kernelsources/README.md) |
+| **notifiers** | Integrate with monitoring/alerting systems | [Notifiers](scripts/plugins/notifiers/README.md) |
+| **patches** | Apply custom kernel patches | [Patches](scripts/plugins/patches/README.md) |
+| **qatests** | Add quality assurance tests | [QA Tests](scripts/plugins/qatests/README.md) |
+| **env_extensions** | Customize build environment variables | [Environment Extensions](scripts/plugins/env_extensions/README.md) |
+
+**Quick Example - Custom Kernel Source:**
+```bash
+# Create your custom kernel source plugin
+cat > scripts/plugins/kernelsources/plugins.d/my_source.sh << 'EOF'
+#!/bin/bash
+# My custom kernel source logic
+download_kernel() {
+    # Your implementation here
+}
+EOF
+chmod +x scripts/plugins/kernelsources/plugins.d/my_source.sh
+
+# Use it in params
+KERNEL_SOURCE="my_source"
+```
+
+### Safe Customization Pattern (`.d/` Directories)
+
+All customizations follow the **Unix `.d/` pattern** to protect your changes from git conflicts:
+
+- **`params/params.d/`** - Your custom build configurations (gitignored)
+- **`scripts/plugins/plugins.d/`** - Your custom plugin implementations (gitignored)
+
+**Why this matters:**
+```bash
+# You can safely pull updates without losing your customizations
+git pull
+
+# Your files stay put
+ls params/params.d/        # Still there! ✅
+ls scripts/plugins/plugins.d/  # Still there! ✅
+
+# Update the project fearlessly
+git pull
+```
+
+**Pattern applies to:**
+- Parameters: `params/params.d/my_build.params`
+- Kernel sources: `scripts/plugins/kernelsources/plugins.d/my_source.sh`
+- QA tests: `scripts/plugins/qatests/plugins.d/my_test.sh`
+- Patches: `scripts/plugins/patches/plugins.d/my_patch.patch`
+- Notifiers: `scripts/plugins/notifiers/plugins.d/my_notifier.sh`
+- Environment extensions: `scripts/plugins/env_extensions/plugins.d/my_env.sh`
+
+For detailed customization examples, see:
+- [params/README.md](params/README.md#user-customizations-paramsd) - Parameter customization
+- [scripts/plugins/README.md](scripts/plugins/README.md) - Plugin customization
 
 ### Incremental Builds
 
