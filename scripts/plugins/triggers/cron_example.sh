@@ -22,7 +22,7 @@ set -euo pipefail
 # Cron runs with minimal environment - set everything explicitly
 
 # Repository root (CHANGE THIS to your Harper installation path)
-export REPO_ROOT="/path/to/repo/root"
+export REPO_ROOT="/home/matthew@int.faushaus.net/devel/Debian-Harper"
 
 # Change to repo directory
 cd "$REPO_ROOT" || exit 1
@@ -65,63 +65,85 @@ if [ ! -f "$REPO_ROOT/scripts/plugins/triggers/runner.sh" ]; then
     exit 1
 fi
 
-# Source the runner (loads trigger_build function)
+# Source the runner (loads check_if_build_is_needed function)
 source "$REPO_ROOT/scripts/plugins/triggers/runner.sh"
 
 # ==============================================================================
-# STEP 2: Run Trigger Check
+# STEP 2: Check If Build Is Needed
 # ==============================================================================
 
-log_to_file "Checking for new kernel releases..."
+log_to_file "Checking if new kernel versions are available..."
 
-# Run the trigger plugin
-if trigger_build harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"; then
-    TRIGGER_EXIT_CODE=${PIPESTATUS[0]}
-else
-    TRIGGER_EXIT_CODE=$?
-fi
+# Check if a new version is available that needs building
+# IMPORTANT: Don't use pipes or $()! Those create subshells and lose exported variables
+# Use process substitution with tee to log output while preserving exports
+check_if_build_is_needed harper_deb13_kernel > >(tee -a "$LOGFILE") 2>&1
+BUILD_NEEDED=$?
 
-log_to_file "Trigger check completed with exit code: $TRIGGER_EXIT_CODE"
+log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-zero=no action)"
 
 # ==============================================================================
-# STEP 3: Execute Build if Triggered (PLACEHOLDER)
+# STEP 3: Execute Build (if Check Indicated Build Is Needed)
 # ==============================================================================
-# This is where you would actually execute the build if a new version was detected
-# The trigger plugin above only CHECKS for new versions - it doesn't build yet
+# The check function ONLY detects - it does NOT execute builds
+# If BUILD_NEEDED=0, we execute the build here and use plugin CALLBACKS for tracking
+#
+# Callback Flow:
+#   1. check_if_build_is_needed <plugin>  → plugin exports DETECTED_KERNEL_VERSION
+#   2. Run your build (start_build.sh, script, queue, etc.)
+#   3. build_successful <plugin>          → runner.sh routes to plugin's success callback
+#      OR
+#      build_failed <plugin> "reason"     → runner.sh routes to plugin's failure callback
+#
+# The plugin callbacks handle ALL version tracking logic - you just call them!
+# ==============================================================================
 
 # OPTION A: Build directly with Docker
-# if [ $TRIGGER_EXIT_CODE -eq 0 ]; then
+# if [ $BUILD_NEEDED -eq 0 ]; then
+#     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
 #     log_to_file "Executing build with tinyconfig for testing..."
-#     
+    
 #     # Set build environment variables
 #     export HOST_OUTPUT_DIR="$REPO_ROOT/output"
-#     
+    
 #     # Run the build
 #     if "$REPO_ROOT/start_build.sh" --params-file "$REPO_ROOT/params/tinyconfig.params" 2>&1 | tee -a "$LOGFILE"; then
 #         log_to_file "Build completed successfully"
-#         
-#         # Update version tracking file with build results
-#         # (You'd need to extract SCHED_PRIORITY from build logs)
-#         # cat > "$REPO_ROOT/version_tracking/harper_deb13_latest_kernel.txt" << EOF
-#         # KERNEL_VERSION=<detected_version>
-#         # LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
-#         # BUILD_STATUS=success
-#         # SCHED_PRIORITY=<extracted_from_build>
-#         # EOF
+        
+#         # Callback to plugin: updates version tracking file automatically
+#         # Flow: build_successful → runner.sh → harper_deb13_kernel_build_successful()
+#         build_successful harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"
 #     else
-#         log_to_file "Build failed"
+#         BUILD_EXIT_CODE=$?
+#         log_to_file "Build failed with exit code: $BUILD_EXIT_CODE"
+        
+#         # Callback to plugin: handles failure (optionally skip this version)
+#         # Flow: build_failed → runner.sh → harper_deb13_kernel_build_failed()
+#         build_failed harper_deb13_kernel "exit_code_$BUILD_EXIT_CODE" 2>&1 | tee -a "$LOGFILE"
 #     fi
 # fi
 
 # OPTION B: Use a dedicated build execution script
-# if [ $TRIGGER_EXIT_CODE -eq 0 ]; then
-#     "$REPO_ROOT/scripts/execute_triggered_build.sh" 2>&1 | tee -a "$LOGFILE"
+# if [ $BUILD_NEEDED -eq 0 ]; then
+#     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
+#     
+#     if "$REPO_ROOT/scripts/execute_triggered_build.sh" 2>&1 | tee -a "$LOGFILE"; then
+#         # Plugin callback handles all version tracking
+#         build_successful harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"
+#     else
+#         # Plugin callback handles failure
+#         build_failed harper_deb13_kernel "script_failed" 2>&1 | tee -a "$LOGFILE"
+#     fi
 # fi
 
 # OPTION C: Queue the build for later execution
-# if [ $TRIGGER_EXIT_CODE -eq 0 ]; then
-#     echo "build:harper_deb13:$(date +%s)" >> "$REPO_ROOT/build_queue.txt"
-#     log_to_file "Build queued for processing"
+# if [ $BUILD_NEEDED -eq 0 ]; then
+#     # Queue includes the detected version (exported by check function)
+#     echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_KERNEL_VERSION}" >> "$REPO_ROOT/build_queue.txt"
+#     log_to_file "Build queued for kernel version ${DETECTED_KERNEL_VERSION}"
+#     
+#     # Note: When processing queue, call build_successful/build_failed callbacks
+#     # to update version tracking after build completes
 # fi
 
 log_to_file "=== Trigger Cron Job Complete ==="

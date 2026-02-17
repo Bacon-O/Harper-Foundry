@@ -4,14 +4,30 @@
 # Harper Foundry: Debian Trixie Kernel Release Trigger Plugin
 # ==============================================================================
 # Monitors Debian Salsa API for new linux-image versions in trixie-backports
-# Compares against last successful build version and triggers CI if new release available
+# Compares against last successful build version
+#
+# PLUGIN INTERFACE (all trigger plugins must implement):
+#   <plugin>_trigger()            - Check if build is needed, export version info
+#                                    Returns: 0=build needed, 1=no action
+#   <plugin>_build_successful()   - Callback invoked when build succeeds
+#   <plugin>_build_failed()       - Callback invoked when build fails
 #
 # Usage:
-#   source ./scripts/plugins/triggers/harper_deb13_kernel.sh
-#   harper_deb13_kernel_trigger [--force]
+#   source ./scripts/plugins/triggers/runner.sh
+#   
+#   # Check if build needed
+#   check_if_build_is_needed harper_deb13_kernel
+#   if [ $? -eq 0 ]; then
+#       # Run build...
+#       if build succeeded; then
+#           build_successful harper_deb13_kernel
+#       else
+#           build_failed harper_deb13_kernel "error_info"
+#       fi
+#   fi
 #
 # Options:
-#   --force   Skip version comparison and trigger build anyway
+#   --force   Skip version comparison and always trigger
 #
 # Environment:
 #   REPO_ROOT - Set automatically if not provided
@@ -27,14 +43,19 @@ DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/reposi
 # ==============================================================================
 # FUNCTION: harper_deb13_kernel_trigger
 # ==============================================================================
-# Main trigger function for Debian Trixie kernel monitoring
+# Checks if a new Debian kernel version is available and needs building
+# This function ONLY detects - it does NOT execute builds
 #
 # Arguments:
-#   --force   Skip version comparison and trigger build
+#   --force   Skip version comparison and always indicate build is needed
+#
+# Exports:
+#   DETECTED_KERNEL_VERSION - Version number detected (e.g., "6.12.0")
+#   DETECTED_BUILD_REASON   - Why build is needed ("new_version" or "forced")
 #
 # Returns:
-#   0 - Action completed (build triggered or no action needed)
-#   1 - Error occurred
+#   0 - Build IS needed (new version detected or forced)
+#   1 - Build NOT needed (version already built)
 #
 # ==============================================================================
 harper_deb13_kernel_trigger() {
@@ -146,48 +167,95 @@ EOF
     fi
     
     # ==========================================================================
-    # STEP 5: Trigger Build if Needed
+    # STEP 5: Return Build Status to Caller
     # ==========================================================================
+    # This plugin ONLY detects if a build is needed - it does NOT execute builds
+    # The caller (e.g., cron_example.sh) decides what to do based on exit code
     
     if [ "$build_needed" = true ]; then
-        log_warn "Triggering harper_deb13. build for kernel $latest_upstream_version (reason: $build_reason)..."
+        log_warn "Build needed for kernel $latest_upstream_version (reason: $build_reason)"
+        log_info "Returning exit code 0 to indicate build is needed"
         
-        # PLACEHOLDER: Execute build or trigger CI pipeline
-        # This is the core execution point - customize based on your infrastructure
+        # Export detected version for use by caller (e.g., in build_successful callback)
+        export DETECTED_KERNEL_VERSION="$latest_upstream_version"
+        export DETECTED_BUILD_REASON="$build_reason"
         
-        cat << 'EXECUTION_PLACEHOLDER'
-
-    ╔════════════════════════════════════════════════════════════════════════════╗
-    ║ Build trigger placeholder for new kernel versions.
-    ║
-    ║ Implementation options:                                                    ║
-    │ 1. GitHub Actions: Use workflow_dispatch to trigger CI pipeline            ║
-    │    gh workflow run ci-build.yml -f kernel_version=<version>                ║
-    │                                                                            ║
-    │ 2. Docker: Build locally                                                   ║
-    │    ./start_build.sh --params-file params/harper_deb13.params               ║
-    │                                                                            ║
-    │ 3. Remote: SSH to build server and execute                                 ║
-    │    ssh buildserver 'cd /path && ./start_build.sh ...'                      ║
-    │                                                                            ║
-    │ 4. Queue: Add to job queue for batch processing                            ║
-    │                                                                            ║
-    ╚════════════════════════════════════════════════════════════════════════════╝
-
-EXECUTION_PLACEHOLDER
-
-        # After successful build, update version tracking file:
-        # cat > "$VERSION_TRACKING_FILE" << EOF
-        # KERNEL_VERSION=$latest_upstream_version
-        # LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
-        # BUILD_STATUS=success
-        # EOF
-        # EOF
-        
-        log_ok "Build trigger executed (placeholder)"
-        return 0
+        return 0  # 0 = build needed
     else
         log_ok "No action needed. Latest version already built."
-        return 0
+        log_info "Returning exit code 1 to indicate no build needed"
+        return 1  # non-zero = no build needed
     fi
+}
+
+# ==============================================================================
+# FUNCTION: harper_deb13_kernel_build_successful
+# ==============================================================================
+# Callback invoked when build completes successfully
+# Updates version tracking file with the newly built kernel version
+#
+# Arguments:
+#   None (uses exported DETECTED_KERNEL_VERSION from trigger function)
+#
+# Returns:
+#   0 - Tracking file updated successfully
+#   1 - Error updating tracking file
+#
+# ==============================================================================
+harper_deb13_kernel_build_successful() {
+    log_info "=== Build Success Callback ==="
+    
+    if [ -z "${DETECTED_KERNEL_VERSION:-}" ]; then
+        log_error "DETECTED_KERNEL_VERSION not set. Did you run the trigger check first?"
+        return 1
+    fi
+    
+    log_ok "Updating version tracking for kernel $DETECTED_KERNEL_VERSION"
+    
+    # Update version tracking file
+    cat > "$VERSION_TRACKING_FILE" << EOF
+KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=success
+EOF
+    
+    log_ok "Version tracking updated: $VERSION_TRACKING_FILE"
+    log_ok "Next trigger check will compare against version $DETECTED_KERNEL_VERSION"
+    
+    return 0
+}
+
+# ==============================================================================
+# FUNCTION: harper_deb13_kernel_build_failed
+# ==============================================================================
+# Callback invoked when build fails
+# Updates tracking file to record the failure (optional)
+#
+# Arguments:
+#   $1 - (optional) Error message or exit code from build
+#
+# Returns:
+#   0 - Failure recorded
+#
+# ==============================================================================
+harper_deb13_kernel_build_failed() {
+    local error_info="${1:-unknown}"
+    
+    log_info "=== Build Failure Callback ==="
+    log_error "Build failed for kernel ${DETECTED_KERNEL_VERSION:-unknown}: $error_info"
+    
+    # Optionally update tracking file to record failure
+    # This prevents retrying the same failed version repeatedly
+    # Uncomment if you want to skip failed versions:
+    #
+    # cat > "$VERSION_TRACKING_FILE" << EOF
+# KERNEL_VERSION=${DETECTED_KERNEL_VERSION:-unknown}
+# LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+# BUILD_STATUS=failed
+# BUILD_ERROR=$error_info
+# EOF
+    
+    log_warn "Version tracking NOT updated - will retry this version on next trigger check"
+    
+    return 0
 }

@@ -11,13 +11,31 @@ The trigger system monitors upstream sources and automatically initiates builds 
 **Plugin Runner:** `runner.sh`
 - Main dispatcher that loads and executes trigger plugins
 - Exports logging functions: `log_info()`, `log_ok()`, `log_warn()`, `log_error()`
-- Routes to plugin functions: `{trigger_name}_trigger()`
+- Routes to plugin functions via these exported functions:
+  - `check_if_build_is_needed <plugin>` - Check if build needed
+  - `build_successful <plugin>` - Callback when build succeeds
+  - `build_failed <plugin> [error]` - Callback when build fails
+
+**Plugin Interface (each plugin must implement):**
+
+1. **`{plugin}_trigger()`** - Detection function
+   - Checks if new version available
+   - Exports: `DETECTED_KERNEL_VERSION`, `DETECTED_BUILD_REASON`
+   - Returns: 0=build needed, 1=no action
+
+2. **`{plugin}_build_successful()`** - Success callback
+   - Updates version tracking file
+   - Called after successful build
+
+3. **`{plugin}_build_failed()`** - Failure callback  
+   - Handles build failures
+   - Optional: update tracking to skip failed versions
 
 **Available Plugins:**
 - `harper_deb13_kernel.sh` - Debian Trixie Backports kernel releases
   - Monitors: Debian Salsa API
   - Tracks: Version in `version_tracking/harper_deb13_latest_kernel.txt`
-  - Executes: Build trigger (placeholder)
+  - Exports: `DETECTED_KERNEL_VERSION` for use in callbacks
 
 ## Usage
 
@@ -27,38 +45,111 @@ The trigger system monitors upstream sources and automatically initiates builds 
 source ./scripts/plugins/triggers/runner.sh
 ```
 
-### Trigger Manually
+### Check and Execute Build
 
 ```bash
-# Check for new kernel versions
-trigger_build harper_deb13_kernel
+# Check if new kernel version available
+check_if_build_is_needed harper_deb13_kernel
 
-# Force build regardless of version
-trigger_build harper_deb13_kernel --force
+if [ $? -eq 0 ]; then
+    echo "Build needed for kernel version: $DETECTED_KERNEL_VERSION"
+    
+    # Execute your build here
+    if ./start_build.sh --params-file params/harper_deb13.params; then
+        # Build succeeded - update tracking
+        build_successful harper_deb13_kernel
+    else
+        # Build failed - handle error
+        build_failed harper_deb13_kernel "build_exit_$?"
+    fi
+else
+    echo "No build needed - already up to date"
+fi
+```
+
+### Force Build
+
+```bash
+# Force build regardless of version comparison
+check_if_build_is_needed harper_deb13_kernel --force
 ```
 
 ### Create a New Plugin
 
 1. **Create plugin file:** `scripts/plugins/triggers/{name}.sh`
 
-2. **Implement function:** `{name}_trigger()`
+2. **Implement the three required functions:**
 
 ```bash
 #!/bin/bash
 # Harper Foundry: Custom Trigger Plugin
 
-my_trigger_trigger() {
+VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/my_custom_latest.txt"
+
+# REQUIRED: Detection function
+my_custom_trigger() {
     local force_build="${1:-}"
     
     log_info "=== My Custom Trigger ==="
     
-    # Your implementation:
-    # 1. Check upstream source
-    # 2. Compare against last built version
-    # 3. Trigger build if needed
+    # 1. Query upstream source for latest version
+    local latest_version="1.2.3"  # Your detection logic here
     
-    log_ok "Trigger executed"
+    # 2. Load last built version from tracking file
+    source "$VERSION_TRACKING_FILE"
+    local last_version="${VERSION:-unknown}"
+    
+    # 3. Compare and decide
+    if [ "$latest_version" != "$last_version" ]; then
+        # Export detected version for callbacks
+        export DETECTED_VERSION="$latest_version"
+        export DETECTED_BUILD_REASON="new_version"
+        
+        log_warn "Build needed: $latest_version"
+        return 0  # Build needed
+    else
+        log_ok "Already up to date: $last_version"
+        return 1  # No action needed
+    fi
 }
+
+# REQUIRED: Success callback
+my_custom_build_successful() {
+    log_info "=== Build Success Callback ==="
+    
+    # Update version tracking file
+    cat > "$VERSION_TRACKING_FILE" << EOF
+VERSION=$DETECTED_VERSION
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=success
+EOF
+    
+    log_ok "Version tracking updated"
+    return 0
+}
+
+# REQUIRED: Failure callback
+my_custom_build_failed() {
+    local error_info="${1:-unknown}"
+    
+    log_error "Build failed: $error_info"
+    
+    # Optionally update tracking to skip this version
+    # (Comment out to retry failed versions)
+    # cat > "$VERSION_TRACKING_FILE" << EOF
+    # VERSION=$DETECTED_VERSION
+    # BUILD_STATUS=failed
+    # EOF
+    
+    return 0
+}
+```
+
+3. **Test your plugin:**
+
+```bash
+source ./scripts/plugins/triggers/runner.sh
+check_if_build_is_needed my_custom
 ```
 
 3. **Make executable:**

@@ -8,7 +8,7 @@
 #
 # Usage:
 #   $(source ./scripts/plugins/triggers/runner.sh)
-#   trigger_build <trigger_type> [options...]
+#   check_if_build_is_needed <trigger_type> [options...]
 #
 # Supported Trigger Types:
 #   - harper_deb13_kernel    : Debian Trixie Backports kernel releases
@@ -34,7 +34,7 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC}   $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC}  $1"; }
 
 # ==============================================================================
-# FUNCTION: trigger_build
+# FUNCTION: check_if_build_is_needed
 # ==============================================================================
 # Main dispatcher function. Routes to appropriate trigger plugin.
 #
@@ -43,17 +43,17 @@ log_error() { echo -e "${RED}[ERROR]${NC}  $1"; }
 #   $2+ - options to pass to the plugin
 #
 # Returns:
-#   0 if no action needed or build triggered successfully
-#   1 if error occurred
+#   0 if build is needed (new version detected)
+#   1 if no action needed or error occurred
 #
 # ==============================================================================
-trigger_build() {
+check_if_build_is_needed() {
     local trigger_type="${1:-}"
     shift || true
     
     if [ -z "$trigger_type" ]; then
         log_error "No trigger type specified"
-        log_info "Usage: trigger_build <trigger_type> [options...]"
+        log_info "Usage: check_if_build_is_needed <trigger_type> [options...]"
         log_info ""
         log_info "Available trigger types:"
         for plugin in "$PLUGINS_DIR"/*.sh; do
@@ -93,6 +93,78 @@ trigger_build() {
     fi
 }
 
+# ==============================================================================
+# FUNCTION: build_successful
+# ==============================================================================
+# Callback invoked when a build completes successfully
+# Routes to the plugin's build_successful callback to update tracking
+#
+# Arguments:
+#   $1 - trigger_type (e.g., "harper_deb13_kernel")
+#   $2+ - optional arguments to pass to plugin callback
+#
+# Returns:
+#   Plugin callback's return code
+#
+# ==============================================================================
+build_successful() {
+    local trigger_type="${1:-}"
+    shift || true
+    
+    if [ -z "$trigger_type" ]; then
+        log_error "No trigger type specified for build_successful callback"
+        return 1
+    fi
+    
+    local callback_func="${trigger_type}_build_successful"
+    
+    if declare -f "$callback_func" > /dev/null; then
+        "$callback_func" "$@"
+        return $?
+    else
+        log_warn "Plugin $trigger_type does not define $callback_func function"
+        log_warn "Skipping success callback"
+        return 0
+    fi
+}
+
+# ==============================================================================
+# FUNCTION: build_failed
+# ==============================================================================
+# Callback invoked when a build fails
+# Routes to the plugin's build_failed callback to handle failure
+#
+# Arguments:
+#   $1 - trigger_type (e.g., "harper_deb13_kernel")
+#   $2+ - optional error info to pass to plugin callback
+#
+# Returns:
+#   Plugin callback's return code
+#
+# ==============================================================================
+build_failed() {
+    local trigger_type="${1:-}"
+    shift || true
+    
+    if [ -z "$trigger_type" ]; then
+        log_error "No trigger type specified for build_failed callback"
+        return 1
+    fi
+    
+    local callback_func="${trigger_type}_build_failed"
+    
+    if declare -f "$callback_func" > /dev/null; then
+        "$callback_func" "$@"
+        return $?
+    else
+        log_warn "Plugin $trigger_type does not define $callback_func function"
+        log_warn "Skipping failure callback"
+        return 0
+    fi
+}
+
 # Export functions for use in subshells
 export -f log_info log_ok log_warn log_error
-export -f trigger_build
+export -f check_if_build_is_needed
+export -f build_successful
+export -f build_failed
