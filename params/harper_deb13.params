@@ -32,9 +32,9 @@
 # Note: REPO_ROOT (repository location) is auto-detected and does not need configuration
 #
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. Use fast storage (SSD/NVMe) for best performance. This is mounted as /build in the container."
-BUILD_WORKSPACE_DIR=""
+BUILD_WORKSPACE_DIR="/mnt/build-data/build"
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-HOST_OUTPUT_DIR=""
+HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
 # When true, repo-relative defaults based on params file name
 #       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
