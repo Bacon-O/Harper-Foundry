@@ -71,6 +71,7 @@ BUILD_LLVM="1"
 
 # --- Performance & Parallelism ---
 # Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
+# Set to "ALL" to use all available cores, or specify a number (e.g., 4)
 PARALLEL_JOBS=""
 
 # --- Build Strategy ---

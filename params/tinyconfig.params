@@ -68,7 +68,8 @@ BUILD_LLVM="1"
 
 # --- Performance & Parallelism ---
 # Defaults to nproc-1 (min 1) when empty
-PARALLEL_JOBS=""
+# Set to "ALL" to use all available cores, or specify a number (e.g., 4)
+PARALLEL_JOBS="ALL"
 
 # --- Build Strategy ---
 # Tinyconfig is a kbuild target, not a file - handles minimal kernel generation
