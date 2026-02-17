@@ -103,29 +103,32 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # ==============================================================================
 
 # OPTION A: Build directly with Docker
-# if [ $BUILD_NEEDED -eq 0 ]; then
-#     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
-#     log_to_file "Executing build with tinyconfig for testing..."
+if [ $BUILD_NEEDED -eq 0 ]; then
+    log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
+    log_to_file "Executing build with tinyconfig for testing..."
     
-#     # Set build environment variables
-#     export HOST_OUTPUT_DIR="$REPO_ROOT/output"
+    # Set build environment variables
+    export HOST_OUTPUT_DIR="$REPO_ROOT/output"
     
-#     # Run the build (use RELATIVE path - works both on host and in container)
-#     if "$REPO_ROOT/start_build.sh" --params-file params/tinyconfig.params 2>&1 | tee -a "$LOGFILE"; then
-#         log_to_file "Build completed successfully"
+    # Change to repo root so relative paths work correctly
+    cd "$REPO_ROOT" || exit 1
+    
+    # Run the build using RELATIVE path only (no $REPO_ROOT prefix)
+    if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a "$LOGFILE"; then
+        log_to_file "Build completed successfully"
         
-#         # Callback to plugin: updates version tracking file automatically
-#         # Flow: build_successful → runner.sh → harper_deb13_kernel_build_successful()
-#         build_successful harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"
-#     else
-#         BUILD_EXIT_CODE=$?
-#         log_to_file "Build failed with exit code: $BUILD_EXIT_CODE"
+        # Callback to plugin: updates version tracking file automatically
+        # Flow: build_successful → runner.sh → harper_deb13_kernel_build_successful()
+        build_successful harper_deb13_kernel 2>&1 | tee -a "$LOGFILE"
+    else
+        BUILD_EXIT_CODE=$?
+        log_to_file "Build failed with exit code: $BUILD_EXIT_CODE"
         
-#         # Callback to plugin: handles failure (optionally skip this version)
-#         # Flow: build_failed → runner.sh → harper_deb13_kernel_build_failed()
-#         build_failed harper_deb13_kernel "exit_code_$BUILD_EXIT_CODE" 2>&1 | tee -a "$LOGFILE"
-#     fi
-# fi
+        # Callback to plugin: handles failure (optionally skip this version)
+        # Flow: build_failed → runner.sh → harper_deb13_kernel_build_failed()
+        build_failed harper_deb13_kernel "exit_code_$BUILD_EXIT_CODE" 2>&1 | tee -a "$LOGFILE"
+    fi
+fi
 
 # OPTION B: Use a dedicated build execution script
 # if [ $BUILD_NEEDED -eq 0 ]; then
