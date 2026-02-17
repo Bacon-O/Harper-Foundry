@@ -110,8 +110,8 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 #     # Set build environment variables
 #     export HOST_OUTPUT_DIR="$REPO_ROOT/output"
     
-#     # Run the build
-#     if "$REPO_ROOT/start_build.sh" --params-file "$REPO_ROOT/params/tinyconfig.params" 2>&1 | tee -a "$LOGFILE"; then
+#     # Run the build (use RELATIVE path - works both on host and in container)
+#     if "$REPO_ROOT/start_build.sh" --params-file params/tinyconfig.params 2>&1 | tee -a "$LOGFILE"; then
 #         log_to_file "Build completed successfully"
         
 #         # Callback to plugin: updates version tracking file automatically
