@@ -174,6 +174,13 @@ if [ -f "$PARAMS_FILE" ]; then
     fi
 
     # 4.5. Container Path Adjustments
+    # Set default paths for host environment first
+    if [ -z "$PLUGIN_DIR" ]; then
+        export PLUGIN_DIR="${REPO_ROOT}/scripts/plugins/"
+        export TEST_FUNCTIONS_DIR="${REPO_ROOT}/scripts/plugins/qatests/tests/"
+        export TEST_PACKAGE_DIR="${REPO_ROOT}/scripts/plugins/qatests/packages/"
+    fi
+    
     # If running inside a container, translate host paths to container paths
     if [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
         # Inside container: plugins are mounted at /opt/factory/scripts/plugins
@@ -252,7 +259,7 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     else
         echo "📂 Running in container - output mounted at /opt/factory/output"
     fi    
-    echo "✅ Environment fueled for $TARGET_ARCH build."
+    echo "✅ Environment configured for $TARGET_ARCH build."
 else
     echo "❌ Error: $PARAMS_FILE not found!"
     exit 1

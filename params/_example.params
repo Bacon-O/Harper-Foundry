@@ -17,7 +17,13 @@
 BUILD_WORKSPACE_DIR=""
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 HOST_OUTPUT_DIR=""
+
+# When true, repo-relative defaults based on params file name
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
+# When false aboslute outpaths are respected 
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/
 USE_PARAM_SCOPED_DIRS="true"
+
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""

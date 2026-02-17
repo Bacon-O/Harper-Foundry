@@ -52,8 +52,8 @@ In your params file:
 # QA Configuration
 QA_MODE="RELAXED"                              # ENFORCED = fail build | RELAXED = warn only
 BYPASS_QA="false"                                  # Set true to skip all QA
-TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"   # Individual tests location
-TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"  # Test packages location
+# Note: TEST_FUNCTIONS_DIR and TEST_PACKAGE_DIR are automatically set by env_setup.sh
+# They default to the plugin directories but can be overridden if needed
 
 # Individual tests to run
 QA_TESTS=(

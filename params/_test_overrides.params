@@ -1,3 +1,6 @@
+# shellcheck disable=all
+# disabling shellcheck for as it is only for testing and not meant to be 
+# a full prodcution script. A permanent fix is planned.
 # ==============================================================================
 # HARPER FOUNDRY: TESTING OVERRIDE CONFIGURATION
 # ==============================================================================
