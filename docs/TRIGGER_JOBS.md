@@ -14,68 +14,70 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
 
 ## Architecture
 
-**Diagram: Alloy Deb13 Automated Build Pipeline**
+**Diagram: Harper Deb13 Automated Build Pipeline with Callbacks**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Upstream Kernel Source                                     │
-│  (Debian Salsa API / Trixie-Backports)                      │
+│  Upstream Scheduler (Cron or GitHub Actions)                │
+│  - Local: cron_example.sh (runs with provided schedule)    │
+│  - CI: .github/workflows/monitor-deb13-kernel.yml (6h)    │
 └────────────────────┬────────────────────────────────────────┘
                      │
-                     │ Poll every 6 hours
+                     │ Executes: check_if_build_is_needed()
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  GitHub Actions Workflow                                    │
-│  (.github/workflows/monitor-deb13-kernel.yml)              │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     │ Executes: source runner.sh && trigger_build
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Trigger Plugin Runner (Plugin Dispatcher)                  │
+│  STEP 1: Trigger Plugin Runner (Dispatcher)                │
 │  (scripts/plugins/triggers/runner.sh)                       │
 │                                                             │
 │  - Loads appropriate trigger plugin                         │
-│  - Routes to: harper_deb13_kernel_trigger() function              │
-│  - Manages environment and logging                          │
+│  - Exports: DETECTED_KERNEL_VERSION, DETECTED_BUILD_REASON │
+│  - Returns: 0=build needed, 1=no action                    │
 └────────────────────┬────────────────────────────────────────┘
                      │
-                     │ Calls harper_deb13_kernel_trigger()
+                     │ Calls: harper_deb13_kernel_trigger()
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Trigger Plugin: Debian Trixie Kernel Monitor              │
-│  (scripts/plugins/triggers/harper_deb13_kernel.sh)               │
+│  STEP 2: Trigger Detection Plugin                           │
+│  (scripts/plugins/triggers/harper_deb13_kernel.sh)         │
 │                                                             │
-│  1. Query Debian Salsa API                                  │
-│  2. Load last compiled version                              │
+│  1. Query Debian Salsa API for latest version               │
+│  2. Load last successfully built version                    │
 │  3. Compare versions                                        │
-│  4. Trigger build if new version detected                   │
+│  4. Export DETECTED_KERNEL_VERSION if new                   │
+│  5. Return: 0 if build needed, 1 if not                    │
 └────────────────────┬────────────────────────────────────────┘
                      │
         ┌────────────┴────────────┐
         │                         │
         ▼                         ▼
    ┌─────────┐          ┌─────────────────┐
-   │No Action │          │Trigger Build    │
-   │Needed    │          │(Placeholder)    │
+   │Return 1 │          │Return 0 (Build  │
+   │No Action │         │Needed)          │
+   │Needed    │          │                 │
    └─────────┘          └────────┬────────┘
                                   │
-                 ┌────────────────┼────────────────┐
-                 │                │                │
-                 ▼                ▼                ▼
-            ┌─────────┐    ┌──────────┐    ┌──────────┐
-            │GitHub   │    │Docker    │    │Remote    │
-            │Actions  │    │Local     │    │SSH Build │
-            └────┬────┘    └────┬─────┘    └────┬─────┘
-                 │              │              │
-                 └──────────────┬──────────────┘
-                                │
-                                ▼
-                      ┌──────────────────┐
-                      │Build Complete    │
-                      │Update Tracking   │
-                      │File              │
-                      └──────────────────┘
+                 ┌────────────────┴─────────────────┐
+                 │                                  │
+                 ▼                                  ▼
+       ┌──────────────────┐          ┌──────────────────────┐
+       │STEP 3: Execute   │          │STEP 4: Success       │
+       │Build (Optional)  │          │Callback              │
+       │                  │          │                      │
+       │./start_build.sh  │──────────▶│build_successful()    │
+       │--params-file ... │          │(Updates tracking)    │
+       └──────────────────┘          └──────────────────────┘
+               │                              │
+               │ (if fails)                   │
+               └──────────────┬───────────────┘
+                              │
+                              ▼
+                   ┌──────────────────────┐
+                   │Failure Callback      │
+                   │                      │
+                   │build_failed()        │
+                   │(Log error, optional  │
+                   │ version skipping)    │
+                   └──────────────────────┘
 ```
 
 ## Setup
@@ -150,54 +152,179 @@ gh workflow run monitor-deb13-kernel.yml
 
 **Locally (via trigger plugin system):**
 ```bash
-# Load the trigger plugin runner and execute (Alloy Deb13 example)
+# Load the trigger plugin runner and execute (harper_deb13 example)
 source ./scripts/plugins/triggers/runner.sh
-trigger_build harper_deb13_kernel
+
+# Check if build is needed (STEP 1: Detection)
+check_if_build_is_needed harper_deb13_kernel
+BUILD_NEEDED=$?
+
+if [ $BUILD_NEEDED -eq 0 ]; then
+    echo "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
+    
+    # STEP 2: Execute build (optional - you implement this)
+    if ./start_build.sh --params-file params/tinyconfig.params; then
+        echo "Build successful"
+        
+        # STEP 3: Success callback (plugin updates tracking automatically)
+        build_successful harper_deb13_kernel
+    else
+        echo "Build failed"
+        
+        # Failure callback (plugin handles failure logic)
+        build_failed harper_deb13_kernel "build_exit_${?}"
+    fi
+else
+    echo "No action needed - version already built"
+fi
 
 # Force build regardless of version:
-trigger_build harper_deb13_kernel --force
+check_if_build_is_needed harper_deb13_kernel --force
 ```
 
-## Implementation: The Placeholder
+## Plugin Interface: Three-Function Pattern
 
-The trigger plugin includes a **PLACEHOLDER** for the actual build execution. This is intentional - implementation depends on your infrastructure:
+Each trigger plugin implements three functions that form the complete trigger lifecycle:
 
-**Note:** The examples below use Alloy Deb13 configuration, but the same pattern applies to other build profiles.
+### 1. `<plugin>_trigger()` - Detection Phase
 
-### Option 1: GitHub Actions Dispatch
-Trigger the main CI/CD pipeline:
+**Purpose:** Check if build is needed
+
+**Returns:**
+- `0` - Build IS needed (new version detected)
+- `1` - Build NOT needed (version already built)
+
+**Exports:**
+- `DETECTED_KERNEL_VERSION` - Version string for build
+- `DETECTED_BUILD_REASON` - Reason ("new_version" or "forced")
+
+**Example:**
 ```bash
-gh workflow run ci-build.yml \
-  -f config_file=params/harper_deb13.params \
-  -f kernel_version=latest
+harper_deb13_kernel_trigger() {
+    # Query API, compare versions
+    if [ new_version_found ]; then
+        export DETECTED_KERNEL_VERSION="6.12.5"
+        export DETECTED_BUILD_REASON="new_version"
+        return 0  # Build needed
+    else
+        return 1  # No action needed
+    fi
+}
 ```
 
-### Option 2: Local Docker Build
-Execute immediately:
+### 2. `<plugin>_build_successful()` - Success Callback
+
+**Purpose:** Handle successful build completion
+
+**Responsibility:**
+- Update version tracking file
+- Record successful build metadata
+- Prepare for next trigger check
+
+**Example:**
 ```bash
-./start_build.sh --params-file params/harper_deb13.params \
-                 --kernel-version latest
+harper_deb13_kernel_build_successful() {
+    log_ok "Build succeeded for ${DETECTED_KERNEL_VERSION}"
+    
+    # Update tracking file
+    cat > "$VERSION_TRACKING_FILE" << EOF
+KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=success
+EOF
+    
+    return 0
+}
 ```
+
+### 3. `<plugin>_build_failed()` - Failure Callback
+
+**Purpose:** Handle build failures
+
+**Responsibility:**
+- Log failure details
+- Optionally skip this version (prevent retry loops)
+- Prepare for next attempt
+
+**Example:**
+```bash
+harper_deb13_kernel_build_failed() {
+    local error_info="${1:-unknown}"
+    
+    log_error "Build failed for ${DETECTED_KERNEL_VERSION}: $error_info"
+    
+    # Optionally update tracking to skip failed version:
+    # cat > "$VERSION_TRACKING_FILE" << EOF
+    # KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+    # BUILD_STATUS=failed
+    # BUILD_ERROR=$error_info
+    # EOF
+    
+    return 0
+}
+```
+
+## Build Execution: Implementation Options
+
+The **detection** (Step 1-2) is handled by the plugin. The **build execution** (Step 3-4) is your responsibility. Choose the approach best for your infrastructure:
+
+### Option 1: Local Docker Build (Default)
+Execute immediately on the trigger machine:
+```bash
+if [ $BUILD_NEEDED -eq 0 ]; then
+    ./start_build.sh --params-file params/tinyconfig.params
+    if [ $? -eq 0 ]; then
+        build_successful harper_deb13_kernel
+    else
+        build_failed harper_deb13_kernel "build_exit_${?}"
+    fi
+fi
+```
+
+See `scripts/plugins/triggers/cron_example.sh` for full example.
+
+### Option 2: GitHub Actions Workflow
+Use the existing workflow for distributed execution:
+```bash
+# In .github/workflows/monitor-deb13-kernel.yml
+check_if_build_is_needed harper_deb13_kernel
+if [ $? -eq 0 ]; then
+    ./start_build.sh --params-file params/tinyconfig.params
+    build_successful harper_deb13_kernel  # Plugin handles tracking
+fi
+```
+
+See `.github/workflows/monitor-deb13-kernel.yml` for current implementation.
 
 ### Option 3: Remote SSH Build
 Delegate to a build server:
 ```bash
-ssh buildserver 'cd /path/to/repo && \
-  ./start_build.sh --params-file params/harper_deb13.params'
+if [ $BUILD_NEEDED -eq 0 ]; then
+    if ssh buildserver "cd /repo && ./start_build.sh ..."; then
+        build_successful harper_deb13_kernel
+    else
+        build_failed harper_deb13_kernel "remote_build_failed"
+    fi
+fi
 ```
 
 ### Option 4: Job Queue
-Add to a queue for batch processing:
+Enqueue for batch processing:
 ```bash
-# Example: Enqueue to Redis or local queue
-redis-cli LPUSH "kernel_builds" "kernel_version:latest:config:harper_deb13."
+if [ $BUILD_NEEDED -eq 0 ]; then
+    queue build harper_deb13_kernel "$DETECTED_KERNEL_VERSION"
+    # Later, when processing queue:
+    # if build_succeeded; then
+    #     build_successful harper_deb13_kernel
+    # fi
+fi
 ```
 
 ## Customization
 
 ### Create a New Trigger Plugin
 
-To monitor a different upstream source (e.g., Fedora kernel):
+To monitor a different upstream source (e.g., Fedora kernel), implement the three required functions:
 
 1. **Create plugin file:** `scripts/plugins/triggers/fedora_kernel.sh`
 
@@ -205,35 +332,88 @@ To monitor a different upstream source (e.g., Fedora kernel):
 #!/bin/bash
 # Harper Foundry: Fedora Kernel Release Trigger Plugin
 
+VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/fedora_latest_kernel.txt"
+FEDORA_KOJI_API="https://koji.fedoraproject.org/koji/api/v1/..."
+
+# REQUIRED: Detection function
 fedora_kernel_trigger() {
     local force_build="${1:-}"
     
     log_info "=== Fedora Kernel Release Monitor ==="
     
-    # Your custom logic here:
-    # 1. Query Fedora package APIs
-    # 2. Load last compiled version
-    # 3. Compare versions
-    # 4. Trigger build if new
+    # 1. Query Fedora Koji API for latest kernel
+    latest_version=$(curl -s "$FEDORA_KOJI_API" | ...)
     
-    log_ok "Fedora kernel trigger executed"
+    # 2. Load last built version
+    source "$VERSION_TRACKING_FILE" 2>/dev/null || KERNEL_VERSION="unknown"
+    
+    # 3. Compare and decide
+    if [ "$latest_version" != "$KERNEL_VERSION" ] || [ "$force_build" = "true" ]; then
+        export DETECTED_KERNEL_VERSION="$latest_version"
+        export DETECTED_BUILD_REASON="new_version"
+        return 0  # Build needed
+    fi
+    
+    return 1  # No action
+}
+
+# REQUIRED: Success callback
+fedora_kernel_build_successful() {
+    log_ok "Updating tracking for Fedora kernel $DETECTED_KERNEL_VERSION"
+    
+    cat > "$VERSION_TRACKING_FILE" << EOF
+KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=success
+EOF
+    
+    return 0
+}
+
+# REQUIRED: Failure callback
+fedora_kernel_build_failed() {
+    local error_info="${1:-unknown}"
+    log_error "Fedora kernel build failed: $error_info"
+    return 0
 }
 ```
 
-2. **Make executable:**
-```bash
-chmod +x scripts/plugins/triggers/fedora_kernel.sh
-```
-
-3. **Test locally:**
+2. **Test locally:**
 ```bash
 source ./scripts/plugins/triggers/runner.sh
-trigger_build fedora_kernel
+
+# Test detection
+check_if_build_is_needed fedora_kernel
+
+if [ $? -eq 0 ]; then
+    echo "Build needed: $DETECTED_KERNEL_VERSION"
+fi
 ```
 
-### Change Target Build Profile
+3. **Integrate into automation:**
+```bash
+# Add to cron_example.sh or GitHub Actions workflow
+if [ $BUILD_NEEDED -eq 0 ]; then
+    ./start_build.sh --params-file params/fedora_profile.params
+    build_successful fedora_kernel
+fi
+```
 
-Modify `scripts/plugins/triggers/harper_deb13_kernel.sh`:
+### Change Build Profile Targeted by Trigger
+
+Modify the detection logic in `scripts/plugins/triggers/harper_deb13_kernel.sh`:
+
+```bash
+# Change which kernel package to monitor
+DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/..."  # Different package
+
+# Change where to store version tracking
+VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/PROFILE_NAME_latest.txt"
+```
+
+### Adjust Polling Frequency
+
+Edit `.github/workflows/monitor-deb13-kernel.yml`:
 
 ```yaml
 on:
@@ -243,14 +423,12 @@ on:
     # - cron: '0 * * * *'    # Every hour
 ```
 
-### Adjust Polling Frequency
-
-Edit `.github/workflows/monitor-deb13-kernel.yml`:
+Or edit your local cron entry:
 
 ```bash
-# Update the version tracking file path or profile name:
-BUILD_CONFIG="params/PROFILE_NAME.params"
-VERSION_TRACKING_FILE="path/to/tracking/file.txt"
+crontab -e
+# Change from 10 minutes to daily (19:03 UTC):
+# 3 19 * * * /path/to/cron_example.sh
 ```
 
 ### Create Chained Triggers
@@ -292,9 +470,10 @@ BUILD_STATUS=success               # success | failed | in_progress
 - Commit: `git commit -m "Initialize version tracking"`
 
 ### "Build not triggering"
-- Check that the placeholder code has been replaced with actual implementation
-- Verify `GITHUB_TOKEN` or credentials are configured if using remote build
-- Check logs: `gh run view <run_id> --log`
+- Check that build execution code (Step 3) is actually uncommented/implemented
+- Verify function exports in runner.sh: `grep export.*build_successful /path/to/runner.sh`
+- Check logs: `tail -f logs/trigger_cron.log` (cron) or `gh run view <run_id> --log` (Actions)
+- Verify pipes aren't hiding errors: `check_if_build_is_needed harper_deb13_kernel 2>&1 | tee -a logfile`
 
 ### "Version tracking out of sync"
 - Reset to known state: `echo "KERNEL_VERSION=6.11.8" > version_tracking/harper_deb13_latest_kernel.txt`
@@ -302,14 +481,29 @@ BUILD_STATUS=success               # success | failed | in_progress
 
 ## Next Steps
 
-1. **Replace the placeholder** in `scripts/plugins/triggers/harper_deb13_kernel.sh` with your build execution method
-2. **Test locally** before enabling automated workflow:
+1. **Implement build execution** (Step 3) in your orchestrator:
+   - Local cron: Edit `scripts/plugins/triggers/cron_example.sh` OPTION A/B/C
+   - GitHub Actions: Modify `.github/workflows/monitor-deb13-kernel.yml` build steps
+
+2. **Test locally** before enabling automated runs:
    ```bash
    source ./scripts/plugins/triggers/runner.sh
-   trigger_build harper_deb13_kernel
+   check_if_build_is_needed harper_deb13_kernel
+   
+   # If BUILD_NEEDED=0, simulate full flow:
+   ./start_build.sh --params-file params/tinyconfig.params
+   build_successful harper_deb13_kernel
    ```
-3. **Monitor first builds** carefully to ensure version tracking updates correctly
-4. **Add notifications** (optional) - Email, Slack, Discord updates on build completion
+
+3. **Monitor first builds** carefully:
+   - Check logs: `tail -f logs/trigger_cron.log`
+   - Verify version tracking updated: `cat version_tracking/harper_deb13_latest_kernel.txt`
+   - Confirm second trigger doesn't rebuild same version
+
+4. **Add notifications** (optional):
+   - GitHub Actions: Use Slack/Discord actions on workflow completion
+   - Cron: Email output by removing `| tee` and letting cron mail output
+   - Plugin: Add notification calls to success/failure callbacks
 
 ## References
 

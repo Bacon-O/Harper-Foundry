@@ -265,6 +265,7 @@ See [scripts/alloymixtures/README.md](scripts/alloymixtures/README.md) for detai
   - Full preemption for lower latency
   - Intel/AMD P-State frequency scaling
   - ZSTD kernel compression
+- No kernel singing implemented
 - ⚠️ Experimental - use at your own risk
 
 ### Cleanup

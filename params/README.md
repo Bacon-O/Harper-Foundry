@@ -11,6 +11,7 @@ This directory contains configuration files (params files) that define how a bui
   - Target: x86_64 with AVX2, FMA, BMI2 (Haswell+)
   - Timer: 1000Hz for low latency
   - Source: Debian Trixie Backports
+  - No kernel singing implemented
   - Status: ⚠️ EXPERIMENTAL - Use at your own risk
   - Use: Enthusiast desktop builds, reference implementation
 
