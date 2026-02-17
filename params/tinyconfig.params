@@ -13,8 +13,12 @@
 # BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
 # HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
 # Note: REPO_ROOT is auto-detected
-BUILD_WORKSPACE_DIR="/mnt/build-data/tinyconfig/"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
+BUILD_WORKSPACE_DIR=""
+HOST_OUTPUT_DIR=""
+
+# When true, repo-relative defaults based on params file name
+# When false aboslute outpaths are respected 
+USE_PARAM_SCOPED_DIRS="true"
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""

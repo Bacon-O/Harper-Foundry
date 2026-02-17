@@ -1,3 +1,3 @@
 # ShellCheck configuration
 # Ignore .params files (configuration/sourced files, not executable scripts)
-#disable=SC2034
+disable=SC2034

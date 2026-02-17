@@ -101,7 +101,7 @@ if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/fo
     PARAMS_FILE="${REPO_ROOT}/params/tinyconfig.params"
 fi
 
-# 3. Load and Hydrate
+# 3. Load the Params File
 if [ -f "$PARAMS_FILE" ]; then
     echo "📖 Consulting the blueprint from $PARAMS_FILE..."
     set -a
