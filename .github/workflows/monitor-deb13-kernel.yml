@@ -30,28 +30,55 @@ jobs:
       
       - name: Run kernel release trigger
         run: |
-          source ./scripts/plugins/triggers/runner.sh
+          cd ${{ github.workspace }}
+          
+          # Run the trigger orchestrator (handles detection, build, and callbacks)
           if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
-            trigger_build harper_deb13_kernel --force
+            # Force build even if version hasn't changed
+            export FORCE_BUILD="true"
+          fi
+          
+          # Source runner and execute trigger check
+          source ./scripts/plugins/triggers/runner.sh
+          
+          check_if_build_is_needed harper_deb13_kernel --force
+          BUILD_NEEDED=$?
+          
+          if [ $BUILD_NEEDED -eq 0 ]; then
+            echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
+            
+            # Execute build with tinyconfig for CI testing
+            export HOST_OUTPUT_DIR="${GITHUB_WORKSPACE}/output"
+            if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a /tmp/build.log; then
+              echo "✅ Build completed successfully"
+              # Update tracking via plugin callback
+              build_successful harper_deb13_kernel
+            else
+              echo "❌ Build failed"
+              # Handle failure via plugin callback
+              build_failed harper_deb13_kernel "ci_build_failed"
+            fi
           else
-            trigger_build harper_deb13_kernel
+            echo "ℹ️  No new kernel version available"
           fi
         env:
           REPO_ROOT: ${{ github.workspace }}
       
-      - name: Update version tracking file
+      - name: Commit updated version tracking (if changed)
         if: success()
         run: |
-          # Placeholder: This would be done by trigger script on successful build
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          cd ${{ github.workspace }}
           
+          # Check if version tracking file was updated by build_successful callback
           if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
-            echo "No version changes to commit"
+            echo "ℹ️  No version changes to commit"
           else
+            echo "✅ Version tracking updated - committing changes"
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
             git add version_tracking/harper_deb13_latest_kernel.txt
             git commit -m "Update tracked kernel version [skip ci]"
-            git push
+            git push || echo "⚠️  Could not push (may be read-only)"
           fi
       
       - name: Notify on failure
