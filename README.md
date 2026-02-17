@@ -149,8 +149,7 @@ The build is configured via files in the `params/` directory. The default is `pa
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
 | `QA_MODE` | QA strictness | `RELAXED`, `ENFORCED` |
 
-
-More information can be found in the example params file. Also supports any additional custom variables required for your workflow aa all variables get exported correctly for the environment whem env_setuo.sh is called.
+Additional custom variables can be added to your params files and will be exported to the environment. For advanced environment customization (adding custom environment extensions), see [Environment Extensions](scripts/plugins/env_extensions/README.md).
 ### Validation
 
 Always validate your configuration before building:
@@ -453,7 +452,7 @@ DOCKERFILE_PATH="docker/my_custom.dockerfile"
 
 ## 🐛 Troubleshooting
 
-For common issues and solutions, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+For common issues and solutions, see [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 Quick diagnostics:
 ```bash

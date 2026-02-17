@@ -228,7 +228,7 @@ EOF
 ## Parameter Categories
 
 ### Core Setup (Required)
-- `BUILD_WORKSPACE_DIR` - Build workspace on host (use fast storage like SSD/NVMe), mounted as /build
+- `BUILD_WORKSPACE_DIR` - Build workspace on host mounted as /build
 - `HOST_OUTPUT_DIR` - Where .deb files go
 - `USE_PARAM_SCOPED_DIRS` - When true, repo-relative defaults are scoped per params name
 - `DOCKERFILE_PATH` - Docker image to use
