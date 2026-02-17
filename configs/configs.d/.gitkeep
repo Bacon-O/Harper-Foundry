@@ -1,0 +1,12 @@
+# Custom Kernel Configurations
+#
+# This directory is for your custom kernel configuration files.
+# They work the same as official configs in ../. but are gitignored.
+#
+# Example:
+#   cp ../harper_deb13_tune.config ./my_custom_tune.config
+#   # Edit my_custom_tune.config as needed
+#   # Then reference it in your params file:
+#   TUNING_CONFIG="configs.d/my_custom_tune.config"
+#
+# The system automatically checks configs.d/ first, then falls back to configs/.

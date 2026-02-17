@@ -1,4 +1,0 @@
-# Test custom params file in new location
-source params/harper_deb13.params
-TARGET_ARCH="x86_64"
-RELEASE_TAG="test-custom"

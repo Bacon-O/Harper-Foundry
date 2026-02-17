@@ -35,11 +35,6 @@ This directory contains configuration files (params files) that define how a bui
   - Copy and customize to create your own build configs
   - Use: Starting point for custom configurations
 
-- **`_example.params`** - Working example configuration
-  - Complete, working reference implementation
-  - Shows all available parameters with documentation
-  - Use: Reference, copy as starting point
-
 ## User Customizations (`params/params.d/`)
 
 **To avoid git conflicts when updating, store your custom params files in the `params/params.d/` directory.**

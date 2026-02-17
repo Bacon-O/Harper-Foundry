@@ -1,36 +1,31 @@
 # ==============================================================================
-# HARPER FOUNDRY: BLUEPRINT CONFIGURATION
+# HARPER FOUNDRY: TINYCONFIG QUICK TEST CONFIGURATION
 # ==============================================================================
+# This configuration is designed for FAST pipeline testing, not production use.
+# Build time: 2-5 minutes vs 30-60+ minutes for full builds.
+# Use this to quickly validate changes to the foundry itself.
 
 # ==============================================================================
 # CORE FOUNDRY SETUP (Hard Requirements)
-# These parameters are essential for the build system to function.
-# Incorrect values will likely prevent the build from starting or completing.
 # ==============================================================================
 
 # --- Pathing & Identity ---
 # BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
 # HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
-# USE_PARAM_SCOPED_DIRS: When true, repo-relative defaults are scoped per params name
 # Note: REPO_ROOT is auto-detected
-# @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur.
 BUILD_WORKSPACE_DIR=""
-# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
-#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
 # When false aboslute outpaths are respected 
-#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/
 USE_PARAM_SCOPED_DIRS="true"
-
 
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
 FOUNDRY_GID=""
 
 # --- Foundry Execution ---
-# The script within the container that Docker will execute.
+# Using the tinyconfig quick test build script
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
 INCREMENTAL_BUILD="false"
 
@@ -44,7 +39,7 @@ CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # Versioning & Tagging
 BUILD_ARCH_TAG="amd64v3"
-RELEASE_TAG="example"
+RELEASE_TAG="harper-test"
 
 # --- Target Specifications ---
 TARGET_ARCH="x86_64"
@@ -76,13 +71,14 @@ BUILD_LLVM="1"
 # ==============================================================================
 
 # --- Performance & Parallelism ---
-# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
+# Defaults to nproc-1 (min 1) when empty
 # Set to "ALL" to use all available cores, or specify a number (e.g., 4)
-PARALLEL_JOBS=""
+PARALLEL_JOBS="ALL"
 
 # --- Build Strategy ---
-# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+# Tinyconfig is a kbuild target, not a file - handles minimal kernel generation
 BASE_CONFIG="tinyconfig"
+# No tuning config for tinyconfig - we want absolute minimum
 TUNING_CONFIG=""
 
 # --- Patches if any ---
@@ -93,46 +89,47 @@ TUNING_CONFIG=""
 # ==============================================================================
 
 # --- QA Flags ---
+# For quick tests, we only do minimal validation
 BYPASS_QA="false"
 ENABLE_QEMU_TESTS="false"
 
+# Use RELAXED mode - warn but don't fail on missing nice-to-haves
 QA_MODE="RELAXED"
 
+# Only run essential file validation tests
 QA_TESTS=(
     "filesexists.sh"
 )
 
-QA_TEST_PACKAGE=(
-    "minimal"
-)
+# No test packages for quick builds
+QA_TEST_PACKAGE=()
 
 # --- Chemical Audit: Critical (Must Pass) ---
+# For tinyconfig, we only check absolute essentials
 QA_CRITICAL_CHECKS=( 
     "CONFIG_TTY=y"
     "CONFIG_PRINTK=y"
 )
 
 # --- Chemical Audit: Optional (Warn Only) ---
+# Much shorter list for tinyconfig tests
 QA_OPTIONAL_CHECKS=(
-    "CONFIG_NTSYNC=y"
-    "CONFIG_HZ_500=y"
-    "CONFIG_PREEMPT=y"
+    "CONFIG_BLK_DEV=y"
+    "CONFIG_EXT4_FS=y"
+    "CONFIG_PROC_FS=y"
+    "CONFIG_SYSFS=y"
 )
 
-# --- VM Proving Ground Specs (for QEMU testing) ---
-QA_VM_MEMORY="1G"
-QA_VM_CORES="4"
-QA_VM_TIMEOUT="30s"
+# --- VM Proving Ground Specs (Not used for quick tests) ---
+QA_VM_MEMORY="512M"
+QA_VM_CORES="2"
+QA_VM_TIMEOUT="15s"
+
 # ==============================================================================
 # ENVIRONMENT CUSTOMIZATION
 # ==============================================================================
 
 # --- Environment Extensions ---
-# Optionally specify environment extensions to load (in order).
-# Extensions are sourced from plugins.d/env_extensions/ (custom) or plugins/env_extensions/ (official).
-# Leave unset or empty () to load no extensions.
-# Examples:
-#   ENV_EXTENSIONS=("container_optimized.sh" "debug_mode.sh")  # Load these in order
-#   ENV_EXTENSIONS=("my_custom.sh")                            # Load only this one
-#   ENV_EXTENSIONS=()                                           # Load none (default)
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=()

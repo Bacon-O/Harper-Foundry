@@ -66,13 +66,26 @@ env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c fakeroot make 
 cp debian/build/build_amd64_none_amd64/.config .config
 
 # 5️⃣ Merge Tuning Profile
-if [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
-    echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
-    cp "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ./
+if [ -n "$TUNING_CONFIG" ]; then
+    # Check custom configs first, then fall back to official
+    tuning_file=""
+    if [ -f "${CONTAINER_CONFIG_DIR}/configs.d/$TUNING_CONFIG" ]; then
+        tuning_file="${CONTAINER_CONFIG_DIR}/configs.d/$TUNING_CONFIG"
+        echo "🧪 Merging Custom Tuning Profile: $TUNING_CONFIG"
+    elif [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+        tuning_file="${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
+        echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
+    fi
     
-    # Executing WITHOUT -m, and explicitly passing LLVM and ARCH 
-    # to protect the toolchain variables during validation
-    LLVM=1 ARCH="$TARGET_ARCH" ./scripts/kconfig/merge_config.sh .config "$TUNING_CONFIG"
+    if [ -n "$tuning_file" ]; then
+        cp "$tuning_file" ./
+        
+        # Executing WITHOUT -m, and explicitly passing LLVM and ARCH 
+        # to protect the toolchain variables during validation
+        LLVM=1 ARCH="$TARGET_ARCH" ./scripts/kconfig/merge_config.sh .config "$TUNING_CONFIG"
+    else
+        echo "⚠️  Warning: TUNING_CONFIG '$TUNING_CONFIG' not found in configs/ or configs.d/"
+    fi
 fi
 
 # 6️⃣ Sanitization (Keys, Debug)

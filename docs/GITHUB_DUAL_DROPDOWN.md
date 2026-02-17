@@ -13,7 +13,6 @@ This document explains the **dual dropdown system** for GitHub Actions workflows
 │ • tinyconfig.params                     │
 │ • harper_deb13.params                   │
 │ • foundry.params                        │
-│ • _example.params                       │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
@@ -191,7 +190,6 @@ When you trigger a manual workflow, you'll see:
 │ │ tinyconfig.params               │    │
 │ │ harper_deb13.params             │    │
 │ │ foundry.params                  │    │
-│ │ _example.params                 │    │
 │ └─────────────────────────────────┘    │
 │                                         │
 │ Apply Override ▼                        │
@@ -361,7 +359,6 @@ Select which params file to use as the foundation:
 - `tinyconfig.params` - Fast minimal build (2-5 min)
 - `harper_deb13.params` - Full desktop kernel Debian 13 build (experimental)
 - `foundry.params` - Template (requires customization)
-- `_example.params` - Reference example
 
 ### Dropdown 2: Apply Override
 Choose whether to apply testing overrides:
@@ -385,7 +382,6 @@ When you trigger a manual workflow in GitHub Actions, you'll see:
 │ │ tinyconfig.params                   │    │
 │ │ harper_deb13.params                 │    │
 │ │ foundry.params                      │    │
-│ │ _example.params                     │    │
 │ └─────────────────────────────────────┘    │
 │                                             │
 │ Apply Override ▼                            │

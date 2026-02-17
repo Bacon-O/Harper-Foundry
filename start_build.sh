@@ -84,23 +84,96 @@ fi
 
 # Handle --shell-menu: show interactive menu
 if [ "$SHELL_MENU" == "true" ]; then
-    echo "📂 Available param configs:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  📂 Available Configurations"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    mapfile -t params_list < <(for f in params/*.params; do [[ "$(basename "$f")" != _* ]] && basename "$f"; done)
     
-    if [ ${#params_list[@]} -eq 0 ]; then
-        echo "❌ No param files found in params/ directory"
+    # Collect project params (from params/ directory, excluding templates starting with _)
+    mapfile -t project_params < <(for f in params/*.params; do [[ -f "$f" ]] && [[ "$(basename "$f")" != _* ]] && echo "params/$(basename "$f")"; done | sort)
+    
+    # Collect user custom params (from params/params.d/ directory)
+    mapfile -t user_params < <(for f in params/params.d/*.params; do [[ -f "$f" ]] && echo "$f"; done | sort)
+    
+    # Combine all params
+    all_params=()
+    if [ ${#project_params[@]} -gt 0 ]; then
+        all_params+=("${project_params[@]}")
+    fi
+    if [ ${#user_params[@]} -gt 0 ]; then
+        all_params+=("${user_params[@]}")
+    fi
+    
+    if [ ${#all_params[@]} -eq 0 ]; then
+        echo "❌ No param files found in params/ or params/params.d/ directories"
         exit 1
     fi
     
-    PS3="Select a config (enter number): "
-    select selected_param in "${params_list[@]}"; do
-        if [[ -n "$selected_param" ]]; then
-            BUILD_ARGS+=("-p" "params/$selected_param")
-            echo "✅ Selected: $selected_param"
-            break
+    # Display built-in configurations
+    if [ ${#project_params[@]} -gt 0 ]; then
+        echo "🔧 BUILT-IN CONFIGURATIONS (Suggestions):"
+        echo ""
+        index=1
+        for param in "${project_params[@]}"; do
+            basename=$(basename "$param" .params)
+            case "$basename" in
+                foundry)
+                    suggestion="← Default, recommended for standard builds"
+                    ;;
+                tinyconfig)
+                    suggestion="← Quick test builds (2-5 mins)"
+                    ;;
+                harper_deb13)
+                    suggestion="← Debian 13 optimized"
+                    ;;
+                *)
+                    suggestion=""
+                    ;;
+            esac
+            printf "   %d) %-25s %s\n" "$index" "$param" "$suggestion"
+            ((index++))
+        done
+        echo ""
+    fi
+    
+    # Display custom user configurations
+    if [ ${#user_params[@]} -gt 0 ]; then
+        echo "👤 CUSTOM USER CONFIGURATIONS:"
+        echo ""
+        for param in "${user_params[@]}"; do
+            printf "   %d) %s\n" "$index" "$param"
+            ((index++))
+        done
+        echo ""
+    fi
+    
+    # Display quit option
+    echo "q) quit"
+    echo ""
+    
+    # Get user input
+    while true; do
+        read -p "Select a config (enter number or q to quit): " user_choice
+        
+        # Check for quit commands
+        if [[ "$user_choice" =~ ^[qQ]$ ]] || [[ "$user_choice" =~ ^[qQ][uU][iI][tT]$ ]] || [[ "$user_choice" =~ ^[eE][xX][iI][tT]$ ]]; then
+            echo "❌ Cancelled"
+            exit 1
+        fi
+        
+        # Check if it's a valid number
+        if [[ "$user_choice" =~ ^[0-9]+$ ]]; then
+            index=$((user_choice - 1))
+            if [ "$index" -ge 0 ] && [ "$index" -lt ${#all_params[@]} ]; then
+                selected_param="${all_params[$index]}"
+                BUILD_ARGS+=("-p" "$selected_param")
+                echo "✅ Selected: $selected_param"
+                break
+            else
+                echo "❌ Invalid selection. Please enter a number between 1 and ${#all_params[@]}, or q to quit."
+            fi
         else
-            echo "❌ Invalid selection"
+            echo "❌ Invalid input. Please enter a number or q to quit."
         fi
     done
     echo ""

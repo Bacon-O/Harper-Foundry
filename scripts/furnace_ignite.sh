@@ -63,10 +63,13 @@ if [ "$SHELL_MODE" == "true" ]; then
     echo ""
     
     DOCKER_FLAGS="-it"
-    CONTAINER_PARAMS_FILE="/opt/factory/params/$(basename "$PARAMS_FILE")"
+    # Preserve subdirectory structure (e.g., params.d/) when mapping to container
+    relative_params_path="${PARAMS_FILE#${REPO_ROOT}/}"
+    CONTAINER_PARAMS_FILE="/opt/factory/$relative_params_path"
     CONTAINER_OVERRIDE_ARGS=""
     if [ -n "$OVERRIDE_PARAMS" ]; then
-        CONTAINER_OVERRIDE_FILE="/opt/factory/params/$(basename "$OVERRIDE_PARAMS")"
+        relative_override_path="${OVERRIDE_PARAMS#${REPO_ROOT}/}"
+        CONTAINER_OVERRIDE_FILE="/opt/factory/$relative_override_path"
         CONTAINER_OVERRIDE_ARGS="-o \"$CONTAINER_OVERRIDE_FILE\""
     fi
     # Preload params into the shell environment
@@ -90,8 +93,11 @@ eval "docker run $DOCKER_FLAGS --rm \
     -v \"${HOST_QEMU_STATIC=}\":/usr/bin/qemu-x86_64-static:ro \
     -v "${BUILD_WORKSPACE_DIR}:/build" \
     -v \"${REPO_ROOT}/scripts:/opt/factory/scripts:ro\" \
+    -v \"${REPO_ROOT}/scripts/scripts.d:/opt/factory/scripts/scripts.d:ro\" \
     -v \"${REPO_ROOT}/configs:/opt/factory/configs:ro\" \
+    -v \"${REPO_ROOT}/configs/configs.d:/opt/factory/configs/configs.d:ro\" \
     -v \"${REPO_ROOT}/params:/opt/factory/params:ro\" \
+    -v \"${REPO_ROOT}/params/params.d:/opt/factory/params/params.d:ro\" \
     -v "${BUILD_OUTPUT_DIR}:/opt/factory/output" \
     -w \"/build\" \
     \"$CONTAINER_IMAGE_NAME\" \
