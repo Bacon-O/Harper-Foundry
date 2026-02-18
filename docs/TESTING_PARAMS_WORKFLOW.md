@@ -175,7 +175,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ inputs.production_base }}
         run: |
           echo "Testing with base: $PRODUCTION_CONFIG"
-          ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
+          ./scripts/launch.sh --params-file params/_test_overrides.params
 ```
 
 **This workflow:**
@@ -209,7 +209,7 @@ jobs:
         env:
           PRODUCTION_CONFIG: ${{ matrix.base_config }}
         run: |
-          ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
+          ./scripts/launch.sh --params-file params/_test_overrides.params
 ```
 
 **This workflow:**
@@ -249,7 +249,7 @@ jobs:
           KERNEL_VERSION="6.12.8"  # Pin for reproducibility
           EOF
           
-          ./scripts/furnace_ignite.sh --params-file params/_env_override.params
+          ./scripts/launch.sh --params-file params/_env_override.params
 ```
 
 ## Advanced: Per-Environment Params Files

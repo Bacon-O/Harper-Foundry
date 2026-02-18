@@ -84,7 +84,7 @@ make: *** [Makefile:1234] Error 1
 
 3. Try a clean build:
    ```bash
-   ./scripts/furnace_clean.sh --deep
+   ./scripts/clean.sh --deep
    ./start_build.sh
    ```
 
@@ -223,7 +223,7 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
    ls -ld "$BUILD_WORKSPACE_DIR"
    ```
 
-2. Check volume mount paths in `furnace_ignite.sh`
+2. Check volume mount paths in `launch.sh`
 
 3. Ensure SELinux/AppArmor allows Docker volume mounts:
    ```bash
@@ -320,12 +320,12 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
 **Solutions:**
 1. Clean old builds:
    ```bash
-   ./scripts/furnace_clean.sh
+   ./scripts/clean.sh
    ```
 
 2. Deep clean including Docker cache:
    ```bash
-   ./scripts/furnace_clean.sh --deep
+   ./scripts/clean.sh --deep
    ```
 
 3. Prune Docker system:

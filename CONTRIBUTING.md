@@ -210,11 +210,11 @@ validate_config() {
 
 ### Creating Test Packages
 
-Test packages are collections of related tests stored in `scripts/plugins/qatests/testpackages/`.
+Test packages are collections of related tests stored in `scripts/plugins/qatests/packages/`.
 
 1. Create a new directory:
    ```bash
-   mkdir scripts/plugins/qatests/testpackages/mypackage
+   mkdir scripts/plugins/qatests/packages/mypackage
    ```
 
 2. Add test scripts or symlinks to the directory

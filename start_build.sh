@@ -331,15 +331,15 @@ if [ "$SHELL_MODE" == "true" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     
-    # Launch shell mode in furnace_ignite
+    # Launch shell mode in launch
     export SHELL_MODE="true"
-    bash ./scripts/furnace_ignite.sh "${BUILD_ARGS[@]}"
+    bash ./scripts/launch.sh "${BUILD_ARGS[@]}"
     exit 0
 fi
 
 # 2. Preheat (normal build mode)
-echo "🌡️  Phase 1: Preheating Furnace..."
-if ! bash ./scripts/furnace_preheat.sh "${BUILD_ARGS[@]}"; then
+echo "🌡️  Phase 1: Validating prerequisites..."
+if ! bash ./scripts/validate.sh "${BUILD_ARGS[@]}"; then
     echo "❌ Preheat failed. Cannot proceed with build."
     exit 1
 fi
@@ -347,7 +347,7 @@ echo ""
 
 # 3. Ignition
 echo "🔥 Phase 2: Igniting Build Process..."
-if ! bash ./scripts/furnace_ignite.sh "${BUILD_ARGS[@]}"; then
+if ! bash ./scripts/launch.sh "${BUILD_ARGS[@]}"; then
     echo "❌ Build process failed."
     echo ""
     echo "💡 Troubleshooting tips:"
@@ -392,5 +392,5 @@ echo ""
 echo "Next steps:"
 echo "  • View builds: ./scripts/show_builds.sh"
 echo "  • Install kernel: <Follow your distro's kernel installation process>"
-echo "  • Clean old builds: ./scripts/furnace_clean.sh"
+echo "  • Clean old builds: ./scripts/clean.sh"
 echo ""

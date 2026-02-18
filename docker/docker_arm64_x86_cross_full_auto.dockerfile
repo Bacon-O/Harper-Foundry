@@ -56,7 +56,7 @@ RUN set -eux; \
 RUN pip3 install --break-system-packages buildbot-worker twisted
 
 # REMOVED: COPY scripts/ci-build_full.sh
-# Because we are now mounting scripts via furnace_ignite.sh
+# Because we are now mounting scripts via launch.sh
 
 WORKDIR /build
 CMD ["/bin/bash"]

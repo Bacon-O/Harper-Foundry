@@ -7,7 +7,7 @@ The **Harper Foundry** is an extensible containerized build system. While curren
 
 ## ⚠️ Early Stage Software
 
-**This project is still in early/enthusiast stage.** I have validated the logic for my specific use cae, but it has not been tested against a wide range of hardware,confirations or edge cases. Expect bugs, and use it at your own risk.
+**This project is still in beta stage.** I have validated the logic for my specific use case, but it has not been tested against a wide range of hardware, configurations, or edge cases. Expect bugs, and use it at your own risk.
 
 **Known Limitations:**
 - Limited testing on platforms beyond x86_64/arm64 with Debian 13
@@ -122,7 +122,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 *   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment setup.
-    *   `furnace_ignite.sh`: Docker container launch logic.
+    *   `launch.sh`: Docker container launch logic.
     *   `compile_scripts/`: Build script variants (full, tinyconfig, etc.).
     *   `material_analysis.sh`: Post-build Quality Assurance.
 *   `configs/`: Kernel configuration fragments (base configs and tuning overlays).
@@ -287,14 +287,14 @@ The project includes cleanup utilities for managing disk space.
 To remove older build artifacts while keeping the most recent ones (default: 3):
 
 ```bash
-./scripts/furnace_clean.sh
+./scripts/clean.sh
 ```
 
 #### Deep Cleanup (Scrub)
 To remove all build artifacts from the distribution directory and prune the Docker builder cache, use the `--deep` or `--scrub` flag. This is useful for reclaiming significant disk space.
 
 ```bash
-./scripts/furnace_clean.sh --deep
+./scripts/clean.sh --deep
 ```
 
 ## 🏭 CI/CD Pipeline

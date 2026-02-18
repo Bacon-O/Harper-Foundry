@@ -1,53 +1,14 @@
 # Custom Kernel Source Plugins
 
-Add custom kernel source fetchers here. These override official kernel source plugins with the same name.
+Add custom kernel source fetchers here to override or extend official plugins.
 
-## Purpose
-
-Replace or extend kernel source fetching with:
-- Custom repositories (GitLab, internal servers)
-- Alternative architectures
-- Development branches
-- Patched versions
-
-## Template
-
+**Reference in params:**
 ```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/kernelsources/mykernel.sh
-
-fetch_kernel() {
-    echo "Fetching custom kernel..."
-    # Download kernel source
-    # Set KERNEL_SOURCE_PATH variable
-    # Set KERNEL_VERSION variable
-}
-
-# Export the function
-export -f fetch_kernel
-```
-
-## Usage
-
-Reference in your params file:
-
-```bash
-# params/your.params
 ENV_EXTENSIONS=("kernelsources/mykernel.sh")
 KERNEL_SOURCE="mykernel"
 ```
 
-## Examples
-
-### Private Repository
-
-```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/kernelsources/gitlab_private.sh
-
-fetch_kernel() {
-    echo "Fetching from private GitLab..."
-    git clone https://private.gitlab.com/kernel.git kernel_src
+See [Official kernel sources](../../plugins/kernelsources/README.md) for plugin interface.
     cd kernel_src
     git checkout my-branch
     KERNEL_SOURCE_PATH="$PWD"

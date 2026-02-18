@@ -62,11 +62,11 @@ status:
 
 clean:
 	@echo "🧹 Cleaning old build artifacts..."
-	./scripts/furnace_clean.sh
+	./scripts/clean.sh
 
 deep-clean:
 	@echo "🧼 Deep cleaning all artifacts and Docker cache..."
-	./scripts/furnace_clean.sh --deep
+	./scripts/clean.sh --deep
 
 # Development tools (optional)
 SHFMT_FLAGS := $(shell cat .shfmt 2>/dev/null)

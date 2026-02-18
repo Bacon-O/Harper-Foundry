@@ -13,7 +13,7 @@ The build system has been refactored to support multiple compile scripts - diffe
 scripts/
 ├── ci-build.sh          # Single monolithic build script
 ├── env_setup.sh
-├── furnace_ignite.sh
+├── launch.sh
 └── ...
 ```
 
@@ -25,7 +25,7 @@ scripts/
 │   ├── harper_deb13.sh  # Harper Debian 13 enthusiast builds (60+ min) ⚠️ EXPERIMENTAL
 │   └── tinyconfig.sh    # Quick tests (2-5 min)
 ├── env_setup.sh
-├── furnace_ignite.sh
+├── launch.sh
 └── ...
 ```
 

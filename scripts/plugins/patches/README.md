@@ -67,7 +67,7 @@ For patches you want to contribute back:
 
 1. Create a new script in `patches/` (e.g., `patches/openzfs.sh`)
 2. Follow the template above
-3. Update `scripts/alloymixtures/` to use your patch as needed
+3. Update `scripts/compile_scripts/` to use your patch as needed
 4. Document the patch and its requirements in comments
 5. Submit a pull request with test results
 

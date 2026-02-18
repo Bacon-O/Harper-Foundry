@@ -158,7 +158,7 @@ smelt:
         PRODUCTION_CONFIG: harper_deb13.params  # From preheat
       run: |
         PRODUCTION_CONFIG=harper_deb13.params \
-          bash ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
+          bash ./scripts/launch.sh --params-file params/_test_overrides.params
 ```
 
 ### Inside _test_overrides.params
@@ -221,7 +221,7 @@ Dropdown 1: harper_deb13.params
 Dropdown 2: none
 
 Workflow executes:
-  bash ./scripts/furnace_ignite.sh --params-file params/harper_deb13.params
+  bash ./scripts/launch.sh --params-file params/harper_deb13.params
 
 Result:
   • Sources: params/harper_deb13.params
@@ -236,7 +236,7 @@ Dropdown 2: testing.params (test output dir + enforced QA)
 
 Workflow executes:
   PRODUCTION_CONFIG=harper_deb13.params \
-    bash ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
+    bash ./scripts/launch.sh --params-file params/_test_overrides.params
 
 Result:
   • _test_overrides.params sources: harper_deb13.params
@@ -515,7 +515,7 @@ smelt:
         PRODUCTION_CONFIG: harper_deb13.params  # From preheat
       run: |
         PRODUCTION_CONFIG=harper_deb13.params \
-          bash ./scripts/furnace_ignite.sh --params-file params/_test_overrides.params
+          bash ./scripts/launch.sh --params-file params/_test_overrides.params
 ```
 
 ### Inside _test_overrides.params

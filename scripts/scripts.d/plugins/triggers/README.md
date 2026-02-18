@@ -1,52 +1,10 @@
 # Custom Triggers
 
-Add custom build scheduling triggers here.
+Add custom build triggers (webhooks, cron, event-driven, etc.).
 
-## Purpose
+Implement standard functions: `{name}_trigger()`, `{name}_build_successful()`, `{name}_build_failed()`
 
-Automate builds with custom triggering logic:
-- Webhook handlers
-- Cron job wrappers
-- CI/CD integrations
-- Custom monitoring systems
-- Event-driven builds
-
-## Template
-
-```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/triggers/mytrigger.sh
-
-# Initialize trigger
-trigger_init() {
-    echo "Setting up trigger..."
-    # Setup logic
-}
-
-# Main trigger handler
-trigger_handler() {
-    echo "Trigger activated"
-    # Handle trigger event
-    ./start_build.sh
-}
-
-# Cleanup
-trigger_cleanup() {
-    echo "Cleaning up trigger..."
-}
-
-export -f trigger_init trigger_handler trigger_cleanup
-```
-
-## Examples
-
-### GitHub Webhook
-
-```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/triggers/github_webhook.sh
-
-# Run as: ./scripts/scripts.d/plugins/triggers/github_webhook.sh --port 8080
+See [Official triggers](../../plugins/triggers/README.md) for detailed interface.
 
 trigger_init() {
     PORT=${1:-8080}

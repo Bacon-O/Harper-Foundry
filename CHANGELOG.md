@@ -72,9 +72,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `start_build.sh` - Main build entry point
 - `params/foundry.params` - Configuration file
 - `scripts/env_setup.sh` - Environment setup and argument parsing
-- `scripts/furnace_preheat.sh` - Prerequisites checking
-- `scripts/furnace_ignite.sh` - Docker container orchestration
-- `scripts/furnace_clean.sh` - Artifact cleanup
+- `scripts/validate.sh` - Prerequisites checking
+- `scripts/launch.sh` - Docker container orchestration
+- `scripts/clean.sh` - Artifact cleanup
 - `scripts/compile_scripts/harper_deb13.sh` - Container-internal build logic
 - `scripts/material_analysis.sh` - QA test orchestration
 - QA test plugins:

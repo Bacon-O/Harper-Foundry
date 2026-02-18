@@ -1,53 +1,11 @@
 # Custom QA Tests
 
-Add custom quality assurance tests here. These run alongside official QA tests.
+Add custom QA tests and test packages here.
 
-## Purpose
+**Standalone tests:** `tests/mytest.sh`  
+**Test packages:** `packages/mytest/{runner.sh, test.sh}`
 
-Validate build artifacts and functionality:
-- Custom benchmarks
-- Memory tests
-- Compatibility checks
-- Custom hardware validation
-- Application-specific testing
-
-## Directory Structure
-
-```bash
-scripts/scripts.d/plugins/qatests/
-├── packages/           # QA test packages (reusable)
-│   └── mytest/
-│       ├── runner.sh
-│       └── mytest.sh
-├── tests/              # Standalone test scripts
-│   ├── memtest.sh
-│   └── custom_bench.sh
-└── README.md
-```
-
-## Standalone Tests
-
-Simple test scripts in `tests/`:
-
-```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/qatests/tests/memtest.sh
-
-echo "Testing memory..."
-# Your test logic
-```
-
-## QA Test Packages
-
-Complex tests package with `runner.sh` in `packages/`:
-
-```bash
-scripts/scripts.d/plugins/qatests/packages/mytest/
-├── runner.sh       # Entry point called by QA system
-└── mytest.sh       # Test implementation
-```
-
-### runner.sh Template
+See [Official QA tests](../../plugins/qatests/README.md) for interface and usage.
 
 ```bash
 #!/bin/bash

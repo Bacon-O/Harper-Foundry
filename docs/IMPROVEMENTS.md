@@ -11,7 +11,7 @@ This document summarizes all the improvements made to the Harper Foundry project
   
 - **Fixed**: Typo `DEB_TARTET_ARCH` → `DEB_TARGET_ARCH` throughout the codebase
   - Updated in `params/foundry.params`
-  - Updated in `scripts/furnace_ignite.sh`
+  - Updated in `scripts/launch.sh`
   - Updated in `TROUBLESHOOTING.md`
 
 - **Fixed**: Typo `haperbase` → `harperbase` in QA test package name
@@ -194,9 +194,9 @@ Common task shortcuts:
 3. `scripts/plugins/qatests/filesexists.sh` - Fixed path and variables
 4. `scripts/plugins/qatests/linuxconfig.sh` - Fixed path and variables  
 5. `scripts/plugins/qatests/debpackage.sh` - Fixed path and variables
-6. `scripts/furnace_ignite.sh` - Fixed DEB_TARGET_ARCH typo
+6. `scripts/launch.sh` - Fixed DEB_TARGET_ARCH typo
 7. `TROUBLESHOOTING.md` - Fixed DEB_TARGET_ARCH typo
-8. `scripts/plugins/qatests/testpackages/harperbase/` - Restructured directory
+8. `scripts/plugins/qatests/packages/harperbase/` - Restructured directory (renamed from testpackages/)
 
 ### New Files Created (10 files)
 1. `.editorconfig` - Editor configuration

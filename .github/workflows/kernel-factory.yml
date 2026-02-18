@@ -95,7 +95,7 @@ jobs:
         env:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
         run: |
-          bash ./scripts/furnace_preheat.sh ${{ steps.set-args.outputs.args }}
+          bash ./scripts/validate.sh ${{ steps.set-args.outputs.args }}
 
   smelt:
     needs: preheat
@@ -107,7 +107,7 @@ jobs:
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
         run: |
-          bash ./scripts/furnace_ignite.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/launch.sh ${{ needs.preheat.outputs.args }}
 
   analysis:
     needs: [preheat, smelt]
@@ -133,4 +133,4 @@ jobs:
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
         run: |
-          bash ./scripts/furnace_clean.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/clean.sh ${{ needs.preheat.outputs.args }}

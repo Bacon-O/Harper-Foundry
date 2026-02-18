@@ -1,53 +1,13 @@
 # Custom Notifiers
 
-Add custom build status notifiers here. These override official notifiers with the same name.
+Add custom build status notifiers (Slack, Discord, email, etc.).
 
-## Purpose
-
-Send build status updates to your systems:
-- Slack webhooks
-- Discord webhooks
-- Email
-- Matrix/Elements
-- Custom monitoring systems
-- SMS alerts
-
-## Template
-
+**Reference in params:**
 ```bash
-#!/bin/bash
-# scripts/scripts.d/plugins/notifiers/myalert.sh
-
-notify_start() {
-    echo "Build started: $BUILD_ID"
-    # Send notification
-}
-
-notify_success() {
-    echo "Build succeeded: $BUILD_ID"
-    # Send notification
-}
-
-notify_failure() {
-    echo "Build failed: $BUILD_ID - $1"
-    # Send notification
-}
-
-export -f notify_start notify_success notify_failure
-```
-
-## Usage
-
-Reference in your params file:
-
-```bash
-# params/your.params
 ENV_EXTENSIONS=("notifiers/myalert.sh")
 ```
 
-## Examples
-
-### Slack Webhook
+See [Official notifiers](../../plugins/notifiers/README.md) for plugin interface.
 
 ```bash
 #!/bin/bash
