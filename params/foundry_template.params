@@ -7,7 +7,7 @@
 # accidental use. Copy and customize this file to create your own build config.
 #
 # Example:
-#   cp params/foundry.params params/my_custom_build.params
+#   cp params/foundry_template.params params/my_custom_build.params
 #   # Edit params/my_custom_build.params with your settings
 #   ./start_build.sh -p params/my_custom_build.params
 #

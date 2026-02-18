@@ -5,8 +5,10 @@ VERSION="v0.0-alpha-rc1"
 
 # Determine the repository root, assuming install.sh is in the root directory
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_PARAMS_FILE="${REPO_ROOT}/params/foundry_template.params"
 PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
 TEMP_PARAMS_FILE="${PARAMS_FILE}.tmp"
+SOURCE_PARAMS_FILE="$PARAMS_FILE"
 
 # Handle version and help flags early
 if [[ "$1" == "-v" ]] || [[ "$1" == "--version" ]]; then
@@ -52,9 +54,18 @@ if [ -f "${REPO_ROOT}/scripts/check_prerequisites.sh" ]; then
     fi
 fi
 
-if [ ! -f "$PARAMS_FILE" ]; then
-    echo "❌ Error: $PARAMS_FILE not found. Please ensure the repository is complete."
+if [ ! -f "$TEMPLATE_PARAMS_FILE" ]; then
+    echo "❌ Error: Template params file not found: $TEMPLATE_PARAMS_FILE"
+    echo "   Please ensure the repository is complete."
     exit 1
+fi
+
+if [ -f "$PARAMS_FILE" ]; then
+    SOURCE_PARAMS_FILE="$PARAMS_FILE"
+else
+    SOURCE_PARAMS_FILE="$TEMPLATE_PARAMS_FILE"
+    echo "ℹ️  No existing params file found at $PARAMS_FILE."
+    echo "   Using template $TEMPLATE_PARAMS_FILE to generate a new config."
 fi
 
 # --- Dynamic Parameter Loading and Prompting ---
@@ -66,7 +77,7 @@ declare -A prompt_descriptions # Stores descriptions for variables to be prompte
 param_lines=() # Array to hold all lines of the params file, preserving order
 current_description="" # Stores the description from the last # @PROMPT comment
 
-echo "📖 Analyzing $PARAMS_FILE for configurable parameters..."
+echo "📖 Analyzing $SOURCE_PARAMS_FILE for configurable parameters..."
 
 while IFS= read -r line || [[ -n "$line" ]]; do
     param_lines+=("$line")
@@ -97,7 +108,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
             current_description="" # Reset after associating with a variable
         fi
     fi
-done < "$PARAMS_FILE"
+done < "$SOURCE_PARAMS_FILE"
 
 # --- Prompting Function ---
 prompt_for_variable() {
@@ -122,7 +133,7 @@ prompt_for_variable() {
 echo ""
 echo "Please provide the following paths. These are critical for the build system"
 echo "to correctly locate your repository and store build artifacts. Defaults are"
-echo "based on your current 'params/foundry.params' file."
+echo "based on $SOURCE_PARAMS_FILE."
 
 for var_name in "${!prompt_descriptions[@]}"; do
     current_val="${current_values[$var_name]}"
@@ -194,6 +205,8 @@ echo ""
 echo "==================================================="
 echo "🎉 Setup Complete!"
 echo "==================================================="
+echo ""
+echo "Template tip: $TEMPLATE_PARAMS_FILE is a good starting point for new configs."
 echo ""
 echo "Next steps:"
 echo "  1. Review the configuration: cat $PARAMS_FILE"

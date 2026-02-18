@@ -119,7 +119,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 📂 Project Structure
 
 *   `start_build.sh`: The main entry point for local builds.
-*   `params/`: Configuration files (e.g., `foundry.params`, `tinyconfig.params`).
+*   `params/`: Configuration files (e.g., `foundry.params`, `foundry_template.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment setup.
     *   `launch.sh`: Docker container launch logic.
@@ -131,6 +131,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 🛠️ Configuration
 
 The build is configured via files in the `params/` directory. The default is `params/foundry.params`.
+If it does not exist yet, run `./install.sh` to generate it from `params/foundry_template.params`.
 
 ### Key Variables
 

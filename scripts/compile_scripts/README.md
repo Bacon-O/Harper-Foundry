@@ -115,7 +115,7 @@ To add a new alloy mixture:
 
 3. **Create matching params file (optional):**
    ```bash
-   cp params/foundry.params params/my-custom.params
+   cp params/foundry_template.params params/my-custom.params
    ```
 
 4. **Update the params:**

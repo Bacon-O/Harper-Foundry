@@ -30,7 +30,7 @@ This directory contains configuration files (params files) that define how a bui
 
 ### Templates
 
-- **`foundry.params`** - Template with EDIT_ME placeholders
+- **`foundry_template.params`** - Template with EDIT_ME placeholders
   - ⚠️ **DO NOT USE DIRECTLY** - this is a template!
   - Copy and customize to create your own build configs
   - Use: Starting point for custom configurations
@@ -41,7 +41,8 @@ This directory contains configuration files (params files) that define how a bui
 
 ```
 params/
-├── foundry.params          # Project-maintained templates
+├── foundry_template.params # Project-maintained template
+├── foundry.params          # Generated local config (optional)
 ├── harper_deb13.params     # Project-maintained
 ├── tinyconfig.params       # Project-maintained
 └── params.d/               # Your custom configs (not in git)
@@ -176,7 +177,7 @@ workflow_dispatch:
       options:
         - 'tinyconfig.params'              # Fast validation (2-5 min)
         - 'harper_deb13.params'      # Full desktop kernel (experimental)
-        - 'foundry.params'                 # Template (needs customization)
+        - 'foundry_template.params'        # Template (needs customization)
     
     override_mode:
       description: 'Apply Override'
@@ -197,7 +198,7 @@ workflow_dispatch:
 ### Option 1: Copy Template
 
 ```bash
-cp params/foundry.params params/my_build.params
+cp params/foundry_template.params params/my_build.params
 # Edit params/my_build.params - replace all EDIT_ME values
 ./start_build.sh -p params/my_build.params
 ```
