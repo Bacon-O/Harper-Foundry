@@ -242,9 +242,9 @@ See [params/README.md](params/README.md#configuration-override-patterns) for det
 ./start_build.sh --rebuild
 ```
 
-## 🧪 Build Mixtures (Alloy Configurations)
+## 🧪 Build Targets 
 
-The foundry supports different "alloy mixtures" - build configurations optimized for different purposes:
+The foundry can support different build targest and configurations optimized for different purposes:
 
 ### Available Mixtures
 
