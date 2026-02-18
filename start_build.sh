@@ -21,6 +21,8 @@ SHELL_MODE="false"
 SHELL_MENU="false"
 SHOW_CONFIGS="false"
 TEST_RUN="false"
+QA_ONLY="false"
+QA_BUILD_DIR=""
 BUILD_ARGS=()
 
 while [[ "$#" -gt 0 ]]; do
@@ -34,6 +36,7 @@ while [[ "$#" -gt 0 ]]; do
             echo ""
             echo "Build Modes:"
             echo "  (default)             Run full build pipeline (preheat → build → QA)"
+            echo "  --qa-only [BUILD_DIR] Run QA tests only against a build directory"
             echo ""
             echo "Interactive Modes:"
             echo "  --shell               Launch interactive container shell"
@@ -52,13 +55,13 @@ while [[ "$#" -gt 0 ]]; do
             echo "  -b, --bypass-qa           Skip Quality Assurance"
             echo "  -i, --incremental         Skip 'make clean' for faster rebuilds"
             echo "  -e, --exec <script>       Override the container execution script"
-            echo "  -v, --version             Show version information"
             echo ""
             echo "Examples:"
             echo "  ./start_build.sh --show-configs"
             echo "  ./start_build.sh --shell-menu"
             echo "  ./start_build.sh -p params/tinyconfig.params -t"
             echo "  ./start_build.sh -p params/foundry.params -o params/_test_overrides.params"
+            echo "  ./start_build.sh --qa-only -p params/harper_deb13.params ./output/build_20260217_160524"
             echo "  ./start_build.sh -v"
             echo ""
             exit 0
@@ -70,6 +73,9 @@ while [[ "$#" -gt 0 ]]; do
             SHELL_MENU="true"
             SHELL_MODE="true"
             ;;
+        --qa-only)
+            QA_ONLY="true"
+            ;;
         --show-configs)
             SHOW_CONFIGS="true"
             ;;
@@ -79,11 +85,40 @@ while [[ "$#" -gt 0 ]]; do
             BUILD_ARGS+=("--test-run")
             ;;
         *)
+            # Pass all other arguments to BUILD_ARGS
             BUILD_ARGS+=("$1")
             ;;
     esac
     shift
 done
+
+# For QA_ONLY mode, extract build directory from last argument
+if [ "$QA_ONLY" == "true" ]; then
+    if [ ${#BUILD_ARGS[@]} -eq 0 ]; then
+        echo "❌ ERROR: --qa-only requires a build directory argument"
+        echo ""
+        echo "Usage: $0 --qa-only -p params/file ./output/build_directory"
+        exit 1
+    fi
+    
+    # Check if last BUILD_ARGS entry looks like a path (not a flag)
+    last_arg="${BUILD_ARGS[-1]}"
+    if [[ "$last_arg" == -* ]]; then
+        echo "❌ ERROR: --qa-only requires a build directory argument"
+        echo ""
+        echo "Usage: $0 --qa-only -p params/file ./output/build_directory"
+        exit 1
+    fi
+    
+    # Pop the last argument as the build directory
+    QA_BUILD_DIR="$last_arg"
+    unset 'BUILD_ARGS[-1]'
+    
+    if [ ! -d "$QA_BUILD_DIR" ]; then
+        echo "❌ ERROR: Build directory not found: $QA_BUILD_DIR"
+        exit 1
+    fi
+fi
 
 # Handle --show-configs: display available configs
 if [ "$SHOW_CONFIGS" == "true" ]; then
@@ -190,6 +225,37 @@ fi
 
 # 1. Fueling
 source ./scripts/env_setup.sh "${BUILD_ARGS[@]}"
+
+# If QA_ONLY mode, run QA tests on existing build and exit
+if [ "$QA_ONLY" == "true" ]; then
+    echo "🛡️  Running Quality Assurance on existing build..."
+    echo "📂 Build directory: $QA_BUILD_DIR"
+    echo ""
+    
+    # Override output directory to the user-provided build
+    HOST_OUTPUT_DIR="$QA_BUILD_DIR"
+    export HOST_OUTPUT_DIR
+    
+    # Run material analysis (QA tests)
+    if ! bash ./scripts/material_analysis.sh "${BUILD_ARGS[@]}"; then
+        echo "❌ Quality assurance checks failed."
+        echo ""
+        echo "Review the QA output above for details."
+        
+        if [ "$QA_MODE" == "ENFORCED" ]; then
+            echo ""
+            echo "QA_MODE=ENFORCED: QA is considered failed."
+            exit 1
+        else
+            echo ""
+            echo "QA_MODE=RELAXED: QA completed with warnings."
+        fi
+    fi
+    
+    echo ""
+    echo "✅ QA tests completed. Exiting."
+    exit 0
+fi
 
 # If shell mode, skip build phases and launch interactive shell
 if [ "$SHELL_MODE" == "true" ]; then
