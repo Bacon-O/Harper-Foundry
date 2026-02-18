@@ -9,15 +9,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Clean runtime state from previous builds (ensure fresh start)
-rm -rf var/runtime 2>/dev/null || true
-
-# Generate BUILD_ID once at the start (persists across all env_setup.sh calls)
-if [ -n "$GITHUB_RUN_ID" ]; then
-    BUILD_ID="gh_${GITHUB_RUN_ID}"
-else
-    BUILD_ID=$(date +%Y%m%d_%H%M%S)
-fi
-export BUILD_ID
+# rm -rf var/runtime 2>/dev/null || true
 
 # Pre-parse arguments for shell mode and menu (before env_setup)
 SHELL_MODE="false"
@@ -25,8 +17,9 @@ SHELL_MENU="false"
 SHOW_CONFIGS="false"
 TEST_RUN="false"
 QA_ONLY="false"
-QA_BUILD_DIR=""
+QA_ONLY_BUILD_DIR=""
 BUILD_ARGS=()
+_params_file=""
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -78,6 +71,17 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --qa-only)
             QA_ONLY="true"
+            export QA_ONLY
+            BUILD_ARGS+=("--qa-only")
+            shift
+            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+                echo "❌ ERROR: --qa-only requires a build directory path"
+                echo "Usage: $0 --qa-only <BUILD_DIR>"
+                echo "Example: $0 --qa-only ./output/build_20260217_160524"
+                exit 1
+            fi
+            QA_ONLY_BUILD_DIR="$1"
+            BUILD_ARGS+=("$1")
             ;;
         --show-configs)
             SHOW_CONFIGS="true"
@@ -91,16 +95,32 @@ while [[ "$#" -gt 0 ]]; do
             # Handle flags that take values - consume both flag and value
             BUILD_ARGS+=("$1")
             shift
+            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+                echo "❌ ERROR: -p/--params-file requires a file path"
+                echo "Example: $0 -p params/tinyconfig.params"
+                exit 1
+            fi
+            _params_file="$1"
             BUILD_ARGS+=("$1")
             ;;
         -o|--overrides)
             BUILD_ARGS+=("$1")
             shift
+            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+                echo "❌ ERROR: -o/--overrides requires a file path"
+                echo "Example: $0 -o params/_test_overrides.params"
+                exit 1
+            fi
             BUILD_ARGS+=("$1")
             ;;
         -e|--exec)
             BUILD_ARGS+=("$1")
             shift
+            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+                echo "❌ ERROR: -e/--exec requires a script path"
+                echo "Example: $0 -e scripts/compile_scripts/custom.sh"
+                exit 1
+            fi
             BUILD_ARGS+=("$1")
             ;;
         *)
@@ -111,67 +131,13 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# For QA_ONLY mode, extract build directory from last argument
-if [ "$QA_ONLY" == "true" ]; then
-    if [ ${#BUILD_ARGS[@]} -eq 0 ]; then
-        echo "❌ ERROR: --qa-only requires a build directory argument"
-        echo ""
-        echo "Usage: $0 --qa-only -p params/file ./output/build_directory"
-        exit 1
-    fi
-    
-    # Find the last positional argument (skip flag-value pairs)
-    # Flags that take values: -p, --params-file, -o, --overrides, -e, --exec
-    idx=$((${#BUILD_ARGS[@]} - 1))
-    found=false
-    
-    while [ $idx -ge 0 ]; do
-        arg="${BUILD_ARGS[$idx]}"
-        
-        if [[ "$arg" == -* ]]; then
-            # Current is a flag, skip it
-            ((idx--))
-        else
-            # Current is not a flag (could be positional or flag value)
-            # Check if the previous item is a flag that takes a value
-            is_flag_value=false
-            if [ $((idx - 1)) -ge 0 ]; then
-                prev_arg="${BUILD_ARGS[$((idx - 1))]}"
-                if [[ "$prev_arg" == -p ]] || [[ "$prev_arg" == --params-file ]] || \
-                   [[ "$prev_arg" == -o ]] || [[ "$prev_arg" == --overrides ]] || \
-                   [[ "$prev_arg" == -e ]] || [[ "$prev_arg" == --exec ]]; then
-                    is_flag_value=true
-                fi
-            fi
-            
-            if [ "$is_flag_value" = true ]; then
-                # This is a value for a flag, not positional - skip it
-                ((idx--))
-            else
-                # This is a real positional argument (our build directory)
-                QA_BUILD_DIR="$arg"
-                found=true
-                break
-            fi
-        fi
-    done
-    
-    if [ "$found" != "true" ]; then
-        echo "❌ ERROR: --qa-only requires a build directory argument"
-        echo ""
-        echo "Usage: $0 --qa-only -p params/file ./output/build_directory"
-        exit 1
-    fi
-    
-    # Remove the build directory from BUILD_ARGS
-    unset 'BUILD_ARGS[$idx]'
-    BUILD_ARGS=("${BUILD_ARGS[@]}")  # Reindex array
-    
-    if [ ! -d "$QA_BUILD_DIR" ]; then
-        echo "❌ ERROR: Build directory not found: $QA_BUILD_DIR"
-        exit 1
-    fi
+# Generate BUILD_ID once at the start (persists across all env_setup.sh calls)
+if [ -n "$GITHUB_RUN_ID" ]; then
+    BUILD_ID="gh_${GITHUB_RUN_ID}"
+elif [ "$QA_ONLY" == "true" ] && [ -n "$QA_ONLY_BUILD_DIR" ]; then
+    BUILD_ID=$(date +%Y%m%d_%H%M%S)
 fi
+export BUILD_ID
 
 # Handle --show-configs: display available configs
 if [ "$SHOW_CONFIGS" == "true" ]; then
@@ -276,6 +242,37 @@ if [ "$SHELL_MENU" == "true" ]; then
     echo ""
 fi
 
+# Auto-select tinyconfig for --test-run if no params specified
+if [ "$TEST_RUN" == "true" ] && [ -z "$_params_file" ]; then
+    _params_file="params/tinyconfig.params"
+    BUILD_ARGS+=("-p" "$_params_file")
+    echo "ℹ️  Test mode: Auto-selecting tinyconfig.params"
+    echo ""
+fi
+
+# Validate params file is provided (skip for --show-configs and --shell-menu)
+if [ "$SHOW_CONFIGS" != "true" ] && [ "$SHELL_MENU" != "true" ]; then
+    if [ -z "$_params_file" ] || [ ! -r "$_params_file" ]; then
+        echo "❌ ERROR: No params file specified. Use -p or --params-file to specify a config."
+        echo "Example: $0 -p params/tinyconfig.params"
+        echo ""
+        echo "Available options:"
+        echo "  • View configs: $0 --show-configs"
+        echo "  • Interactive menu: $0 --shell-menu"
+        exit 1
+    fi
+fi
+
+# Validate that --qa-only has a valid build directory
+if [ "$QA_ONLY" == "true" ]; then
+    if [ ! -d "$QA_ONLY_BUILD_DIR" ]; then
+        echo "❌ ERROR: --qa-only requires a valid build directory"
+        echo "Provided: '$QA_ONLY_BUILD_DIR'"
+        echo "Example: $0 --qa-only ./output/build_20260217_160524 -p params/tinyconfig.params"
+        exit 1
+    fi
+fi
+
 # 1. Fueling
 # For QA_ONLY mode, we need to set a flag to tell env_setup to skip directory creation
 if [ "$QA_ONLY" == "true" ]; then
@@ -287,13 +284,13 @@ source ./scripts/env_setup.sh "${BUILD_ARGS[@]}"
 # If QA_ONLY mode, run QA tests on existing build and exit
 if [ "$QA_ONLY" == "true" ]; then
     echo "🛡️  Running Quality Assurance on existing build..."
-    echo "📂 Build directory: $QA_BUILD_DIR"
+    echo "📂 Build directory: $QA_ONLY_BUILD_DIR"
     echo ""
     
     # For QA-only mode, pass the specific build directory to QA tests
     # This tells the QA test scripts to use this directory directly
     # instead of searching for the latest build
-    export QA_ONLY_BUILD_DIR="$QA_BUILD_DIR"
+    export QA_ONLY_BUILD_DIR="$QA_ONLY_BUILD_DIR"
     
     # Run material analysis (QA tests)
     if ! bash ./scripts/material_analysis.sh "${BUILD_ARGS[@]}"; then

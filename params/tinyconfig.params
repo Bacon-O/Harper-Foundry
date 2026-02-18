@@ -102,7 +102,9 @@ QA_TESTS=(
 )
 
 # No test packages for quick builds
-QA_TEST_PACKAGE=()
+QA_TEST_PACKAGE=(
+    
+)
 
 # --- Chemical Audit: Critical (Must Pass) ---
 # For tinyconfig, we only check absolute essentials

@@ -15,6 +15,7 @@ if [ -z "$LATEST_BUILD_DIR" ]; then
     exit 1
 fi
 
+echo "🧪 Starting Test: Files Exists"
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
 KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
@@ -40,5 +41,5 @@ if [ ! -s "$KERNEL_IMAGE" ]; then
     exit 1
 fi
 
-echo "✅ Artifact Validation Passed: kernel.config and bzImage found."
+echo "✅ Test Passed: Files Exists"
 exit 0

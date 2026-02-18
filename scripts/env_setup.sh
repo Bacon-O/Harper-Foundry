@@ -4,7 +4,7 @@
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # 2. Handle Arguments
-PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
+PARAMS_FILE=""
 OVERRIDE_PARAMS=""
 TEST_RUN_MODE="false"
 DOCKER_REBUILD="false"
@@ -87,6 +87,11 @@ while [[ "$#" -gt 0 ]]; do
             EXEC_OVERRIDE="$2"
             shift
             ;;
+        --qa-only)
+            QA_ONLY_MODE="true"
+            shift
+            QA_ONLY_BUILD_DIR="$1"
+            ;;
         *)
             echo "❌ Error: Unknown option '$1'"
             echo "Run with --help for a list of available options."
@@ -99,6 +104,15 @@ done
 # Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
 if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry.params" ]; then
     PARAMS_FILE="${REPO_ROOT}/params/tinyconfig.params"
+fi
+
+if [ "$QA_ONLY" == "true" ]; then
+    if [ ! -d "$QA_ONLY_BUILD_DIR" ]; then
+        echo "❌ ERROR: --qa-only requires a build directory path"
+        echo "Usage: $0 --qa-only <BUILD_DIR>"
+        echo "Example: $0 --qa-only ./output/build_20260217_160524"
+        exit 1
+    fi
 fi
 
 # 3. Load the Params File
@@ -239,13 +253,6 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         export REMOTE_IMAGE_REF="$DOCKERFILE_PATH"
     fi
 
-    # 8. Create Runtime State Directory
-    # Store persistent values across multiple env_setup.sh calls
-    RUNTIME_DIR="${REPO_ROOT}/var/runtime"
-    if [ ! -d "$RUNTIME_DIR" ]; then
-        mkdir -p "$RUNTIME_DIR"
-    fi
-
     # 9. Metadata (Anchor the BUILD_ID to the GitHub Run)
     # Only calculate BUILD_ID if not already set (e.g., from start_build.sh)
     if [ -z "$BUILD_ID" ]; then
@@ -256,22 +263,15 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         fi
         export BUILD_ID
     fi
-
-    # In QA-only mode, BUILD_OUTPUT_DIR is the specific build to test
-    # Otherwise, calculate it normally with the timestamp
-    if [ -n "$QA_ONLY_BUILD_DIR" ]; then
-        export BUILD_OUTPUT_DIR="$QA_ONLY_BUILD_DIR"
-    else
-        export BUILD_OUTPUT_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
-    fi
     
-    # Write runtime state files for other scripts to read
-    echo "$BUILD_ID" > "${RUNTIME_DIR}/BUILD_ID"
-    echo "$BUILD_OUTPUT_DIR" > "${RUNTIME_DIR}/BUILD_OUTPUT_DIR"
-    echo "$HOST_OUTPUT_DIR" > "${RUNTIME_DIR}/HOST_OUTPUT_DIR"
-    if [ -n "$QA_ONLY_BUILD_DIR" ]; then
-        echo "$QA_ONLY_BUILD_DIR" > "${RUNTIME_DIR}/QA_BUILD_DIR"
+    # Set BUILD_OUTPUT_DIR based on mode
+    if [ "$QA_ONLY_MODE" == "true" ]; then
+        BUILD_OUTPUT_DIR=$QA_ONLY_BUILD_DIR
+        echo "🔬 QA-Only Mode: Targeting existing build at $BUILD_OUTPUT_DIR"
+    else
+        BUILD_OUTPUT_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
     fi
+    export BUILD_OUTPUT_DIR
     
     # Only create output directory on host, not inside container (it's already mounted)
     # Skip creation in QA-only mode

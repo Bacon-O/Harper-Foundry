@@ -15,6 +15,7 @@ if [ -z "$LATEST_BUILD_DIR" ]; then
     exit 1
 fi
 
+echo "🧪 Starting Test: Linux Config"
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
 CONFIG_FILE="${LATEST_BUILD_DIR}/kernel.config"
@@ -58,5 +59,5 @@ if [ "$MISSING_CRITICAL" -gt 0 ]; then
     fi
 fi
     
-echo "✅ Chemical Audit Passed."
+echo "✅ Test Passed: Linux Config"
 exit 0

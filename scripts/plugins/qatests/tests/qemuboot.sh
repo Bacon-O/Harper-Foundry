@@ -15,6 +15,7 @@ if [ -z "$LATEST_BUILD_DIR" ]; then
     exit 1
 fi
 
+echo "🧪 Starting Test: QEMU Boot"
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
 KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
@@ -58,5 +59,5 @@ else
     echo "⏩ Stage 3: Stress Test Bypassed."
 fi
 
-echo "✅ Qemu Boot Validation Passed."
+echo "✅ Test Passed: QEMU Boot"
 exit 0

@@ -15,6 +15,7 @@ if [ -z "$LATEST_BUILD_DIR" ]; then
     exit 1
 fi
 
+echo "🧪 Starting Test: Debian Package"
 echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 
 KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
@@ -43,5 +44,5 @@ else
     exit 1
 fi
 
-echo "✅ Debian Package Validation Passed."
+echo "✅ Test Passed: Debian Package"
 exit 0
