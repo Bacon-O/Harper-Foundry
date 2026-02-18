@@ -100,7 +100,9 @@ Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 
 **Profile Targets:**
 amd64v3/x86_64v3 Haswell/Zen and newer (2013+).
+
 **Ideal For:** Gaming, desktop workstations, enthusiast systems
+
 **Not Recommended For:** Server workloads, real-time systems
 
 ---
