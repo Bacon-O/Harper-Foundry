@@ -8,6 +8,9 @@ echo "  Harper Foundry - Build Orchestrator ($VERSION)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# Clean runtime state from previous builds (ensure fresh start)
+rm -rf var/runtime 2>/dev/null || true
+
 # Generate BUILD_ID once at the start (persists across all env_setup.sh calls)
 if [ -n "$GITHUB_RUN_ID" ]; then
     BUILD_ID="gh_${GITHUB_RUN_ID}"
@@ -84,6 +87,22 @@ while [[ "$#" -gt 0 ]]; do
             export TEST_RUN
             BUILD_ARGS+=("--test-run")
             ;;
+        -p|--params-file)
+            # Handle flags that take values - consume both flag and value
+            BUILD_ARGS+=("$1")
+            shift
+            BUILD_ARGS+=("$1")
+            ;;
+        -o|--overrides)
+            BUILD_ARGS+=("$1")
+            shift
+            BUILD_ARGS+=("$1")
+            ;;
+        -e|--exec)
+            BUILD_ARGS+=("$1")
+            shift
+            BUILD_ARGS+=("$1")
+            ;;
         *)
             # Pass all other arguments to BUILD_ARGS
             BUILD_ARGS+=("$1")
@@ -101,18 +120,52 @@ if [ "$QA_ONLY" == "true" ]; then
         exit 1
     fi
     
-    # Check if last BUILD_ARGS entry looks like a path (not a flag)
-    last_arg="${BUILD_ARGS[-1]}"
-    if [[ "$last_arg" == -* ]]; then
+    # Find the last positional argument (skip flag-value pairs)
+    # Flags that take values: -p, --params-file, -o, --overrides, -e, --exec
+    idx=$((${#BUILD_ARGS[@]} - 1))
+    found=false
+    
+    while [ $idx -ge 0 ]; do
+        arg="${BUILD_ARGS[$idx]}"
+        
+        if [[ "$arg" == -* ]]; then
+            # Current is a flag, skip it
+            ((idx--))
+        else
+            # Current is not a flag (could be positional or flag value)
+            # Check if the previous item is a flag that takes a value
+            is_flag_value=false
+            if [ $((idx - 1)) -ge 0 ]; then
+                prev_arg="${BUILD_ARGS[$((idx - 1))]}"
+                if [[ "$prev_arg" == -p ]] || [[ "$prev_arg" == --params-file ]] || \
+                   [[ "$prev_arg" == -o ]] || [[ "$prev_arg" == --overrides ]] || \
+                   [[ "$prev_arg" == -e ]] || [[ "$prev_arg" == --exec ]]; then
+                    is_flag_value=true
+                fi
+            fi
+            
+            if [ "$is_flag_value" = true ]; then
+                # This is a value for a flag, not positional - skip it
+                ((idx--))
+            else
+                # This is a real positional argument (our build directory)
+                QA_BUILD_DIR="$arg"
+                found=true
+                break
+            fi
+        fi
+    done
+    
+    if [ "$found" != "true" ]; then
         echo "❌ ERROR: --qa-only requires a build directory argument"
         echo ""
         echo "Usage: $0 --qa-only -p params/file ./output/build_directory"
         exit 1
     fi
     
-    # Pop the last argument as the build directory
-    QA_BUILD_DIR="$last_arg"
-    unset 'BUILD_ARGS[-1]'
+    # Remove the build directory from BUILD_ARGS
+    unset 'BUILD_ARGS[$idx]'
+    BUILD_ARGS=("${BUILD_ARGS[@]}")  # Reindex array
     
     if [ ! -d "$QA_BUILD_DIR" ]; then
         echo "❌ ERROR: Build directory not found: $QA_BUILD_DIR"
@@ -224,6 +277,11 @@ if [ "$SHELL_MENU" == "true" ]; then
 fi
 
 # 1. Fueling
+# For QA_ONLY mode, we need to set a flag to tell env_setup to skip directory creation
+if [ "$QA_ONLY" == "true" ]; then
+    export QA_ONLY_MODE="true"
+fi
+
 source ./scripts/env_setup.sh "${BUILD_ARGS[@]}"
 
 # If QA_ONLY mode, run QA tests on existing build and exit
@@ -232,9 +290,10 @@ if [ "$QA_ONLY" == "true" ]; then
     echo "📂 Build directory: $QA_BUILD_DIR"
     echo ""
     
-    # Override output directory to the user-provided build
-    HOST_OUTPUT_DIR="$QA_BUILD_DIR"
-    export HOST_OUTPUT_DIR
+    # For QA-only mode, pass the specific build directory to QA tests
+    # This tells the QA test scripts to use this directory directly
+    # instead of searching for the latest build
+    export QA_ONLY_BUILD_DIR="$QA_BUILD_DIR"
     
     # Run material analysis (QA tests)
     if ! bash ./scripts/material_analysis.sh "${BUILD_ARGS[@]}"; then
@@ -332,6 +391,6 @@ echo "📦 Build artifacts are in: $BUILD_OUTPUT_DIR"
 echo ""
 echo "Next steps:"
 echo "  • View builds: ./scripts/show_builds.sh"
-echo "  • Install kernel: sudo dpkg -i $BUILD_OUTPUT_DIR/*.deb"
+echo "  • Install kernel: <Follow your distro's kernel installation process>"
 echo "  • Clean old builds: ./scripts/furnace_clean.sh"
 echo ""

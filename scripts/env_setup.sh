@@ -150,8 +150,8 @@ if [ -f "$PARAMS_FILE" ]; then
     fi
     export BUILD_WORKSPACE_DIR HOST_OUTPUT_DIR
 
-    # Create default host directories if running on host
-    if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+    # Create default host directories if running on host (skip in QA-only mode)
+    if [ "$QA_ONLY_MODE" != "true" ] && [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
         mkdir -p "$BUILD_WORKSPACE_DIR" "$HOST_OUTPUT_DIR"
     fi
     
@@ -239,7 +239,14 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         export REMOTE_IMAGE_REF="$DOCKERFILE_PATH"
     fi
 
-    # 8. Metadata (Anchor the BUILD_ID to the GitHub Run)
+    # 8. Create Runtime State Directory
+    # Store persistent values across multiple env_setup.sh calls
+    RUNTIME_DIR="${REPO_ROOT}/var/runtime"
+    if [ ! -d "$RUNTIME_DIR" ]; then
+        mkdir -p "$RUNTIME_DIR"
+    fi
+
+    # 9. Metadata (Anchor the BUILD_ID to the GitHub Run)
     # Only calculate BUILD_ID if not already set (e.g., from start_build.sh)
     if [ -z "$BUILD_ID" ]; then
         if [ -n "$GITHUB_RUN_ID" ]; then
@@ -250,14 +257,31 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         export BUILD_ID
     fi
 
-    export BUILD_OUTPUT_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
+    # In QA-only mode, BUILD_OUTPUT_DIR is the specific build to test
+    # Otherwise, calculate it normally with the timestamp
+    if [ -n "$QA_ONLY_BUILD_DIR" ]; then
+        export BUILD_OUTPUT_DIR="$QA_ONLY_BUILD_DIR"
+    else
+        export BUILD_OUTPUT_DIR="${HOST_OUTPUT_DIR}/build_${BUILD_ID}"
+    fi
+    
+    # Write runtime state files for other scripts to read
+    echo "$BUILD_ID" > "${RUNTIME_DIR}/BUILD_ID"
+    echo "$BUILD_OUTPUT_DIR" > "${RUNTIME_DIR}/BUILD_OUTPUT_DIR"
+    echo "$HOST_OUTPUT_DIR" > "${RUNTIME_DIR}/HOST_OUTPUT_DIR"
+    if [ -n "$QA_ONLY_BUILD_DIR" ]; then
+        echo "$QA_ONLY_BUILD_DIR" > "${RUNTIME_DIR}/QA_BUILD_DIR"
+    fi
     
     # Only create output directory on host, not inside container (it's already mounted)
-    if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
-        mkdir -p "$BUILD_OUTPUT_DIR"
-        echo "📂 Artifact Target: $BUILD_OUTPUT_DIR"
-    else
-        echo "📂 Running in container - output mounted at /opt/factory/output"
+    # Skip creation in QA-only mode
+    if [ "$QA_ONLY_MODE" != "true" ]; then
+        if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+            mkdir -p "$BUILD_OUTPUT_DIR"
+            echo "📂 Artifact Target: $BUILD_OUTPUT_DIR"
+        else
+            echo "📂 Running in container - output mounted at /opt/factory/output"
+        fi
     fi    
     echo "✅ Environment configured for $TARGET_ARCH build."
     

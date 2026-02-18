@@ -17,6 +17,7 @@ params/*.tmp
 params/params.d/        # User customizations
 configs/configs.d/      # User customizations
 scripts/scripts.d/      # User customizations
+var/
 *.config.old
 *.patch
 *.orig

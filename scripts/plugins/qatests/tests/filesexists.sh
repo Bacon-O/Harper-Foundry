@@ -2,11 +2,13 @@
 set -e
 
 # 1. Load the Foundry Environment
-# This ensures we have access to QA_CRITICAL_CHECKS, QA_OPTIONAL_CHECKS, and HOST_OUTPUT_DIR
+# This ensures we have access to BUILD_OUTPUT_DIR and other foundry variables
 source "$(dirname "$0")/../../../env_setup.sh" "$@"
 
-# 2. Locate Latest Build Directory
-LATEST_BUILD_DIR=$(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" -printf "%T@ %p\n" | sort -n | tail -1 | cut -f2- -d" ")
+# 2. Use the Build Directory
+# In QA-only mode, BUILD_OUTPUT_DIR is set directly by env_setup.sh to the test directory
+# In normal mode, it's the latest build
+LATEST_BUILD_DIR="$BUILD_OUTPUT_DIR"
 
 if [ -z "$LATEST_BUILD_DIR" ]; then
     echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
