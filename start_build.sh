@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
+VERSION="v0.0-alpha-rc1"
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Harper Foundry - Build Orchestrator"
+echo "  Harper Foundry - Build Orchestrator ($VERSION)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
@@ -23,6 +25,10 @@ BUILD_ARGS=()
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        -v|--version)
+            echo "Harper Foundry $VERSION"
+            exit 0
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
@@ -34,6 +40,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "  --shell-menu          Show menu to select params file, then shell"
             echo ""
             echo "Information:"
+            echo "  -v, --version         Show version information"
             echo "  --show-configs        Display all available param configs with details"
             echo "  -h, --help            Show this help message"
             echo ""
@@ -45,12 +52,14 @@ while [[ "$#" -gt 0 ]]; do
             echo "  -b, --bypass-qa           Skip Quality Assurance"
             echo "  -i, --incremental         Skip 'make clean' for faster rebuilds"
             echo "  -e, --exec <script>       Override the container execution script"
+            echo "  -v, --version             Show version information"
             echo ""
             echo "Examples:"
             echo "  ./start_build.sh --show-configs"
             echo "  ./start_build.sh --shell-menu"
             echo "  ./start_build.sh -p params/tinyconfig.params -t"
             echo "  ./start_build.sh -p params/foundry.params -o params/_test_overrides.params"
+            echo "  ./start_build.sh -v"
             echo ""
             exit 0
             ;;

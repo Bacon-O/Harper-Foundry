@@ -1,13 +1,34 @@
 #!/bin/bash
 set -e
 
+VERSION="v0.0-alpha-rc1"
+
 # Determine the repository root, assuming install.sh is in the root directory
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
 TEMP_PARAMS_FILE="${PARAMS_FILE}.tmp"
 
+# Handle version and help flags early
+if [[ "$1" == "-v" ]] || [[ "$1" == "--version" ]]; then
+    echo "Harper Foundry $VERSION"
+    exit 0
+fi
+
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -v, --version    Show version information"
+    echo "  -h, --help       Show this help message"
+    echo ""
+    echo "Description:"
+    echo "  Interactive setup wizard for Harper Foundry configuration."
+    echo ""
+    exit 0
+fi
+
 echo "==================================================="
-echo " Harper Foundry: Interactive Setup"
+echo " Harper Foundry: Interactive Setup ($VERSION)"
 echo "==================================================="
 echo ""
 
