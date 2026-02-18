@@ -98,7 +98,8 @@ Harper Deb13 optimizes the base Debian kernel for desktop/gaming workloads:
 | **Kernel Compression** | gzip/xz | ZSTD | Faster boot decompression |
 | **Tuning** | Conservative defaults | Desktop/gaming optimized | Balances responsiveness with stability |
 
-**Profile Targets:** Ryzen 5800X3D/7900GRE and Intel i7-12700H systems
+**Profile Targets:**
+amd64v3/x86_64v3 Haswell/Zen and newer (2013+).
 **Ideal For:** Gaming, desktop workstations, enthusiast systems
 **Not Recommended For:** Server workloads, real-time systems
 
