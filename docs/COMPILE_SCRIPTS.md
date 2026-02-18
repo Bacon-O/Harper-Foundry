@@ -39,7 +39,6 @@ scripts/
 
 **Modified Files:**
 - `params/foundry_template.params` - Updated `FOUNDRY_EXEC` to `compile_scripts/harper_deb13.sh`
-- `Makefile` - `make test` now uses tinyconfig params
 - `README.md` - Added compile scripts section
 - `CONTRIBUTING.md` - Updated test instructions
 - `scripts/validate_params.sh` - Enhanced to handle compile_scripts paths
@@ -302,7 +301,6 @@ Updated files:
 - ✅ README.md - Added compile scripts section
 - ✅ CONTRIBUTING.md - Updated test commands
 - ✅ CHANGELOG.md - Documented changes
-- ✅ Makefile - Updated test target
 - ✅ scripts/compile_scripts/README.md - Comprehensive guide
 
 ## Breaking Changes

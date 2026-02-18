@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Prerequisites checker** (`scripts/check_prerequisites.sh`) - Validates system requirements before building
 - **Build status viewer** (`scripts/show_builds.sh`) - Display build artifacts and disk usage information
 - **Configuration validator** (`scripts/validate_params.sh`) - Comprehensive validation of foundry_template.params
-- **Makefile** - Common task shortcuts for building, testing, and maintenance
 - **CONTRIBUTING.md** - Comprehensive contribution guidelines
 - **TROUBLESHOOTING.md** - Detailed troubleshooting guide with common issues and solutions
 - **.editorconfig** - Consistent coding style configuration
@@ -32,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reorganized build scripts** - Moved `ci-build.sh` to `compile_scripts/harper_deb13.sh`
   - Removed `ci-build.sh` symlink; update any custom references
   - Updated `FOUNDRY_EXEC` in `foundry_template.params`
-- **Makefile `test` target** - Now uses tinyconfig for much faster testing
+
 - **README structure** - Added alloy mixtures section and comparison table
 
 ### Fixed

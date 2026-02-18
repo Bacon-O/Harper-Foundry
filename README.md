@@ -99,12 +99,7 @@ Other Linux distributions should work, but **no testing has been performed**. If
 
 4. **Start your first build:**
    ```bash
-   ./start_build.sh
-   ```
-
-   Or use the Makefile:
-   ```bash
-   make build
+   ./start_build.sh -p params/params.d/foundry_compile.params
    ```
 
 Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
@@ -178,22 +173,6 @@ The foundry accepts several arguments to control the process:
 | `-i` | `--incremental` | Skip `make mrproper` for faster rebuilds. |
 | `-e` | `--exec <script>` | Override the script executed inside the container. |
 | `-h` | `--help` | Display help menu. |
-
-### Makefile Shortcuts
-
-For convenience, common tasks are available via `make`:
-
-```bash
-make help        # Show all available targets
-make setup       # Run interactive setup
-make check       # Check system prerequisites  
-make validate    # Validate configuration
-make build       # Run full build
-make test        # Run fast test build
-make status      # Show build artifacts
-make clean       # Clean old builds
-make deep-clean  # Remove all artifacts
-```
 
 ### Examples
 

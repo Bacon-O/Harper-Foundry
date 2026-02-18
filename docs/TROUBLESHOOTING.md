@@ -58,10 +58,7 @@ ls -lh /path/to/HOST_OUTPUT_DIR/
 
 ### Issue: Compilation Errors
 
-**Symptoms:**
-```
-make: *** [Makefile:1234] Error 1
-```
+
 
 **Causes:**
 - Missing dependencies in Docker image

@@ -7,7 +7,7 @@ name: Harper Kernel Factory
 on:
   workflow_dispatch:
     inputs:
-      base_params:
+      base_params_gh:
         description: 'Base Configuration'
         type: choice
         required: true
@@ -16,7 +16,7 @@ on:
           - 'tinyconfig.params'
           - 'harper_deb13.params'
       
-      override_mode:
+      override_params_gh:
         description: 'Apply Override'
         type: choice
         required: true
@@ -62,34 +62,33 @@ jobs:
       - name: Configure Arguments
         id: set-args
         run: |
-          PROD_CONFIG=""
+          OVERRIDE_FILE=""
+
           
           # Manual dispatch is the only trigger for this public reference repo
           # Use dual dropdown selection: base params + optional override
-          BASE_PARAMS="${{ github.event.inputs.base_params }}"
-          OVERRIDE_MODE="${{ github.event.inputs.override_mode }}"
+          BASE_PARAMS="${{ github.event.inputs.base_params_gh }}"
+          OVERRIDE_PARAMS="${{ github.event.inputs.override_params_gh }}"
           
           echo "🕹️ Manual Dispatch"
           echo "   Base: $BASE_PARAMS"
-          echo "   Override: $OVERRIDE_MODE"
+          echo "   Override: $OVERRIDE_PARAMS"
           
           # Check if override mode is selected
-          if [[ "$OVERRIDE_MODE" == "testing.params"* ]]; then
+          if [[ "$OVERRIDE_PARAMS" != "none" ]] && [[ "$OVERRIDE_PARAMS" == "*.params" ]]; then
             # Use _test_overrides.params with PRODUCTION_CONFIG env var
-            FILE="params/_test_overrides.params"
-            PROD_CONFIG="$BASE_PARAMS"
+            BASE_FILE="params/$BASE_PARAMS"
+            OVERRIDE_FILE=="params/$OVERRIDE_PARAMS"
             echo "🧪 Applying testing overrides to $BASE_PARAMS"
-            echo "   → Output: /path/to/output/testing"
-            echo "   → QA Mode: ENFORCED"
+            echo "args=--params-file $BASE_FILE --override-file $OVERRIDE_FILE" >> $GITHUB_OUTPUT
           else
             # Use base params directly (no override)
             FILE="params/$BASE_PARAMS"
             echo "📦 Using $BASE_PARAMS directly (no overrides)"
+            echo "args=--params-file $BASE_FILE" >> $GITHUB_OUTPUT
           fi
           
           echo "🚀 Selected Blueprint: $FILE"
-          echo "args=--params-file $FILE" >> $GITHUB_OUTPUT
-          echo "production_config=$PROD_CONFIG" >> $GITHUB_OUTPUT
       
       - name: Charge Audit
         env:

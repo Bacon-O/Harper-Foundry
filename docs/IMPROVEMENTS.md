@@ -68,19 +68,6 @@ All QA test scripts had missing variable definitions and incorrect path to `env_
 - List .deb packages and build metadata
 - Helpful cleanup suggestions
 
-#### Makefile
-Common task shortcuts:
-- `make setup` - Interactive setup
-- `make check` - Prerequisites check
-- `make validate` - Validate config
-- `make build` - Full build
-- `make test` - Fast test build
-- `make status` - Show artifacts
-- `make clean` - Remove old builds
-- `make deep-clean` - Complete cleanup
-- `make lint` - Run shellcheck
-- `make format` - Format scripts
-
 ### 3. Enhanced Scripts
 
 #### Improved `start_build.sh`
@@ -128,7 +115,6 @@ Common task shortcuts:
 - Improved feature list with emojis and better descriptions
 - Added Quick Start section
 - Created Configuration Reference table
-- Added Makefile shortcuts documentation
 - Expanded CI/CD Pipeline section
 - Added Quality Assurance section
 - Added Advanced Usage section
@@ -183,7 +169,6 @@ Common task shortcuts:
 - ✅ Extensive troubleshooting documentation
 - ✅ Clear contribution process
 - ✅ Automated prerequisites checking
-- ✅ Better user experience with Makefile shortcuts
 - ✅ Professional documentation structure
 
 ## 🎯 Files Modified
@@ -203,11 +188,10 @@ Common task shortcuts:
 2. `CONTRIBUTING.md` - Contribution guidelines
 3. `TROUBLESHOOTING.md` - Troubleshooting guide
 4. `CHANGELOG.md` - Version history
-5. `Makefile` - Task shortcuts
-6. `scripts/validate_params.sh` - Config validator
-7. `scripts/check_prerequisites.sh` - System checker
-8. `scripts/show_builds.sh` - Build status viewer
-9. Plus harperbase directory structure files
+5. `scripts/validate_params.sh` - Config validator
+6. `scripts/check_prerequisites.sh` - System checker
+7. `scripts/show_builds.sh` - Build status viewer
+8. Plus harperbase directory structure files
 
 ### Enhanced Files (3 files)
 1. `README.md` - Comprehensive documentation

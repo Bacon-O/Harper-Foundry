@@ -126,6 +126,25 @@ if [ -f "$PARAMS_FILE" ]; then
     # Apply overrides if specified
     if [ -n "$OVERRIDE_PARAMS" ] && [ -f "$OVERRIDE_PARAMS" ]; then
         echo "🔄 Applying overrides from $(basename "$OVERRIDE_PARAMS")..."
+        # Announce which variables are being changed
+        while IFS= read -r line; do
+            # Skip comments and empty lines
+            [[ "$line" =~ ^\s*# ]] && continue
+            [[ -z "$line" ]] && continue
+
+            # Only process lines with an equals sign
+            if [[ "$line" =~ ^\s*([^=[:space:]]+)\s*=\s*(.*)\s*$ ]]; then
+                key="${BASH_REMATCH[1]}"
+                value="${BASH_REMATCH[2]}"
+
+                # Trim quotes from value if they are the first and last characters
+                if [[ "$value" =~ ^\"(.*)\"$ ]]; then
+                    value="${BASH_REMATCH[1]}"
+                fi
+
+                echo "   -> Overwriting $key with: $value"
+            fi
+        done < "$OVERRIDE_PARAMS"
         set -a
         # shellcheck source=/dev/null
         source "$OVERRIDE_PARAMS"

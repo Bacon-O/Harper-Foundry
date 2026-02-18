@@ -29,6 +29,20 @@ FOUNDRY_GID=""
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
 INCREMENTAL_BUILD="false"
 
+# --- Foundry artifact export configuration ---
+# If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
+# Right now SFTP and RSYNC are supported as delivery methods.
+# Both require previous configuration
+
+# Artifact delivery is disabled for tinyconfig tests by default to avoid accidental uploads during quick testing.
+ARTIFCAT_DELIVERY="true"
+ARTIFCAT_DELIVERY_METHOD="sftp"
+REMOTE_DELIVERY_HOST="127.0.0.2"
+REMOTE_DELIVERY_USER="matthew"
+REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
+ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
 # --- Foundry Image Configuration ---
 DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"

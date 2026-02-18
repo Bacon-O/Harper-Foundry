@@ -380,6 +380,14 @@ else
 fi
 echo ""
 
+# 5. Export (Placeholder)
+if [ "$ARTIFCAT_DELIVERY" == "true" ] || [[ "$ARTIFACT_DELIVERY" == "TRUE" ]]; then
+    echo "📦 Phase 4: Exporting Artifacts to Remote Server (Not Implemented)..."
+    bash ./scripts/build_export.sh "${BUILD_ARGS[@]}"
+else
+    echo "📦 Phase 4: Exporting Artifacts skipped"
+fi
+echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✨ Foundry Cycle Complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

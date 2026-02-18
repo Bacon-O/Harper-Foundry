@@ -94,6 +94,8 @@ echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
+./scripts/config --disable DEBUG_INFO
+./scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
 # 🔑 The fix for the certs/signing_key.x509 crash
 ./scripts/config --set-str MODULE_SIG_KEY ""
