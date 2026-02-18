@@ -48,7 +48,7 @@ if [ ! -d "$BUILD_WORKSPACE_DIR" ]; then
     exit 1
 fi
 
-# 5. Tooling Check (Synced with foundry.params)
+# 5. Tooling Check (Synced with foundry_template.params)
 dependencies=(docker) 
 
 if [ "$ENABLE_QEMU_TESTS" == "true" ]; then

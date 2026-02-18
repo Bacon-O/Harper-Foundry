@@ -30,7 +30,7 @@ export -f trigger_init trigger_handler
 trigger_handler() {
     echo "Running nightly build..."
     cd /home/user/devel/Debian-Harper
-    ./start_build.sh --params-file params/foundry.params
+    ./start_build.sh --params-file params/foundry_template.params
     # Notify on completion
 }
 
@@ -70,11 +70,11 @@ export -f trigger_init trigger_handler
 
 trigger_handler() {
     LATEST_VERSION=$(curl -s https://www.kernel.org/releases.json | jq -r '.[0].version')
-    CURRENT_VERSION=$(grep "^KERNEL_VERSION=" params/foundry.params)
+    CURRENT_VERSION=$(grep "^KERNEL_VERSION=" params/foundry_template.params)
     
     if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
         echo "New kernel $LATEST_VERSION released - triggering build"
-        sed -i "s/^KERNEL_VERSION=.*/KERNEL_VERSION=$LATEST_VERSION/" params/foundry.params
+        sed -i "s/^KERNEL_VERSION=.*/KERNEL_VERSION=$LATEST_VERSION/" params/foundry_template.params
         ./start_build.sh
     fi
 }

@@ -23,7 +23,7 @@ Both methods let you:
 ./start_build.sh -p params/harper_deb13.params -o params/_test_overrides.params
 
 # Works with any params combination
-./start_build.sh -p params/foundry.params -o params/my_custom_overrides.params
+./start_build.sh -p params/foundry_template.params -o params/my_custom_overrides.params
 
 # Can be used with other flags
 ./start_build.sh -p params/tinyconfig.params -o params/_test_overrides.params -t --shell
@@ -114,7 +114,7 @@ on:
         default: 'harper_deb13.params'
         options:
           - 'harper_deb13.params'
-          - 'foundry.params'
+          - 'foundry_template.params'
           - 'tinyconfig.params'
       
       override_mode:
@@ -323,7 +323,7 @@ The `kernel-factory.yml` workflow is **manual dispatch only** (perfect for a pub
         options:
           - 'params/tinyconfig.params'     # Fast (2-5 min)
           - 'params/_test_overrides.params'       # Full test build
-          - 'params/foundry.params'        # Production
+          - 'params/foundry_template.params'        # Production
 ```
 
 ## See Also

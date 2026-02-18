@@ -31,7 +31,7 @@ scripts/plugins/qatests/
 - Explains test types, usage, and configuration
 - Templates for creating new tests and packages
 
-**Modified**: `params/foundry.params`
+**Modified**: `params/foundry_template.params`
 - Updated `TEST_FUNCTIONS_DIR="$PLUGIN_DIR/qatests/tests/"`
 - Updated `TEST_PACKAGE_DIR="$PLUGIN_DIR/qatests/packages/"`
 
@@ -93,7 +93,7 @@ All existing functionality preserved:
 
 Validated with:
 ```bash
-./scripts/validate_params.sh params/foundry.params
+./scripts/validate_params.sh params/foundry_template.params
 ./scripts/validate_params.sh params/tinyconfig.params
 ```
 

@@ -56,7 +56,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "  ./start_build.sh --show-configs"
             echo "  ./start_build.sh --shell-menu"
             echo "  ./start_build.sh -p params/tinyconfig.params -t"
-            echo "  ./start_build.sh -p params/foundry.params -o params/_test_overrides.params"
+            echo "  ./start_build.sh -p params/foundry_template.params -o params/_test_overrides.params"
             echo "  ./start_build.sh --qa-only -p params/harper_deb13.params ./output/build_20260217_160524"
             echo "  ./start_build.sh -v"
             echo ""

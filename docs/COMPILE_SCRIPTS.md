@@ -38,7 +38,7 @@ scripts/
 - `scripts/compile_scripts/tinyconfig.sh` - Quick test script
 
 **Modified Files:**
-- `params/foundry.params` - Updated `FOUNDRY_EXEC` to `compile_scripts/harper_deb13.sh`
+- `params/foundry_template.params` - Updated `FOUNDRY_EXEC` to `compile_scripts/harper_deb13.sh`
 - `Makefile` - `make test` now uses tinyconfig params
 - `README.md` - Added compile scripts section
 - `CONTRIBUTING.md` - Updated test instructions
@@ -68,11 +68,11 @@ scripts/
 
 **Usage:**
 ```bash
-# Default behavior (uses foundry.params)
+# Default behavior (uses foundry_template.params)
 ./start_build.sh
 
 # Explicit
-./start_build.sh --params-file params/foundry.params
+./start_build.sh --params-file params/foundry_template.params
 
 # Via make
 make build
@@ -152,7 +152,7 @@ make test
 **Action required:** `ci-build.sh` has been removed.
 - Update any custom scripts or containers that referenced `ci-build.sh`
 - Use `scripts/compile_scripts/harper_deb13.sh` instead
-- `foundry.params` already uses the new path
+- `foundry_template.params` already uses the new path
 
 ### For CI/CD Pipelines
 
@@ -283,7 +283,7 @@ All changes have been validated:
 
 ```bash
 # ✅ Full params validation
-./scripts/validate_params.sh params/foundry.params
+./scripts/validate_params.sh params/foundry_template.params
 ✅ All checks passed! Configuration is valid.
 
 # ✅ Tinyconfig params validation  

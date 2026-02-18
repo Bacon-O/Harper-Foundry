@@ -201,7 +201,7 @@ validate_config() {
    exit 0
    ```
 
-3. Add to `QA_TESTS` array in `params/foundry.params`:
+3. Add to `QA_TESTS` array in `params/foundry_template.params`:
    ```bash
    QA_TESTS=(
        "mytest.sh"
@@ -299,7 +299,7 @@ Harper-Foundry/
 
 ### Key Files to Know
 
-- `params/foundry.params` - Default build configuration
+- `params/foundry_template.params` - Default build configuration
 - `scripts/env_setup.sh` - Environment variable definitions
 - `scripts/compile_scripts/harper_deb13.sh` - Core build logic (runs in Docker)
 - `scripts/material_analysis.sh` - QA test runner

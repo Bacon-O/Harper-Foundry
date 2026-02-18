@@ -42,7 +42,7 @@ This directory contains configuration files (params files) that define how a bui
 ```
 params/
 ├── foundry_template.params # Project-maintained template
-├── foundry.params          # Generated local config (optional)
+├── foundry_template.params          # Generated local config (optional)
 ├── harper_deb13.params     # Project-maintained
 ├── tinyconfig.params       # Project-maintained
 └── params.d/               # Your custom configs (not in git)
@@ -88,7 +88,7 @@ Use the `-o` flag to apply an override params file on top of a base config:
 ./start_build.sh -p params/harper_deb13.params -o params/_test_overrides.params
 
 # Works with any combination
-./start_build.sh -p params/foundry.params -o params/my_overrides.params
+./start_build.sh -p params/foundry_template.params -o params/my_overrides.params
 ```
 
 **How it works:**

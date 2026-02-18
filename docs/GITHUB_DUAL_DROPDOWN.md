@@ -12,7 +12,7 @@ This document explains the **dual dropdown system** for GitHub Actions workflows
 ├─────────────────────────────────────────┤
 │ • tinyconfig.params                     │
 │ • harper_deb13.params                   │
-│ • foundry.params                        │
+│ • foundry_template.params                        │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
@@ -189,7 +189,7 @@ When you trigger a manual workflow, you'll see:
 │ ┌─────────────────────────────────┐    │
 │ │ tinyconfig.params               │    │
 │ │ harper_deb13.params             │    │
-│ │ foundry.params                  │    │
+│ │ foundry_template.params                  │    │
 │ └─────────────────────────────────┘    │
 │                                         │
 │ Apply Override ▼                        │
@@ -211,7 +211,7 @@ When code is pushed (not manual dispatch), the workflow auto-selects configs:
 | Push to `main` | `params/_test_overrides.params` (full test build) |
 | Push to `dev` | `params/tinyconfig.params` (fast validation) |
 | Push to `feature/*` | `params/tinyconfig.params` (fast validation) |
-| Tag `v*` on `main` | `params/foundry.params` (production release) |
+| Tag `v*` on `main` | `params/foundry_template.params` (production release) |
 
 ## Execution Examples
 
@@ -358,7 +358,7 @@ If `PRODUCTION_CONFIG` env var is not set, it defaults to `harper_deb13.params`.
 Select which params file to use as the foundation:
 - `tinyconfig.params` - Fast minimal build (2-5 min)
 - `harper_deb13.params` - Full desktop kernel Debian 13 build (experimental)
-- `foundry.params` - Template (requires customization)
+- `foundry_template.params` - Template (requires customization)
 
 ### Dropdown 2: Apply Override
 Choose whether to apply testing overrides:
@@ -381,7 +381,7 @@ When you trigger a manual workflow in GitHub Actions, you'll see:
 │ ┌─────────────────────────────────────┐    │
 │ │ tinyconfig.params                   │    │
 │ │ harper_deb13.params                 │    │
-│ │ foundry.params                      │    │
+│ │ foundry_template.params                      │    │
 │ └─────────────────────────────────────┘    │
 │                                             │
 │ Apply Override ▼                            │
@@ -546,7 +546,7 @@ When code is pushed (not manual dispatch), the workflow auto-selects configs:
 | Push to `main` | `params/_test_overrides.params` (full test build) |
 | Push to `dev` | `params/tinyconfig.params` (fast validation) |
 | Push to `feature/*` | `params/tinyconfig.params` (fast validation) |
-| Tag `v*` on `main` | `params/foundry.params` (production release) |
+| Tag `v*` on `main` | `params/foundry_template.params` (production release) |
 
 ## Benefits
 

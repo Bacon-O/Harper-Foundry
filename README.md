@@ -119,7 +119,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 📂 Project Structure
 
 *   `start_build.sh`: The main entry point for local builds.
-*   `params/`: Configuration files (e.g., `foundry.params`, `foundry_template.params`, `tinyconfig.params`).
+*   `params/`: Configuration files (e.g., `foundry_template.params`, `foundry_template.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment setup.
     *   `launch.sh`: Docker container launch logic.
@@ -130,7 +130,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 
 ## 🛠️ Configuration
 
-The build is configured via files in the `params/` directory. The default is `params/foundry.params`.
+The build is configured via files in the `params/` directory. The default is `params/foundry_template.params`.
 If it does not exist yet, run `./install.sh` to generate it from `params/foundry_template.params`.
 
 ### Key Variables
@@ -154,7 +154,7 @@ Additional custom variables can be added to your params files and will be export
 Always validate your configuration before building:
 
 ```bash
-./scripts/validate_params.sh params/foundry.params
+./scripts/validate_params.sh params/foundry_template.params
 ```
 
 ## 💻 Usage
@@ -171,7 +171,7 @@ The foundry accepts several arguments to control the process:
 
 | Flag | Long Option | Description |
 | :--- | :--- | :--- |
-| `-p` | `--params-file <path>` | Specify a params file (default: `params/foundry.params`). |
+| `-p` | `--params-file <path>` | Specify a params file (default: `params/foundry_template.params`). |
 | `-t` | `--test-run` | Enable test mode (uses `tinyconfig`, disables QEMU, ignores non-critical QA). |
 | `-r` | `--rebuild` | Force a rebuild of the Docker builder image. |
 | `-b` | `--bypass-qa` | Skip the Material Analysis (QA) stage. |
@@ -375,7 +375,7 @@ For more details, see [QA Tests Documentation](scripts/plugins/qatests/README.md
 ### Configuration
 
 ```bash
-# In params/foundry.params
+# In params/foundry_template.params
 
 # Individual tests
 QA_TESTS=(
@@ -555,7 +555,7 @@ This skips `make mrproper` and reuses previous build state.
 You can use custom Docker images:
 
 ```bash
-# In params/foundry.params
+# In params/foundry_template.params
 DOCKERFILE_PATH="myregistry/custom-builder:latest"
 ```
 

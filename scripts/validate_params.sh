@@ -2,14 +2,14 @@
 # ==============================================================================
 # HARPER FOUNDRY: PARAMS VALIDATION SCRIPT
 # ==============================================================================
-# This script validates foundry.params files to catch common configuration
+# This script validates foundry_template.params files to catch common configuration
 # errors before running a build.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry.params}"
+PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry_template.params}"
 
 echo "🔍 Validating Foundry Parameters..."
 echo "📄 File: $PARAMS_FILE"

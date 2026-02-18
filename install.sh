@@ -6,7 +6,7 @@ VERSION="v0.0-alpha-rc1"
 # Determine the repository root, assuming install.sh is in the root directory
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_PARAMS_FILE="${REPO_ROOT}/params/foundry_template.params"
-PARAMS_FILE="${REPO_ROOT}/params/foundry.params"
+PARAMS_FILE="${REPO_ROOT}/params/foundry_template.params"
 TEMP_PARAMS_FILE="${PARAMS_FILE}.tmp"
 SOURCE_PARAMS_FILE="$PARAMS_FILE"
 
@@ -149,7 +149,7 @@ echo "BYPASS_QA will be explicitly set to 'false' to ensure QA is active by defa
 echo "---------------------------------------------------"
 new_values["BYPASS_QA"]="false" # Explicitly set as per requirement
 
-# --- Generate New params/foundry.params ---
+# --- Generate New params/foundry_template.params ---
 echo ""
 echo "✍️  Updating $PARAMS_FILE with new configuration..."
 

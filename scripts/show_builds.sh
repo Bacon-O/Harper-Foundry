@@ -6,7 +6,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry.params}"
+PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry_template.params}"
 
 # Load configuration
 if [ -f "$PARAMS_FILE" ]; then

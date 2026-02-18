@@ -39,14 +39,14 @@ ls -lh /path/to/HOST_OUTPUT_DIR/
 ```
 
 **Causes:**
-- Invalid `KERNEL_SOURCE` in `params/foundry.params`
+- Invalid `KERNEL_SOURCE` in `params/foundry_template.params`
 - Network issues preventing package download
 - Debian repository not accessible
 
 **Solutions:**
 1. Check your `KERNEL_SOURCE` value:
    ```bash
-   grep KERNEL_SOURCE params/foundry.params
+   grep KERNEL_SOURCE params/foundry_template.params
    ```
 
 2. Verify the package exists:
@@ -76,7 +76,7 @@ make: *** [Makefile:1234] Error 1
 
 2. Verify architecture variables:
    ```bash
-   # In params/foundry.params, ensure these match:
+   # In params/foundry_template.params, ensure these match:
    TARGET_ARCH="x86_64"
    CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
    BUILD_CC="clang --target=x86_64-linux-gnu"
@@ -98,7 +98,7 @@ virtual memory exhausted: Cannot allocate memory
 **Solutions:**
 1. Reduce parallelism:
    ```bash
-   # In params/foundry.params
+   # In params/foundry_template.params
    PARALLEL_JOBS="4"  # Reduce from default
    ```
 
@@ -131,7 +131,7 @@ virtual memory exhausted: Cannot allocate memory
 **Solution:**
 Run the validation script and fix reported errors:
 ```bash
-./scripts/validate_params.sh params/foundry.params
+./scripts/validate_params.sh params/foundry_template.params
 ```
 
 Common fixes:
@@ -285,7 +285,7 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
 
 3. Disable QEMU tests if not needed:
    ```bash
-   # In params/foundry.params
+   # In params/foundry_template.params
    ENABLE_QEMU_TESTS="false"
    ```
 
@@ -299,7 +299,7 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
 **Solutions:**
 1. Increase parallelism:
    ```bash
-   # In params/foundry.params
+   # In params/foundry_template.params
    PARALLEL_JOBS=""  # Empty = use all cores
    ```
 
@@ -389,7 +389,7 @@ If you're still stuck:
    - Include OS and Docker version
    - Attach relevant logs
    - Describe steps to reproduce
-   - Share your `foundry.params` (sanitize paths)
+   - Share your `foundry_template.params` (sanitize paths)
 
 4. **Join the community:**
    - Discord/IRC/Forum links (if applicable)

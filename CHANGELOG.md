@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Builds bzImage in 2-5 minutes vs 30-60+ for full build
 - **Prerequisites checker** (`scripts/check_prerequisites.sh`) - Validates system requirements before building
 - **Build status viewer** (`scripts/show_builds.sh`) - Display build artifacts and disk usage information
-- **Configuration validator** (`scripts/validate_params.sh`) - Comprehensive validation of foundry.params
+- **Configuration validator** (`scripts/validate_params.sh`) - Comprehensive validation of foundry_template.params
 - **Makefile** - Common task shortcuts for building, testing, and maintenance
 - **CONTRIBUTING.md** - Comprehensive contribution guidelines
 - **TROUBLESHOOTING.md** - Detailed troubleshooting guide with common issues and solutions
@@ -31,12 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Reorganized build scripts** - Moved `ci-build.sh` to `compile_scripts/harper_deb13.sh`
   - Removed `ci-build.sh` symlink; update any custom references
-  - Updated `FOUNDRY_EXEC` in `foundry.params`
+  - Updated `FOUNDRY_EXEC` in `foundry_template.params`
 - **Makefile `test` target** - Now uses tinyconfig for much faster testing
 - **README structure** - Added alloy mixtures section and comparison table
 
 ### Fixed
-- **Critical bug**: Removed duplicate `CROSS_COMPILE` variable definition in `foundry.params`
+- **Critical bug**: Removed duplicate `CROSS_COMPILE` variable definition in `foundry_template.params`
 - **Critical bug**: Fixed syntax error in `material_analysis.sh` (duplicate shebang)
 - **Critical bug**: Fixed typo `DEB_TARTET_ARCH` → `DEB_TARGET_ARCH` throughout codebase
 - **Bug**: QA test scripts now properly source `env_setup.sh` with correct relative paths
@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - `start_build.sh` - Main build entry point
-- `params/foundry.params` - Configuration file
+- `params/foundry_template.params` - Configuration file
 - `scripts/env_setup.sh` - Environment setup and argument parsing
 - `scripts/validate.sh` - Prerequisites checking
 - `scripts/launch.sh` - Docker container orchestration

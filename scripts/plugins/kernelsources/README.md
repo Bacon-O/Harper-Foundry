@@ -74,7 +74,7 @@ make tinyconfig
 make -j$(nproc) bzImage
 ```
 
-### In Parameter Files (e.g., foundry.params)
+### In Parameter Files (e.g., foundry_template.params)
 
 ```bash
 # Choose kernel source strategy

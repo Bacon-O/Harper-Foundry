@@ -102,7 +102,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
-if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry.params" ]; then
+if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry_template.params" ]; then
     PARAMS_FILE="${REPO_ROOT}/params/tinyconfig.params"
 fi
 

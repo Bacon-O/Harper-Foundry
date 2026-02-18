@@ -31,7 +31,7 @@ This directory contains different "alloy mixtures" - build script variants optim
 
 **Usage:**
 ```bash
-# In params/foundry.params or custom params file:
+# In params/foundry_template.params or custom params file:
 FOUNDRY_EXEC="alloymixtures/harper_deb13.sh"
 
 # Or via command line:
@@ -189,7 +189,7 @@ All alloy mixture scripts must:
 
 ```bash
 # Complete Harper kernel build (experimental)
-./start_build.sh --params-file params/foundry.params
+./start_build.sh --params-file params/foundry_template.params
 
 # Quick test build
 ./start_build.sh --params-file params/tinyconfig.params

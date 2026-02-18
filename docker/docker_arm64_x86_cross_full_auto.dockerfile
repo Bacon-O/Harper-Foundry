@@ -35,7 +35,7 @@ RUN ln -sf /usr/bin/clang-19 /usr/bin/clang && \
     ln -sf /usr/bin/llvm-readelf-19 /usr/bin/llvm-readelf
 
 # 4. Environment - Stripped to the Toolchain only
-# We move ARCH and WINE_NTSYNC etc. to params/foundry.params 
+# We move ARCH and WINE_NTSYNC etc. to params/foundry_template.params 
 # This makes the image a generic compiler box.
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \

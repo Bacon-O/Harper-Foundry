@@ -12,7 +12,7 @@ help:
 	@echo "Setup & Configuration:"
 	@echo "  make setup       - Run interactive setup (install.sh)"
 	@echo "  make check       - Check system prerequisites"
-	@echo "  make validate    - Validate foundry.params configuration"
+	@echo "  make validate    - Validate foundry_template.params configuration"
 	@echo ""
 	@echo "Building:"
 	@echo "  make build       - Run full kernel build"

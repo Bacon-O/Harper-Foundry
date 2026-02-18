@@ -5,12 +5,12 @@ This document summarizes all the improvements made to the Harper Foundry project
 ## 🐛 Critical Bug Fixes
 
 ### 1. Configuration File Issues
-- **Fixed**: Duplicate/incorrect `CROSS_COMPILE` variable in `params/foundry.params`
+- **Fixed**: Duplicate/incorrect `CROSS_COMPILE` variable in `params/foundry_template.params`
   - Removed the standalone `CROSS_COMPILE` line that had no value
   - Kept only the properly configured variable
   
 - **Fixed**: Typo `DEB_TARTET_ARCH` → `DEB_TARGET_ARCH` throughout the codebase
-  - Updated in `params/foundry.params`
+  - Updated in `params/foundry_template.params`
   - Updated in `scripts/launch.sh`
   - Updated in `TROUBLESHOOTING.md`
 
@@ -55,7 +55,7 @@ All QA test scripts had missing variable definitions and incorrect path to `env_
 - Provides actionable error messages
 
 #### Configuration Validator (`scripts/validate_params.sh`)
-- Comprehensive validation of `foundry.params` files
+- Comprehensive validation of `foundry_template.params` files
 - Checks required variables, file paths, architecture settings
 - Validates QA configuration
 - Integrated into `install.sh` workflow
@@ -189,7 +189,7 @@ Common task shortcuts:
 ## 🎯 Files Modified
 
 ### Fixed Bugs (8 files)
-1. `params/foundry.params` - Removed duplicate CROSS_COMPILE, fixed typos
+1. `params/foundry_template.params` - Removed duplicate CROSS_COMPILE, fixed typos
 2. `scripts/material_analysis.sh` - Removed duplicate shebang
 3. `scripts/plugins/qatests/filesexists.sh` - Fixed path and variables
 4. `scripts/plugins/qatests/linuxconfig.sh` - Fixed path and variables  
