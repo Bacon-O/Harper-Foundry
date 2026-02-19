@@ -49,7 +49,7 @@ ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
 ARTIFACT_DELIVERY_METHOD="sftp"
 REMOTE_DELIVERY_HOST="127.0.0.1"
 REMOTE_DELIVERY_USER="matthew"
-REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
+REMOTE_DELIVERY_PATH="/mnt/build-data/remote-test/"
 ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
