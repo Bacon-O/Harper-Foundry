@@ -10,7 +10,7 @@ source "$(dirname "$0")/../../../env_setup.sh" "$@"
 # In normal mode, it's the latest build with timestamp
 LATEST_BUILD_DIR="$BUILD_OUTPUT_DIR"
 
-if [[-z "$LATEST_BUILD_DIR" ]]; then
+if [[ -z "$LATEST_BUILD_DIR" ]]; then
     echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
     exit 1
 fi
@@ -36,7 +36,7 @@ done
 
 # Part B: Optional Elements (Warn Only)
 echo "⚠️  Checking Optional Systems..."
-if [["${#QA_OPTIONAL_CHECKS[@]}" -gt 0 ]]; then
+if [[ "${#QA_OPTIONAL_CHECKS[@]}" -gt 0 ]]; then
     for CHECK in "${QA_OPTIONAL_CHECKS[@]}"; do
         if grep -Fq "$CHECK" "$CONFIG_FILE"; then
             echo "   ✅ OPTIONAL: $CHECK detected."
@@ -50,8 +50,8 @@ else
 fi
 
 # Fail Logic: Only block build if CRITICAL items are missing
-if [["$MISSING_CRITICAL" -gt 0 ]]; then
-    if [["$TEST_RUN_MODE" == "true" ]]; then
+if [[ "$MISSING_CRITICAL" -gt 0 ]]; then
+    if [[ "$TEST_RUN_MODE" == "true" ]]; then
         echo "🧪 Test Mode: Ignoring $MISSING_CRITICAL critical failures."
     else
         echo "🚨 Chemical Audit Failed: $MISSING_CRITICAL critical elements missing."

@@ -12,7 +12,7 @@ require_cmd() {
 }
 
 is_debian_family="false"
-if [[-f /etc/os-release ]]; then
+if [[ -f /etc/os-release ]]; then
     os_id=$(. /etc/os-release; echo "$ID")
     os_like=$(. /etc/os-release; echo "$ID_LIKE")
     case "$os_id" in
@@ -20,20 +20,20 @@ if [[-f /etc/os-release ]]; then
             is_debian_family="true"
             ;;
     esac
-    if [["$is_debian_family" != "true" ] && echo "$os_like" | grep -Eq "(^|\s)(debian|ubuntu)(\s|$)"; then
+    if [[ "$is_debian_family" != "true" ]] && echo "$os_like" | grep -Eq "(^|\s)(debian|ubuntu)(\s|$)"; then
         is_debian_family="true"
     fi
-elif [[-f /etc/debian_version ]]; then
+elif [[ -f /etc/debian_version ]]; then
     is_debian_family="true"
 fi
 
-if [["$is_debian_family" != "true" ]]; then
+if [[ "$is_debian_family" != "true" ]]; then
     echo "❌ This helper only supports Debian/Ubuntu hosts."
     echo "   Install qemu-user-static and binfmt_misc manually on this distro."
     exit 1
 fi
 
-if [["${EUID}" -ne 0 ]]; then
+if [[ "${EUID}" -ne 0 ]]; then
     echo "⚠️  This helper uses sudo for system-wide changes."
     echo "   You may be prompted for your password."
 fi
@@ -46,7 +46,7 @@ echo "🔧 Installing qemu-user-static (if needed)..."
 sudo apt-get update -y
 sudo apt-get install -y qemu-user-static
 
-if [[! -e /proc/sys/fs/binfmt_misc ]]; then
+if [[ ! -e /proc/sys/fs/binfmt_misc ]]; then
     echo "❌ binfmt_misc not available at /proc/sys/fs/binfmt_misc"
     echo "   Ensure the binfmt_misc kernel module is enabled."
     exit 1
