@@ -216,7 +216,7 @@ echo "==================================================="
 echo ""
 
 # Check prerequisites first
-if [ -f "${REPO_ROOT}/scripts/check_prerequisites.sh" ]; then
+if [[ -f "${REPO_ROOT}/scripts/check_prerequisites.sh" ]]; then
     echo "🔍 Checking system prerequisites..."
     if "${REPO_ROOT}/scripts/check_prerequisites.sh"; then
         echo ""
@@ -235,7 +235,7 @@ if [ -f "${REPO_ROOT}/scripts/check_prerequisites.sh" ]; then
     fi
 fi
 
-if [ ! -f "$TEMPLATE_PARAMS_FILE" ]; then
+if [[ ! -f "$TEMPLATE_PARAMS_FILE" ]]; then
     echo "❌ Error: Template params file not found: $TEMPLATE_PARAMS_FILE"
     read -p "Would you like to generate it now? (y/n): " -r
     echo
@@ -247,7 +247,7 @@ if [ ! -f "$TEMPLATE_PARAMS_FILE" ]; then
         exit 1
     fi  
 fi
-if [ -f "$PARAMS_FILE" ]; then
+if [[ -f "$PARAMS_FILE" ]]; then
     SOURCE_PARAMS_FILE="$PARAMS_FILE"
 else
     SOURCE_PARAMS_FILE="$TEMPLATE_PARAMS_FILE"
@@ -304,12 +304,12 @@ prompt_for_variable() {
     local description="$3"
     local input_value
 
-    if [ -n "$description" ]; then
+    if [[ -n "$description" ]]; then
         echo "" >&2
         echo "$description" >&2
     fi
     read -rp "($var_name) [$current_value]: " input_value
-    if [ -z "$input_value" ]; then
+    if [[ -z "$input_value" ]]; then
         echo "$current_value" # Return current_value
     else
         echo "$input_value" # Return input_value
@@ -367,7 +367,7 @@ echo "✅ Configuration updated successfully in $PARAMS_FILE."
 # Validate the updated configuration
 echo ""
 echo "🔍 Validating configuration..."
-if [ -f "${REPO_ROOT}/scripts/validate_params.sh" ]; then
+if [[ -f "${REPO_ROOT}/scripts/validate_params.sh" ]]; then
     if "${REPO_ROOT}/scripts/validate_params.sh" "$PARAMS_FILE"; then
         echo ""
         echo "✅ Configuration is valid!"

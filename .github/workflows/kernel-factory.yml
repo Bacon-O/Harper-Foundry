@@ -42,7 +42,7 @@ jobs:
   #     - name: Shellcheck
   #       run: |
   #         mapfile -t files < <(git ls-files "*.sh")
-  #         if [ "${#files[@]}" -eq 0 ]; then
+  #         if [[ "${#files[@]}" -eq 0 ]]; then
   #           echo "No shell scripts found."
   #           exit 0
   #         fi
@@ -124,6 +124,20 @@ jobs:
         run: |
           bash ./scripts/material_analysis.sh "$ARGS"
 
+  delivery:
+    needs: [preheat, smelt]
+    if: always() && (github.event.inputs.override_params_gh == 'none')
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Artifact Export
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/artifact_export.sh "$ARGS"
+          
   cleanup:
     needs: [preheat, analysis]
     if: always() 

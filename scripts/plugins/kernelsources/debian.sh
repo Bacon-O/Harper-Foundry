@@ -59,7 +59,7 @@ BUILD_ROOT="${2:-.}"
 mkdir -p "$BUILD_ROOT"
 cd "$BUILD_ROOT"
 
-if [ -z "$VERSION_CONSTRAINT" ]; then
+if [[ -z "$VERSION_CONSTRAINT" ]]; then
     echo "[INFO] Fetching latest available Debian kernel source..." >&2
 else
     echo "[INFO] Fetching Debian kernel source matching: $VERSION_CONSTRAINT" >&2
@@ -83,7 +83,7 @@ fi
 # Find the extracted directory (apt-get source creates linux-* or linux-image-* dir)
 KERNEL_DIR=$(find . -maxdepth 1 -type d -name "linux-*" | head -1)
 
-if [ -z "$KERNEL_DIR" ] || [ ! -d "$KERNEL_DIR" ]; then
+if [[ -z "$KERNEL_DIR" ]] || [[ ! -d "$KERNEL_DIR" ]]; then
     echo "[ERROR] Kernel source extraction failed: no linux-* directory found" >&2
     return 1
 fi

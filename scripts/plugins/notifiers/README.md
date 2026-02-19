@@ -215,7 +215,7 @@ slack_check() {
     # Build status tracking
     # 1 = Success
     # 0 = Failed
-    if [ "$BUILD_STATUS" = "failed" ]; then
+    if [[ "$BUILD_STATUS" = "failed" ]]; then
         message="🚨 Harper Build FAILED for kernel $KERNEL_VERSION"
         color="danger"
     else

@@ -14,7 +14,7 @@ readonly CONTAINER_BUILD_ROOT="/build"
 readonly CONTAINER_OUTPUT_DIR="/opt/factory/output"
 
 # 1️⃣ Load Environment
-if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
+if [[ -f "/opt/factory/scripts/env_setup.sh" ]]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
@@ -30,7 +30,7 @@ echo ""
 
 # 2️⃣ Load Kernel Source Plugin System
 # This allows flexible kernel source handling (kernel.org, debian, custom, etc.)
-if [ -f "/opt/factory/scripts/plugins/kernelsources/runner.sh" ]; then
+if [[ -f "/opt/factory/scripts/plugins/kernelsources/runner.sh" ]]; then
     source /opt/factory/scripts/plugins/kernelsources/runner.sh
 else
     echo "⚠️  WARNING: kernel source plugin system not found"
@@ -45,7 +45,7 @@ cd "$CONTAINER_BUILD_ROOT"
 echo "📥 Fetching kernel source via plugin: KERNEL_SOURCE=$KERNEL_SOURCE"
 fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION" "$CONTAINER_BUILD_ROOT" >/dev/null
 KERNEL_DIR=$(find "$CONTAINER_BUILD_ROOT" -maxdepth 1 -type d -name "linux-*" | head -n1)
-if [ -z "$KERNEL_DIR" ]; then
+if [[ -z "$KERNEL_DIR" ]]; then
     echo "❌ ERROR: Failed to fetch kernel via plugin"
     exit 1
 fi
@@ -119,7 +119,7 @@ mkdir -p "$CONTAINER_OUTPUT_DIR"
 
 # Find and copy bzImage
 BZ_PATH=$(find . -name bzImage | head -n1)
-if [ -f "$BZ_PATH" ]; then
+if [[ -f "$BZ_PATH" ]]; then
     cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
     BZ_SIZE=$(du -h "$BZ_PATH" | cut -f1)
     echo "✅ bzImage: $BZ_SIZE"
@@ -129,7 +129,7 @@ else
 fi
 
 # Save config for reference
-if [ -f .config ]; then
+if [[ -f .config ]]; then
     cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
     echo "✅ Config saved"
 fi
@@ -177,7 +177,7 @@ echo "(Experimental - enthusiast/hobbyist use only)"
 echo ""
 
 # Cleanup
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
+if [[ "$INCREMENTAL_BUILD" != "true" ]]; then
     echo "🧹 Cleaning up..."
     make mrproper 2>/dev/null || true
 fi

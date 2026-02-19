@@ -104,7 +104,7 @@ echo "🐛 Debug mode enabled - verbose output active"
 ```bash
 #!/bin/bash
 # Customizations for ARM64 hosts
-if [ "$(uname -m)" = "aarch64" ]; then
+if [[ "$(uname -m)" = "aarch64" ]]; then
     export PARALLEL_JOBS=8  # Conservative for ARM64
     export QEMU_STATIC_PATH="/usr/bin/qemu-x86_64-static"
     echo "⚙️ ARM64 host optimizations applied"
@@ -204,10 +204,10 @@ Your scripts can check the environment and apply settings conditionally:
 #!/bin/bash
 # Load different settings based on params file
 
-if [ "$(basename "$PARAMS_FILE")" = "harper_deb13.params" ]; then
+if [[ "$(basename "$PARAMS_FILE")" = "harper_deb13.params" ]]; then
     export OPTIMIZED_FOR_DEB13="true"
     echo "🔧 Debian 13 optimizations applied"
-elif [ "$(basename "$PARAMS_FILE")" = "tinyconfig.params" ]; then
+elif [["$(basename "$PARAMS_FILE")" = "tinyconfig.params" ]]; then
     export MINIMAL_BUILD="true"
     echo "🔧 Minimal build mode"
 fi
@@ -226,7 +226,7 @@ echo "Params file: $PARAMS_FILE"
 echo "Build output: $BUILD_OUTPUT_DIR"
 
 # Extend based on main setup
-if [ "$TARGET_ARCH" = "arm64" ]; then
+if [["$TARGET_ARCH" = "arm64" ]]; then
     export ARM64_SPECIFIC="yes"
 fi
 ```
@@ -258,9 +258,9 @@ Detect the host and apply appropriate settings:
 ```bash
 #!/bin/bash
 HOST_CPU=$(nproc)
-if [ "$HOST_CPU" -gt 16 ]; then
+if [["$HOST_CPU" -gt 16 ]]; then
     export PARALLEL_JOBS=16
-elif [ "$HOST_CPU" -gt 8 ]; then
+elif [["$HOST_CPU" -gt 8 ]]; then
     export PARALLEL_JOBS=8
 else
     export PARALLEL_JOBS=$((HOST_CPU - 1))
@@ -275,7 +275,7 @@ Use environment variables to toggle features on-demand:
 #!/bin/bash
 # Allow users to enable experimental features via env var
 : "${ENABLE_CCACHE:=false}"
-if [ "$ENABLE_CCACHE" = "true" ]; then
+if [["$ENABLE_CCACHE" = "true" ]]; then
     export CCACHE_DIR="${REPO_ROOT}/.build-cache"
     export CCACHE_MAXSIZE="5G"
     mkdir -p "$CCACHE_DIR"

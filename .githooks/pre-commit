@@ -9,7 +9,7 @@ set -eo pipefail
 STRICT_MODE=$(git config --local --get foundry.strictLint 2>/dev/null || echo "false")
 
 if ! command -v shellcheck >/dev/null 2>&1; then
-    if [ "$STRICT_MODE" = "true" ]; then
+    if [[ "$STRICT_MODE" = "true" ]]; then
         echo "❌ shellcheck not found - install it to commit in strict mode"
         exit 1
     fi
@@ -18,13 +18,13 @@ fi
 
 mapfile -t files < <(git ls-files "*.sh")
 
-if [ "${#files[@]}" -eq 0 ]; then
+if [[ "${#files[@]}" -eq 0 ]]; then
     exit 0
 fi
 
 echo "🔎 Running shellcheck on ${#files[@]} shell scripts..."
 
-if [ "$STRICT_MODE" = "true" ]; then
+if [[ "$STRICT_MODE" = "true" ]]; then
     # Strict mode: fail on any issues
     shellcheck -x "${files[@]}"
 else

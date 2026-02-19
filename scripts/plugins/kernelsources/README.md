@@ -63,7 +63,7 @@ source /opt/factory/scripts/plugins/kernelsources/runner.sh
 # Fetch kernel source based on KERNEL_SOURCE parameter
 # KERNEL_VERSION is optional - can be empty, "latest", or a specific version
 KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION")
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
     echo "Failed to fetch kernel"
     exit 1
 fi
@@ -104,12 +104,12 @@ If you need custom kernel source logic:
 
 source /opt/factory/scripts/plugins/kernelsources/runner.sh
 
-if [ "$KERNEL_SOURCE" == "custom" ]; then
+if [[ "$KERNEL_SOURCE" == "custom" ]]; then
     # Your custom logic here
     git clone https://my-kernel-repo.com/kernel.git $BUILD_ROOT/kernel
     cd $BUILD_ROOT/kernel
     git checkout stable-6.11
-elif [ "$KERNEL_SOURCE" == "internal-mirror" ]; then
+elif [[ "$KERNEL_SOURCE" == "internal-mirror" ]]; then
     # Or handle other custom types
     rsync -av kernel-mirror.internal:/kernels/ $BUILD_ROOT/
 fi

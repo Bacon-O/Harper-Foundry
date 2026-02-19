@@ -81,7 +81,7 @@ fetch_kernel_source() {
     
     # Check for custom plugin first (in scripts/scripts.d/plugins/kernelsources/) - takes precedence
     local custom_plugin="${REPO_ROOT}/scripts/scripts.d/plugins/kernelsources/${source_file}.sh"
-    if [ -x "$custom_plugin" ]; then
+    if [[ -x "$custom_plugin" ]]; then
         log_kernel_source "INFO" "Using custom kernel source plugin: $source_file"
         "$custom_plugin" "$kernel_version" "$build_root"
         return $?
@@ -121,7 +121,7 @@ fetch_kernel_source() {
 # ============================================================================
 check_plugin_exists() {
     local plugin_file="$KERNELSOURCES_DIR/$1.sh"
-    if [ ! -x "$plugin_file" ]; then
+    if [[ ! -x "$plugin_file" ]]; then
         echo "[ERROR] Plugin not found or not executable: $plugin_file" >&2
         return 1
     fi

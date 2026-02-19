@@ -34,7 +34,7 @@ jobs:
           WORKSPACE_PATH: ${{ github.workspace }}
         run: |
           cd "$WORKSPACE_PATH"
-          if [ "$FORCE_BUILD_INPUT" = "true" ]; then
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
             export FORCE_BUILD="true"
           fi
           
@@ -44,7 +44,7 @@ jobs:
           check_if_build_is_needed harper_deb13_kernel --force
           BUILD_NEEDED=$?
           
-          if [ $BUILD_NEEDED -eq 0 ]; then
+          if [[ $BUILD_NEEDED -eq 0 ]]; then
             echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
             
             # Execute build with tinyconfig for CI testing

@@ -114,7 +114,7 @@ BYPASS_QA="true"
    set -e
    
    # Your test logic here
-   if [ ! -f "expected-file.deb" ]; then
+   if [[ ! -f "expected-file.deb" ]]; then
        echo "❌ Test failed: File not found"
        exit 1
    fi

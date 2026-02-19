@@ -10,7 +10,7 @@ source "$(dirname "$0")/../../../env_setup.sh" "$@"
 # In normal mode, it's the latest build with timestamp
 LATEST_BUILD_DIR="$BUILD_OUTPUT_DIR"
 
-if [ -z "$LATEST_BUILD_DIR" ]; then
+if [[ -z "$LATEST_BUILD_DIR" ]]; then
     echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
     exit 1
 fi
@@ -24,7 +24,7 @@ KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
 echo "  📦 Checking for Debian Packages..."
 DEB_COUNT=$(find "$LATEST_BUILD_DIR" -maxdepth 1 -name "*.deb" | wc -l)
 
-if [ "$DEB_COUNT" -lt 2 ]; then
+if [[ "$DEB_COUNT" -lt 2 ]]; then
     echo "  ❌ ERROR: Missing Debian packages. Found: $DEB_COUNT (Expected at least 2: Image and Headers)."
     exit 1
 else

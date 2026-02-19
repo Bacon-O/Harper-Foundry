@@ -93,7 +93,7 @@ while [[ "$#" -gt 0 ]]; do
             # Handle flags that take values - consume both flag and value
             BUILD_ARGS+=("$1")
             shift
-            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+            if [[ -z "$1" ]] || [[ "$1" == -* ]]; then
                 echo "❌ ERROR: -p/--params-file requires a file path"
                 echo "Example: $0 -p params/tinyconfig.params"
                 exit 1
@@ -104,7 +104,7 @@ while [[ "$#" -gt 0 ]]; do
         -o|--overrides)
             BUILD_ARGS+=("$1")
             shift
-            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+            if [[ -z "$1" ]] || [[ "$1" == -* ]]; then
                 echo "❌ ERROR: -o/--overrides requires a file path"
                 echo "Example: $0 -o params/_test_overrides.params"
                 exit 1
@@ -114,7 +114,7 @@ while [[ "$#" -gt 0 ]]; do
         -e|--exec)
             BUILD_ARGS+=("$1")
             shift
-            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+            if [[ -z "$1" ]] || [[ "$1" == -* ]]; then
                 echo "❌ ERROR: -e/--exec requires a script path"
                 echo "Example: $0 -e scripts/compile_scripts/custom.sh"
                 exit 1
@@ -130,21 +130,22 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Generate BUILD_ID once at the start (persists across all env_setup.sh calls)
-if [ -n "$GITHUB_RUN_ID" ]; then
+if [[ -n "$GITHUB_RUN_ID" ]]; then
     BUILD_ID="gh_${GITHUB_RUN_ID}"
-elif [ "$QA_ONLY" == "true" ] && [ -n "$QA_ONLY_BUILD_DIR" ]; then
+elif [[ "$QA_ONLY" == "true" ]] && [[ -n "$QA_ONLY_BUILD_DIR" ]]; then
     BUILD_ID=$(date +%Y%m%d_%H%M%S)
 fi
 export BUILD_ID
 
 # Handle --show-configs: display available configs
-if [ "$SHOW_CONFIGS" == "true" ]; then
-    bash ./scripts/show_params.sh
+if [[ "$SHOW_CONFIGS" == "true" ]]; then
+    _command=("./scripts/show_params.sh")
+    "${_command[@]}"
     exit 0
 fi
 
 # Handle --shell-menu: show interactive menu
-if [ "$SHELL_MENU" == "true" ]; then
+if [[ "$SHELL_MENU" == "true" ]]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "  📂 Available Configurations"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -158,20 +159,20 @@ if [ "$SHELL_MENU" == "true" ]; then
     
     # Combine all params
     all_params=()
-    if [ ${#project_params[@]} -gt 0 ]; then
+    if [[ ${#project_params[@]} -gt 0 ]]; then
         all_params+=("${project_params[@]}")
     fi
-    if [ ${#user_params[@]} -gt 0 ]; then
+    if [[ ${#user_params[@]} -gt 0 ]]; then
         all_params+=("${user_params[@]}")
     fi
     
-    if [ ${#all_params[@]} -eq 0 ]; then
+    if [[ ${#all_params[@]} -eq 0 ]]; then
         echo "❌ No param files found in params/ or params/params.d/ directories"
         exit 1
     fi
     
     # Display built-in configurations
-    if [ ${#project_params[@]} -gt 0 ]; then
+    if [[ ${#project_params[@]} -gt 0 ]]; then
         echo "🔧 BUILT-IN CONFIGURATIONS (Suggestions):"
         echo ""
         index=1
@@ -198,7 +199,7 @@ if [ "$SHELL_MENU" == "true" ]; then
     fi
     
     # Display custom user configurations
-    if [ ${#user_params[@]} -gt 0 ]; then
+    if [[ ${#user_params[@]} -gt 0 ]]; then
         echo "👤 CUSTOM USER CONFIGURATIONS:"
         echo ""
         for param in "${user_params[@]}"; do
@@ -225,7 +226,7 @@ if [ "$SHELL_MENU" == "true" ]; then
         # Check if it's a valid number
         if [[ "$user_choice" =~ ^[0-9]+$ ]]; then
             index=$((user_choice - 1))
-            if [ "$index" -ge 0 ] && [ "$index" -lt ${#all_params[@]} ]; then
+            if [[ "$index" -ge 0 ]] && [[ "$index" -lt ${#all_params[@]} ]]; then
                 selected_param="${all_params[$index]}"
                 BUILD_ARGS+=("-p" "$selected_param")
                 echo "✅ Selected: $selected_param"
@@ -239,9 +240,12 @@ if [ "$SHELL_MENU" == "true" ]; then
     done
     echo ""
 fi
+# Shell mode end
+
+
 
 # Auto-select tinyconfig for --test-run if no params specified
-if [ "$TEST_RUN" == "true" ] && [ -z "$_params_file" ]; then
+if [[ "$TEST_RUN" == "true" ]] && [[ -z "$_params_file" ]]; then
     _params_file="params/tinyconfig.params"
     BUILD_ARGS+=("-p" "$_params_file")
     echo "ℹ️  Test mode: Auto-selecting tinyconfig.params"
@@ -249,8 +253,8 @@ if [ "$TEST_RUN" == "true" ] && [ -z "$_params_file" ]; then
 fi
 
 # Validate params file is provided (skip for --show-configs and --shell-menu)
-if [ "$SHOW_CONFIGS" != "true" ] && [ "$SHELL_MENU" != "true" ]; then
-    if [ -z "$_params_file" ] || [ ! -r "$_params_file" ]; then
+if [[ "$SHOW_CONFIGS" != "true" ]] && [[ "$SHELL_MENU" != "true" ]]; then
+    if [[ -z "$_params_file" ]] || [[ ! -r "$_params_file" ]]; then
         echo "❌ ERROR: No params file specified. Use -p or --params-file to specify a config."
         echo "Example: $0 -p params/tinyconfig.params"
         echo ""
@@ -262,8 +266,8 @@ if [ "$SHOW_CONFIGS" != "true" ] && [ "$SHELL_MENU" != "true" ]; then
 fi
 
 # Validate that --qa-only has a valid build directory
-if [ "$QA_ONLY" == "true" ]; then
-    if [ ! -d "$QA_ONLY_BUILD_DIR" ]; then
+if [[ "$QA_ONLY" == "true" ]]; then
+    if [[ ! -d "$QA_ONLY_BUILD_DIR" ]]; then
         echo "❌ ERROR: --qa-only requires a valid build directory"
         echo "Provided: '$QA_ONLY_BUILD_DIR'"
         echo "Example: $0 --qa-only ./output/build_20260217_160524 -p params/tinyconfig.params"
@@ -273,14 +277,14 @@ fi
 
 # 1. Fueling
 # For QA_ONLY mode, we need to set a flag to tell env_setup to skip directory creation
-if [ "$QA_ONLY" == "true" ]; then
+if [[ "$QA_ONLY" == "true" ]]; then
     export QA_ONLY_MODE="true"
 fi
 
 source ./scripts/env_setup.sh "${BUILD_ARGS[@]}"
 
 # If QA_ONLY mode, run QA tests on existing build and exit
-if [ "$QA_ONLY" == "true" ]; then
+if [[ "$QA_ONLY" == "true" ]]; then
     echo "🛡️  Running Quality Assurance on existing build..."
     echo "📂 Build directory: $QA_ONLY_BUILD_DIR"
     echo ""
@@ -291,12 +295,14 @@ if [ "$QA_ONLY" == "true" ]; then
     export QA_ONLY_BUILD_DIR="$QA_ONLY_BUILD_DIR"
     
     # Run material analysis (QA tests)
-    if ! bash ./scripts/material_analysis.sh "${BUILD_ARGS[@]}"; then
+    
+    _command=("./scripts/material_analysis.sh" "${BUILD_ARGS[@]}")
+    if ! "${_command[@]}"; then
         echo "❌ Quality assurance checks failed."
         echo ""
         echo "Review the QA output above for details."
         
-        if [ "$QA_MODE" == "ENFORCED" ]; then
+        if [[ "$QA_MODE" == "ENFORCED" ]]; then
             echo ""
             echo "QA_MODE=ENFORCED: QA is considered failed."
             exit 1
@@ -311,8 +317,19 @@ if [ "$QA_ONLY" == "true" ]; then
     exit 0
 fi
 
+### 
+
+if [[ ${#PRE_BUILD_HOOKS[@]} -gt 0 ]]; then
+    echo "⚠️  WARNING: Pre-build hooks configuration detected. Running pre-build hooks..."
+    _command=("./scripts/pre_build_hooks.sh" "${BUILD_ARGS[@]}")
+    "${_command[@]}"
+else
+    echo "🔧 No pre-build hooks configured. Skipping pre-build phase."
+fi
+###
+
 # If shell mode, skip build phases and launch interactive shell
-if [ "$SHELL_MODE" == "true" ]; then
+if [[ "$SHELL_MODE" == "true" ]]; then
     echo "🐚 Launching interactive container shell..."
     echo "📂 Working directory: /build"
     echo "📦 Params: $PARAMS_FILE"
@@ -328,21 +345,33 @@ if [ "$SHELL_MODE" == "true" ]; then
     
     # Launch shell mode in launch
     export SHELL_MODE="true"
-    bash ./scripts/launch.sh "${BUILD_ARGS[@]}"
+    _command=("./scripts/launch.sh" "${BUILD_ARGS[@]}")
+    "${_command[@]}"
+
+    if [[ ${#POST_BUILD_HOOKS[@]} -gt 0 ]]; then
+        echo "⚠️  WARNING: Post-build hooks configuration detected. Running post-build hooks..."
+        _command=("./scripts/post_build_hooks.sh" "${BUILD_ARGS[@]}")
+        "${_command[@]}"
+    else
+        echo "🔧 No post-build hooks configured. Skipping post-build phase."
+    fi
+
     exit 0
 fi
 
 # 2. Preheat (normal build mode)
 echo "🌡️  Phase 1: Validating prerequisites..."
-if ! bash ./scripts/validate.sh "${BUILD_ARGS[@]}"; then
-    echo "❌ Preheat failed. Cannot proceed with build."
+_command=("./scripts/validate_params.sh" "${BUILD_ARGS[@]}")
+if ! "${_command[@]}"; then
+    echo "❌ Validation failed. Cannot proceed with build."
     exit 1
 fi
 echo ""
 
 # 3. Ignition
 echo "🔥 Phase 2: Igniting Build Process..."
-if ! bash ./scripts/launch.sh "${BUILD_ARGS[@]}"; then
+_command=("./scripts/launch.sh" "${BUILD_ARGS[@]}")
+if ! "${_command[@]}"; then
     echo "❌ Build process failed."
     echo ""
     echo "💡 Troubleshooting tips:"
@@ -356,17 +385,18 @@ fi
 echo ""
 
 # 4. Material Analysis (Conditional)
-if [ "$BYPASS_QA" == "true" ]; then
+if [[ "$BYPASS_QA" == "true" ]]; then
     echo "⏩ Phase 3: Skipping Quality Assurance (Bypass Active)."
 else
     echo "🛡️  Phase 3: Running Quality Assurance..."
-    if ! bash ./scripts/material_analysis.sh "${BUILD_ARGS[@]}"; then
+    _command=("./scripts/material_analysis.sh" "${BUILD_ARGS[@]}")
+    if ! "${_command[@]}"; then
         echo "❌ Quality assurance checks failed."
         echo ""
         echo "Build artifacts may be incomplete or invalid."
         echo "Review the QA output above for details."
         
-        if [ "$QA_MODE" == "ENFORCED" ]; then
+        if [[ "$QA_MODE" == "ENFORCED" ]]; then
             echo ""
             echo "QA_MODE=ENFORCED: Build is considered failed."
             exit 1
@@ -381,10 +411,20 @@ echo ""
 # 5. Export (Placeholder)
 if [[ "$ARTIFACT_DELIVERY" == "true" ]] || [[ "$ARTIFACT_DELIVERY" == "TRUE" ]]; then
     echo "📦 Phase 4: Exporting Artifacts to Remote Server (Not Implemented)..."
-    bash ./scripts/artifact_export.sh "${BUILD_ARGS[@]}"
+    _command=("./scripts/artifact_export.sh" "${BUILD_ARGS[@]}")
+    "${_command[@]}"
 else
     echo "📦 Phase 4: Exporting Artifacts skipped"
 fi
+
+if [[ ${#POST_BUILD_HOOKS[@]} -gt 0 ]]; then
+    echo "⚠️  WARNING: Post-build hooks configuration detected. Running post-build hooks..."
+    _command=("./scripts/post_build_hooks.sh" "${BUILD_ARGS[@]}")
+    "${_command[@]}"
+else
+    echo "🔧 No post-build hooks configured. Skipping post-build phase."
+fi
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✨ Foundry Cycle Complete!"

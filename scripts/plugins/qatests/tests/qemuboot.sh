@@ -10,7 +10,7 @@ source "$(dirname "$0")/../../../env_setup.sh" "$@"
 # In normal mode, it's the latest build with timestamp
 LATEST_BUILD_DIR="$BUILD_OUTPUT_DIR"
 
-if [ -z "$LATEST_BUILD_DIR" ]; then
+if [[-z "$LATEST_BUILD_DIR" ]]; then
     echo "❌ ERROR: No build artifacts found in $HOST_OUTPUT_DIR"
     exit 1
 fi
@@ -21,10 +21,10 @@ echo "📂 Analyzing Artifact: $LATEST_BUILD_DIR"
 KERNEL_IMAGE="${LATEST_BUILD_DIR}/bzImage"
 
 # --- STAGE 3: STRESS TEST (QEMU) ---
-if [ "$ENABLE_QEMU_TESTS" == "true" ] && [ "$TEST_RUN_MODE" != "true" ]; then
+if [["$ENABLE_QEMU_TESTS" == "true" ] && [ "$TEST_RUN_MODE" != "true" ]]; then
     echo "🚀 Stage 3: Spawning Stress Test..."
 
-    if [ ! -f "$KERNEL_IMAGE" ]; then
+    if [[! -f "$KERNEL_IMAGE" ]]; then
         echo "❌ ERROR: bzImage not found in $LATEST_BUILD_DIR"
         exit 1
     fi

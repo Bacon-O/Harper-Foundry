@@ -153,10 +153,10 @@ if [[ -f "$PARAMS_FILE" ]]; then
 
     # 3.5 Default host paths if not set in params
     USE_PARAM_SCOPED_DIRS="${USE_PARAM_SCOPED_DIRS:-true}"
-    if [ -z "$BUILD_WORKSPACE_DIR" ]; then
+    if [[ -z "$BUILD_WORKSPACE_DIR" ]]; then
         DEFAULT_WORKSPACE_BASE="${REPO_ROOT}/build-workspace"
-        if [ "$USE_PARAM_SCOPED_DIRS" != "false" ]; then
-            if [ -n "$PRODUCTION_CONFIG" ]; then
+        if [[ "$USE_PARAM_SCOPED_DIRS" != "false" ]]; then
+            if [[ -n "$PRODUCTION_CONFIG" ]]; then
                 WORKSPACE_TAG="$(basename "$PRODUCTION_CONFIG" .params)"
             else
                 WORKSPACE_TAG="$(basename "$PARAMS_FILE" .params)"
@@ -166,11 +166,11 @@ if [[ -f "$PARAMS_FILE" ]]; then
             BUILD_WORKSPACE_DIR="${DEFAULT_WORKSPACE_BASE}"
         fi
     fi
-    if [ -z "$HOST_OUTPUT_DIR" ]; then
+    if [[ -z "$HOST_OUTPUT_DIR" ]]; then
         DEFAULT_OUTPUT_BASE="${REPO_ROOT}/output"
-        if [ "$USE_PARAM_SCOPED_DIRS" != "false" ]; then
-            if [ -z "$WORKSPACE_TAG" ]; then
-                if [ -n "$PRODUCTION_CONFIG" ]; then
+        if [[ "$USE_PARAM_SCOPED_DIRS" != "false" ]]; then
+            if [[ -z "$WORKSPACE_TAG" ]]; then
+                if [[ -n "$PRODUCTION_CONFIG" ]]; then
                     WORKSPACE_TAG="$(basename "$PRODUCTION_CONFIG" .params)"
                 else
                     WORKSPACE_TAG="$(basename "$PARAMS_FILE" .params)"
@@ -190,9 +190,9 @@ if [[ -f "$PARAMS_FILE" ]]; then
     
     # 4. Burner Control (Parallelism)
     # Uses PARALLEL_JOBS from params or defaults to all available cores
-    if [ -z "$PARALLEL_JOBS" ]; then
+    if [[ -z "$PARALLEL_JOBS" ]]; then
         FINAL_JOBS=$(nproc)
-        if [ "$FINAL_JOBS" -gt 1 ]; then
+        if [[ "$FINAL_JOBS" -gt 1 ]]; then
             FINAL_JOBS=$((FINAL_JOBS - 1))
         fi
         export FINAL_JOBS

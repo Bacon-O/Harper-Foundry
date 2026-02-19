@@ -109,7 +109,7 @@ The `_test_overrides.params` file uses **internal inheritance** via environment 
 #!/bin/bash
 # _test_overrides.params
 # ⚠️  REQUIRED: PRODUCTION_CONFIG must be set as environment variable
-if [ -z "$PRODUCTION_CONFIG" ]; then
+if [[ -z "$PRODUCTION_CONFIG" ]]; then
     echo "❌ Error: PRODUCTION_CONFIG environment variable not set"
     exit 1
 fi

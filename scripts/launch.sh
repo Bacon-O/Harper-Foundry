@@ -8,9 +8,9 @@ fi
 
 # 3. Image Preparation
 echo "🔥 Igniting the Furnace..."
-if [ "$FOUNDRY_IMAGE_TYPE" == "build" ]; then
+if [[ "$FOUNDRY_IMAGE_TYPE" == "build" ]]; then
     BUILD_ARGS="--build-arg USER_UID=$HOST_UID --build-arg USER_GID=$HOST_GID"
-    [ "$DOCKER_REBUILD" == "true" ] && BUILD_ARGS="$BUILD_ARGS --no-cache"
+    [[ "$DOCKER_REBUILD" == "true" ]] && BUILD_ARGS="$BUILD_ARGS --no-cache"
     echo "🏗️  Building $CONTAINER_IMAGE_NAME from $DOCKERFILE_PATH..."
     echo "   Using UID:GID = $HOST_UID:$HOST_GID"
     docker build $BUILD_ARGS -t "$CONTAINER_IMAGE_NAME" -f "$DOCKERFILE_PATH" .

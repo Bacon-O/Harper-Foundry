@@ -34,7 +34,7 @@ resolve_kernel_version() {
             local version
             version=$(curl -s "$api_url" 2>/dev/null | grep -A2 latest_stable | grep version | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
-            if [ -z "$version" ]; then
+            if [[ -z "$version" ]]; then
                 echo "[WARN] API query failed, using fallback version 6.12.8" >&2
                 echo "6.12.8"
             else
@@ -48,7 +48,7 @@ resolve_kernel_version() {
             local version
             version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "longterm"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
-            if [ -z "$version" ]; then
+            if [[ -z "$version" ]]; then
                 echo "[WARN] API query failed, using fallback LTS version 6.12.8" >&2
                 echo "6.12.8"
             else
@@ -62,7 +62,7 @@ resolve_kernel_version() {
             local version
             version=$(curl -s "$api_url" 2>/dev/null | grep -B1 '"version":' | grep -A1 '"moniker": "mainline"' | grep '"version":' | head -n1 | sed 's/.*"version": "\([^"]*\)".*/\1/')
             
-            if [ -z "$version" ]; then
+            if [[ -z "$version" ]]; then
                 echo "[WARN] API query failed, using fallback to latest stable" >&2
                 resolve_kernel_version "latest"
             else
@@ -95,7 +95,7 @@ KERNEL_EXTRACT_DIR="linux-${KERNEL_VERSION}"
 echo "[INFO] Fetching official kernel.org source: linux-${KERNEL_VERSION}" >&2
 
 # Check if already downloaded
-if [ ! -f "$KERNEL_TARBALL" ]; then
+if [[ ! -f "$KERNEL_TARBALL" ]]; then
     echo "[INFO] Downloading linux-${KERNEL_VERSION}.tar.xz from kernel.org..." >&2
     
     # Try to download with progress indicator
@@ -110,7 +110,7 @@ else
 fi
 
 # Extract if not already extracted
-if [ ! -d "$KERNEL_EXTRACT_DIR" ]; then
+if [[ ! -d "$KERNEL_EXTRACT_DIR" ]]; then
     echo "[INFO] Extracting kernel source..." >&2
     tar xf "$KERNEL_TARBALL" || {
         echo "[ERROR] Failed to extract kernel tarball" >&2
@@ -119,7 +119,7 @@ if [ ! -d "$KERNEL_EXTRACT_DIR" ]; then
 fi
 
 # Verify extraction
-if [ ! -d "$KERNEL_EXTRACT_DIR" ]; then
+if [[ ! -d "$KERNEL_EXTRACT_DIR" ]]; then
     echo "[ERROR] Kernel extraction failed: $KERNEL_EXTRACT_DIR not found" >&2
     exit 1
 fi

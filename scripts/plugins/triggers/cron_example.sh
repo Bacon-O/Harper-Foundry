@@ -64,7 +64,7 @@ log_to_file "=== Starting Harper Trigger Cron Job ==="
 # STEP 1: Source the Trigger Plugin Runner
 # ==============================================================================
 
-if [ ! -f "$REPO_ROOT/scripts/plugins/triggers/runner.sh" ]; then
+if [[! -f "$REPO_ROOT/scripts/plugins/triggers/runner.sh" ]]; then
     log_to_file "ERROR: Trigger runner not found at $REPO_ROOT/scripts/plugins/triggers/runner.sh"
     exit 1
 fi
@@ -103,7 +103,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # ==============================================================================
 
 # OPTION A: Build directly with Docker
-# if [ $BUILD_NEEDED -eq 0 ]; then
+# if [[$BUILD_NEEDED -eq 0 ]]; then
 #     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
 #     log_to_file "Executing build with tinyconfig for testing..."
     
@@ -132,7 +132,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # fi
 
 # OPTION B: Use a dedicated build execution script
-# if [ $BUILD_NEEDED -eq 0 ]; then
+# if [[$BUILD_NEEDED -eq 0 ]]; then
 #     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
 #     
 #     if "$REPO_ROOT/scripts/execute_triggered_build.sh" 2>&1 | tee -a "$LOGFILE"; then
@@ -145,7 +145,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # fi
 
 # OPTION C: Queue the build for later execution
-# if [ $BUILD_NEEDED -eq 0 ]; then
+# if [[$BUILD_NEEDED -eq 0 ]]; then
 #     # Queue includes the detected version (exported by check function)
 #     echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_KERNEL_VERSION}" >> "$REPO_ROOT/build_queue.txt"
 #     log_to_file "Build queued for kernel version ${DETECTED_KERNEL_VERSION}"

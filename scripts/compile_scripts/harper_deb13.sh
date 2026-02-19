@@ -25,7 +25,7 @@ readonly CONTAINER_OUTPUT_DIR="/opt/factory/output"
 readonly CONTAINER_CONFIG_DIR="/opt/factory/configs"
 
 # 1️⃣ Load Environment
-if [ -f "/opt/factory/scripts/env_setup.sh" ]; then
+if [[ -f "/opt/factory/scripts/env_setup.sh" ]]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
@@ -47,7 +47,7 @@ echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
 source "${PLUGIN_DIR}/kernelsources/runner.sh"
 fetch_kernel_source "$KERNEL_SOURCE" "${KERNEL_VERSION:-latest}" "$CONTAINER_BUILD_ROOT" >/dev/null
 KERNEL_DIR=$(find "$CONTAINER_BUILD_ROOT" -maxdepth 1 -type d -name "linux-*" | head -n1)
-if [ -z "$KERNEL_DIR" ]; then
+if [[ -z "$KERNEL_DIR" ]]; then
     echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1;
 fi
 cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1; }
@@ -66,18 +66,18 @@ env -u ARCH CC=x86_64-linux-gnu-gcc dpkg-architecture -a amd64 -c fakeroot make 
 cp debian/build/build_amd64_none_amd64/.config .config
 
 # 5️⃣ Merge Tuning Profile
-if [ -n "$TUNING_CONFIG" ]; then
+if [[ -n "$TUNING_CONFIG" ]]; then
     # Check custom configs first, then fall back to official
     tuning_file=""
-    if [ -f "${CONTAINER_CONFIG_DIR}/configs.d/$TUNING_CONFIG" ]; then
+    if [[ -f "${CONTAINER_CONFIG_DIR}/configs.d/$TUNING_CONFIG" ]]; then
         tuning_file="${CONTAINER_CONFIG_DIR}/configs.d/$TUNING_CONFIG"
         echo "🧪 Merging Custom Tuning Profile: $TUNING_CONFIG"
-    elif [ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]; then
+    elif [[ -f "${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG" ]]; then
         tuning_file="${CONTAINER_CONFIG_DIR}/$TUNING_CONFIG"
         echo "🧪 Merging Tuning Profile: $TUNING_CONFIG"
     fi
     
-    if [ -n "$tuning_file" ]; then
+    if [[ -n "$tuning_file" ]]; then
         cp "$tuning_file" ./
         
         # Executing WITHOUT -m, and explicitly passing LLVM and ARCH 
@@ -151,7 +151,7 @@ BZ_PATH=$(find . -name bzImage | head -n1)
 echo "✅ Harper Kernel Build Complete."
 
 # Guarantee a completely sterile environment before patching or configuring
-if [ "$INCREMENTAL_BUILD" != "true" ]; then
+if [[ "$INCREMENTAL_BUILD" != "true" ]]; then
     echo "🧹 Scrubbing source tree to factory-fresh state..."
     make mrproper
 fi

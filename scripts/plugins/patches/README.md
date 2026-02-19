@@ -25,7 +25,7 @@ For user custom patches (recommended):
 apply_my_patch() {
     echo "💉 Applying my custom patch..."
     
-    if [ -n "$MY_PATCH_URL" ]; then
+    if [[ -n "$MY_PATCH_URL" ]]; then
         if curl -fLo my-patch.patch "$MY_PATCH_URL"; then
             if patch -p1 < my-patch.patch; then
                 echo "✅ Patch applied successfully!"

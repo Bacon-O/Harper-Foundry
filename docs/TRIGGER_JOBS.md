@@ -159,7 +159,7 @@ source ./scripts/plugins/triggers/runner.sh
 check_if_build_is_needed harper_deb13_kernel
 BUILD_NEEDED=$?
 
-if [ $BUILD_NEEDED -eq 0 ]; then
+if [[ $BUILD_NEEDED -eq 0 ]]; then
     echo "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
     
     # STEP 2: Execute build (optional - you implement this)
@@ -202,7 +202,7 @@ Each trigger plugin implements three functions that form the complete trigger li
 ```bash
 harper_deb13_kernel_trigger() {
     # Query API, compare versions
-    if [ new_version_found ]; then
+    if [[ new_version_found ]]; then
         export DETECTED_KERNEL_VERSION="6.12.5"
         export DETECTED_BUILD_REASON="new_version"
         return 0  # Build needed
@@ -271,9 +271,9 @@ The **detection** (Step 1-2) is handled by the plugin. The **build execution** (
 ### Option 1: Local Docker Build (Default)
 Execute immediately on the trigger machine:
 ```bash
-if [ $BUILD_NEEDED -eq 0 ]; then
+if [[ $BUILD_NEEDED -eq 0 ]]; then
     ./start_build.sh --params-file params/tinyconfig.params
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         build_successful harper_deb13_kernel
     else
         build_failed harper_deb13_kernel "build_exit_${?}"
@@ -288,7 +288,7 @@ Use the existing workflow for distributed execution:
 ```bash
 # In .github/workflows/monitor-deb13-kernel.yml
 check_if_build_is_needed harper_deb13_kernel
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     ./start_build.sh --params-file params/tinyconfig.params
     build_successful harper_deb13_kernel  # Plugin handles tracking
 fi
@@ -299,7 +299,7 @@ See `.github/workflows/monitor-deb13-kernel.yml` for current implementation.
 ### Option 3: Remote SSH Build
 Delegate to a build server:
 ```bash
-if [ $BUILD_NEEDED -eq 0 ]; then
+if [[ $BUILD_NEEDED -eq 0 ]]; then
     if ssh buildserver "cd /repo && ./start_build.sh ..."; then
         build_successful harper_deb13_kernel
     else
@@ -311,7 +311,7 @@ fi
 ### Option 4: Job Queue
 Enqueue for batch processing:
 ```bash
-if [ $BUILD_NEEDED -eq 0 ]; then
+if [[ $BUILD_NEEDED -eq 0 ]]; then
     queue build harper_deb13_kernel "$DETECTED_KERNEL_VERSION"
     # Later, when processing queue:
     # if build_succeeded; then
@@ -348,7 +348,7 @@ fedora_kernel_trigger() {
     source "$VERSION_TRACKING_FILE" 2>/dev/null || KERNEL_VERSION="unknown"
     
     # 3. Compare and decide
-    if [ "$latest_version" != "$KERNEL_VERSION" ] || [ "$force_build" = "true" ]; then
+    if [[ "$latest_version" != "$KERNEL_VERSION" ] || [ "$force_build" = "true" ]]; then
         export DETECTED_KERNEL_VERSION="$latest_version"
         export DETECTED_BUILD_REASON="new_version"
         return 0  # Build needed
@@ -385,7 +385,7 @@ source ./scripts/plugins/triggers/runner.sh
 # Test detection
 check_if_build_is_needed fedora_kernel
 
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     echo "Build needed: $DETECTED_KERNEL_VERSION"
 fi
 ```
@@ -393,7 +393,7 @@ fi
 3. **Integrate into automation:**
 ```bash
 # Add to cron_example.sh or GitHub Actions workflow
-if [ $BUILD_NEEDED -eq 0 ]; then
+if [[ $BUILD_NEEDED -eq 0 ]]; then
     ./start_build.sh --params-file params/fedora_profile.params
     build_successful fedora_kernel
 fi

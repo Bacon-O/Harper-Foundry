@@ -24,6 +24,17 @@ USE_PARAM_SCOPED_DIRS="true"
 FOUNDRY_UID=""
 FOUNDRY_GID=""
 
+# Prestart config
+PRE_BUILD_HOOKS=(
+    "mount_tpmfs.sh"
+)
+POST_BUILD_HOOKS=(
+    "umount_tpmfs.sh"
+    "sleep.sh"
+)
+
+TPMFS_MOUNT_POINT="/tmp/tpmfs"
+
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
@@ -33,18 +44,6 @@ INCREMENTAL_BUILD="false"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-
-# Artifact delivery is disabled for tinyconfig tests by default to avoid accidental uploads during quick testing.
-# ARTIFCAT_DELIVERY="true"
-# ARTIFCAT_COMMPRESSION=""
-# ARTIFCAT_DELIVERY_METHOD="sftp"
-# REMOTE_DELIVERY_HOST="127.0.0.1"
-# REMOTE_DELIVERY_USER="matthew"
-# REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
-# ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
-# LOCAL_DELIVERY_PATH=""
-
-
 ARTIFACT_DELIVERY="true"
 ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
 ARTIFACT_DELIVERY_METHOD="sftp"

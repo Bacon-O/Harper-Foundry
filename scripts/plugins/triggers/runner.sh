@@ -51,13 +51,13 @@ check_if_build_is_needed() {
     local trigger_type="${1:-}"
     shift || true
     
-    if [ -z "$trigger_type" ]; then
+    if [[-z "$trigger_type" ]]; then
         log_error "No trigger type specified"
         log_info "Usage: check_if_build_is_needed <trigger_type> [options...]"
         log_info ""
         log_info "Available trigger types:"
         for plugin in "$PLUGINS_DIR"/*.sh; do
-            if [ "$plugin" != "$PLUGINS_DIR/runner.sh" ]; then
+            if [["$plugin" != "$PLUGINS_DIR/runner.sh" ]]; then
                 local plugin_name
                 plugin_name=$(basename "$plugin" .sh)
                 log_info "  - $plugin_name"
@@ -68,7 +68,7 @@ check_if_build_is_needed() {
     
     local plugin_file="$PLUGINS_DIR/${trigger_type}.sh"
     
-    if [ ! -f "$plugin_file" ]; then
+    if [[! -f "$plugin_file" ]]; then
         log_error "Trigger plugin not found: $trigger_type"
         log_error "Expected: $plugin_file"
         return 1
@@ -111,7 +111,7 @@ build_successful() {
     local trigger_type="${1:-}"
     shift || true
     
-    if [ -z "$trigger_type" ]; then
+    if [[-z "$trigger_type" ]]; then
         log_error "No trigger type specified for build_successful callback"
         return 1
     fi
@@ -146,7 +146,7 @@ build_failed() {
     local trigger_type="${1:-}"
     shift || true
     
-    if [ -z "$trigger_type" ]; then
+    if [[-z "$trigger_type" ]]; then
         log_error "No trigger type specified for build_failed callback"
         return 1
     fi

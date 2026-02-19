@@ -11,12 +11,12 @@
 # scripts/scripts.d/plugins/env_extensions/
 
 # Example: Override Docker memory limit for larger builds
-if [ -z "$DOCKER_MEMORY_LIMIT" ]; then
+if [[ -z "$DOCKER_MEMORY_LIMIT" ]]; then
     export DOCKER_MEMORY_LIMIT="8g"
 fi
 
 # Example: Set custom CPU limits
-if [ -z "$DOCKER_CPU_LIMIT" ]; then
+if [[ -z "$DOCKER_CPU_LIMIT" ]]; then
     export DOCKER_CPU_LIMIT="16"
 fi
 

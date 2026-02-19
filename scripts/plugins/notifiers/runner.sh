@@ -50,23 +50,23 @@ notify() {
     local tool_name="${1:-}"
     shift || true
     
-    if [ -z "$tool_name" ]; then
+    if [[ -z "$tool_name" ]]; then
         log_error "No notifier name specified"
         log_info "Usage: notify <notifier_name> [options...]"
         log_info ""
         log_info "Available notifiers:"
         # Show project notifiers
         for plugin in "$PLUGINS_DIR"/*.sh; do
-            if [ "$plugin" != "$PLUGINS_DIR/runner.sh" ]; then
+            if [[ "$plugin" != "$PLUGINS_DIR/runner.sh" ]]; then
                 local plugin_name
                 plugin_name=$(basename "$plugin" .sh)
                 log_info "  - $plugin_name"
             fi
         done
         # Show custom notifiers
-        if [ -d "${REPO_ROOT}/scripts/scripts.d/plugins/notifiers" ]; then
+        if [[ -d "${REPO_ROOT}/scripts/scripts.d/plugins/notifiers" ]]; then
             for plugin in "${REPO_ROOT}/scripts/scripts.d/plugins/notifiers"/*.sh; do
-                if [ -f "$plugin" ]; then
+                if [[ -f "$plugin" ]]; then
                     local plugin_name
                     plugin_name=$(basename "$plugin" .sh)
                     log_info "  - $plugin_name (custom)"
@@ -78,13 +78,13 @@ notify() {
     
     # Check custom plugins first (scripts.d/plugins/notifiers/) - takes precedence
     local custom_plugin="${REPO_ROOT}/scripts/scripts.d/plugins/notifiers/${tool_name}.sh"
-    if [ -f "$custom_plugin" ]; then
+    if [[ -f "$custom_plugin" ]]; then
         log_info "Loading custom notifier: $tool_name"
         plugin_file="$custom_plugin"
     else
         # Fall back to official plugins
         local plugin_file="$PLUGINS_DIR/${tool_name}.sh"
-        if [ ! -f "$plugin_file" ]; then
+        if [[ ! -f "$plugin_file" ]]; then
             log_error "Notifier plugin not found: $tool_name"
             log_error "Searched:"
             log_error "  - $custom_plugin"

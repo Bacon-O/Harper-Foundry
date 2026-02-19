@@ -16,28 +16,16 @@ fi
 echo "🔍 Checking Input Materials..."
 
 # TUNING_CONFIG is optional - only validate if set
-if [ -n "$TUNING_CONFIG" ]; then
-    # Check custom configs first, then official
-    TUNING_PATH=""
-    if [ -f "${REPO_ROOT}/configs/configs.d/$TUNING_CONFIG" ]; then
-        TUNING_PATH="${REPO_ROOT}/configs/configs.d/$TUNING_CONFIG"
-    elif [ -f "${REPO_ROOT}/configs/$TUNING_CONFIG" ]; then
-        TUNING_PATH="${REPO_ROOT}/configs/$TUNING_CONFIG"
-    else
+if [[ -n "$TUNING_CONFIG" ]]; then
+    if [[ ! -f "${REPO_ROOT}/configs/configs.d/$TUNING_CONFIG" ]] && [[ ! -f "${REPO_ROOT}/configs/$TUNING_CONFIG" ]]; then
         echo "❌ ERROR: Missing Charge Material: $TUNING_CONFIG (not found in configs/ or configs.d/)"
         exit 1
     fi
 fi
 
-if [[ "$BASE_CONFIG" != "defconfig" && "$BASE_CONFIG" != "tinyconfig" ]]; then
-    # Check custom configs first, then official
-    BASE_PATH=""
-    if [ -f "${REPO_ROOT}/configs/configs.d/$BASE_CONFIG" ]; then
-        BASE_PATH="${REPO_ROOT}/configs/configs.d/$BASE_CONFIG"
-    elif [ -f "${REPO_ROOT}/configs/$BASE_CONFIG" ]; then
-        BASE_PATH="${REPO_ROOT}/configs/$BASE_CONFIG"
-    else
-        echo "❌ ERROR: Missing Base Material: $BASE_CONFIG (not found in configs/ or configs.d/)"
+if [[ ! "$BASE_CONFIG" == "defconfig" && ! "$BASE_CONFIG" == "tinyconfig" ]]; then
+    if [[ ! -f "${REPO_ROOT}/configs/configs.d/$BASE_CONFIG" ]] && [[ ! -f "${REPO_ROOT}/configs/$BASE_CONFIG" ]]; then
+        echo "❌ ERROR: Missing Charge Material: $BASE_CONFIG (not found in configs/ or configs.d/)"
         exit 1
     fi
 fi

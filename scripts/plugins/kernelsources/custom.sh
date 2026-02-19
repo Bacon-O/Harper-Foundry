@@ -17,11 +17,11 @@
 #    #!/bin/bash
 #    source /opt/factory/scripts/plugins/kernelsources/runner.sh
 #    
-#    if [ "$KERNEL_SOURCE" == "custom" ]; then
+#    if [[ "$KERNEL_SOURCE" == "custom" ]]; then
 #        # Your custom logic here
 #        git clone https://my-kernel-repo.com/kernel.git $BUILD_ROOT/kernel
 #        cd $BUILD_ROOT/kernel
-#    elif [ "$KERNEL_SOURCE" == "custom-tarball" ]; then
+#    elif [[ "$KERNEL_SOURCE" == "custom-tarball" ]]; then
 #        wget https://my-server.com/kernel-custom.tar.xz
 #        tar xf kernel-custom.tar.xz
 #        cd kernel-custom

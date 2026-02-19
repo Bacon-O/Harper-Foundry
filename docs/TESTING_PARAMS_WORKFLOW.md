@@ -67,7 +67,7 @@ PRODUCTION_CONFIG="tinyconfig.params" ./start_build.sh -p params/_test_overrides
 # params/_test_overrides.params
 #!/bin/bash
 # ⚠️  Requires PRODUCTION_CONFIG environment variable
-if [ -z "$PRODUCTION_CONFIG" ]; then
+if [[ -z "$PRODUCTION_CONFIG" ]]; then
     echo "❌ Error: PRODUCTION_CONFIG environment variable not set"
     exit 1
 fi

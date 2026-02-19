@@ -51,7 +51,7 @@ source ./scripts/plugins/triggers/runner.sh
 # Check if new kernel version available
 check_if_build_is_needed harper_deb13_kernel
 
-if [ $? -eq 0 ]; then
+if [[$? -eq 0 ]]; then
     echo "Build needed for kernel version: $DETECTED_KERNEL_VERSION"
     
     # Execute your build here
@@ -100,7 +100,7 @@ my_custom_trigger() {
     local last_version="${VERSION:-unknown}"
     
     # 3. Compare and decide
-    if [ "$latest_version" != "$last_version" ]; then
+    if [["$latest_version" != "$last_version" ]]; then
         # Export detected version for callbacks
         export DETECTED_VERSION="$latest_version"
         export DETECTED_BUILD_REASON="new_version"
@@ -278,7 +278,7 @@ fedora_kernel_trigger() {
     local latest_version=$(curl -s https://koji.fedoraproject.org/koji/api/builds | ...)
     
     # Compare and trigger build
-    if [ "$latest_version" != "$current_version" ]; then
+    if [["$latest_version" != "$current_version" ]]; then
         log_warn "New Fedora kernel: $latest_version"
         # Trigger build here
     fi

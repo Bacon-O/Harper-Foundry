@@ -63,7 +63,7 @@ BUILD_ROOT="${2:-.}"
 mkdir -p "$BUILD_ROOT"
 cd "$BUILD_ROOT"
 
-if [ -z "$VERSION_CONSTRAINT" ]; then
+if [[ -z "$VERSION_CONSTRAINT" ]]; then
     echo "[INFO] Fetching latest available Trixie Backports kernel source..." >&2
 else
     echo "[INFO] Fetching Trixie Backports kernel source matching: $VERSION_CONSTRAINT" >&2
@@ -85,7 +85,7 @@ fi
 
 # Ensure package indices are up-to-date
 echo "[INFO] Updating package indices..." >&2
-if [ "$(id -u)" -ne 0 ]; then
+if [[ "$(id -u)" -ne 0 ]]; then
     if command -v sudo &>/dev/null; then
         sudo -n apt-get update 2>&1 | grep -E "(Reading|Building)" >&2 || true
     else
@@ -109,7 +109,7 @@ fi
 # Find the extracted directory (apt-get source creates linux-* directory)
 KERNEL_DIR=$(find . -maxdepth 1 -type d -name "linux-*" | head -1)
 
-if [ -z "$KERNEL_DIR" ] || [ ! -d "$KERNEL_DIR" ]; then
+if [[ -z "$KERNEL_DIR" ]] || [[ ! -d "$KERNEL_DIR" ]]; then
     echo "[ERROR] Kernel source extraction failed: no linux-* directory found" >&2
     exit 1
 fi

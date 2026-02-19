@@ -70,7 +70,7 @@ harper_checkmk_check() {
     # STEP 1: Check if version tracking file exists
     # ==========================================================================
     
-    if [ ! -f "$version_file" ]; then
+    if [[ ! -f "$version_file" ]]; then
         echo "3 Harper_Build_${profile} - UNKNOWN: Version tracking file not found at $version_file"
         return 3
     fi
@@ -96,7 +96,7 @@ harper_checkmk_check() {
     local last_notified_status=""
     local last_notified_priority=""
     
-    if [ -f "$notify_state_file" ]; then
+    if [[ -f "$notify_state_file" ]]; then
         # shellcheck disable=SC1090
         source "$notify_state_file"
         last_notified_version="${NOTIFIED_VERSION:-}"
@@ -114,35 +114,35 @@ harper_checkmk_check() {
     local should_update_state=false
     
     # CRITICAL: Build failed completely
-    if [ "$build_status" = "failed" ]; then
+    if [[ "$build_status" = "failed" ]]; then
         status=2
         status_text="CRITICAL"
         message="Build FAILED for kernel $kernel_version (date: $build_date)"
         
         # Always notify on failures (don't check notification state)
-        if [ "$last_notified_version" != "$kernel_version" ] || [ "$last_notified_status" != "failed" ]; then
+        if [[ "$last_notified_version" != "$kernel_version" ] || [ "$last_notified_status" != "failed" ]]; then
             should_update_state=true
         fi
     
     # OK: Build succeeded
-    elif [ "$build_status" = "success" ]; then
+    elif [[ "$build_status" = "success" ]]; then
         status=0
         status_text="OK"
         message="Build successful (kernel $kernel_version, date: $build_date)"
         
         # Notify only if this is a NEW version (don't spam on re-checks)
-        if [ "$last_notified_version" != "$kernel_version" ]; then
+        if [[ "$last_notified_version" != "$kernel_version" ]]; then
             should_update_state=true
         fi
     
     # OK: Build succeeded (priority not set or other)
-    elif [ "$build_status" = "success" ]; then
+    elif [[ "$build_status" = "success" ]]; then
         status=0
         status_text="OK"
         message="Build successful (kernel $kernel_version, priority: $sched_priority, date: $build_date)"
         
         # Notify only on new version
-        if [ "$last_notified_version" != "$kernel_version" ]; then
+        if [[ "$last_notified_version" != "$kernel_version" ]]; then
             should_update_state=true
         fi
     
@@ -157,7 +157,7 @@ harper_checkmk_check() {
     # STEP 5: Update notification state if needed
     # ==========================================================================
     
-    if [ "$should_update_state" = true ]; then
+    if [[ "$should_update_state" = true ]]; then
         cat > "$notify_state_file" << EOF
 NOTIFIED_VERSION=$kernel_version
 NOTIFIED_STATUS=$build_status

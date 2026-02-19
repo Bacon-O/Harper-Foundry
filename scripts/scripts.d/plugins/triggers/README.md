@@ -50,7 +50,7 @@ trigger_init() {
 
 trigger_handler() {
     while true; do
-        if [ -f "$WATCH_FILE" ]; then
+        if [[-f "$WATCH_FILE" ]]; then
             echo "Build triggered by file change"
             ./start_build.sh
             rm "$WATCH_FILE"
@@ -72,7 +72,7 @@ trigger_handler() {
     LATEST_VERSION=$(curl -s https://www.kernel.org/releases.json | jq -r '.[0].version')
     CURRENT_VERSION=$(grep "^KERNEL_VERSION=" params/foundry_template.params)
     
-    if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
+    if [["$LATEST_VERSION" != "$CURRENT_VERSION" ]]; then
         echo "New kernel $LATEST_VERSION released - triggering build"
         sed -i "s/^KERNEL_VERSION=.*/KERNEL_VERSION=$LATEST_VERSION/" params/foundry_template.params
         ./start_build.sh

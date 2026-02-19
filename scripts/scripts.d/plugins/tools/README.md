@@ -75,7 +75,7 @@ mytool_function
 ### From Build Scripts
 
 ```bash
-if [ -f scripts/scripts.d/plugins/tools/mytool.sh ]; then
+if [[-f scripts/scripts.d/plugins/tools/mytool.sh ]]; then
     source scripts/scripts.d/plugins/tools/mytool.sh
     mytool_setup
 fi

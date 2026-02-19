@@ -524,7 +524,7 @@ smelt:
 #!/bin/bash
 # ⚠️  REQUIRED: PRODUCTION_CONFIG environment variable must be set
 # _test_overrides.params will error if PRODUCTION_CONFIG is not provided
-if [ -z "$PRODUCTION_CONFIG" ]; then
+if [[ -z "$PRODUCTION_CONFIG" ]]; then
     echo "❌ Error: PRODUCTION_CONFIG environment variable not set"
     exit 1
 fi

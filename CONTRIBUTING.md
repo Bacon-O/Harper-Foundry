@@ -146,7 +146,7 @@ set -e
 validate_config() {
     local config_file="$1"
     
-    if [ ! -f "$config_file" ]; then
+    if [[ ! -f "$config_file" ]]; then
         echo "❌ ERROR: Config file not found: $config_file"
         return 1
     fi
