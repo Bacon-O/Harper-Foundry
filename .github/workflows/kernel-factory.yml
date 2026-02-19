@@ -94,7 +94,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
           ARGS: ${{ steps.set-args.outputs.args }}
         run: |
-          bash ./scripts/pre_build_hooks.sh "$ARGS"
+          bash ./scripts/pre_build_hooks.sh $ARGS
       - name: Charge Audit
         env:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
