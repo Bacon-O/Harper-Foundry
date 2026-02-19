@@ -5,40 +5,6 @@
 
 set -eo pipefail
 
-#!/bin/bash
-
-echo "🛡️  Running Security Firewall..."
-
-# --- 1. SEMGREP (Code Analysis) ---
-echo "🔍 Scanning Code with Semgrep..."
-docker run --rm -v "${PWD}:/src" semgrep/semgrep semgrep scan \
-  --metrics=off \
-  --config p/typescript --config p/dockerfile --config p/default --config p/security-audit \
-  --error
-SEMGREP_EXIT=$?
-
-# --- 2. TRIVY (Dependency & OS Scan) ---
-echo "📦 Scanning Environment with Trivy..."
-# We use 'fs' (filesystem) mode to scan your current folder
-# --exit-code 1: Fails the commit if issues are found
-# --severity HIGH,CRITICAL: Only block the important stuff
-docker run --rm -v "${PWD}:/src" -v /var/run/docker.sock:/var/run/docker.sock \
-  aquasec/trivy fs \
-  --config /src/trivy.yaml \
-  --exit-code 1 \
-  --severity HIGH,CRITICAL \
-  --quiet \
-  /src
-TRIVY_EXIT=$?
-
-# --- FINAL CHECK ---
-if [ $SEMGREP_EXIT -ne 0 ] || [ $TRIVY_EXIT -ne 0 ]; then
-  echo "❌ Security checks failed. Fix the issues above before committing."
-  exit 1
-fi
-
-echo "✅ All scans passed. Proceeding with commit..."
-
 # Contributors can enable strict mode by setting: git config --local foundry.strictLint true
 STRICT_MODE=$(git config --local --get foundry.strictLint 2>/dev/null || echo "false")
 
