@@ -144,7 +144,7 @@ jobs:
           bash ./scripts/artifact_export.sh $ARGS
           
   cleanup:
-    needs: [preheat, analysis]
+    needs: [preheat, analysis, smelt, delivery]
     if: always() 
     runs-on: self-hosted
     steps:
