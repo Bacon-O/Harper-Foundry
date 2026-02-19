@@ -6,25 +6,206 @@
 # errors before running a build.
 
 set -e
-source "$(dirname "$0")/env_setup.sh" "$@"
+
+genereate_foundry_params() {
+    cat <<EOF > "../params/foundry_template_02.params"
+# ==============================================================================
+# HARPER FOUNDRY: BLUEPRINT CONFIGURATION - TEMPLATE
+# ==============================================================================
+# ⚠️  THIS IS A TEMPLATE! DO NOT USE DIRECTLY!
+#
+# This file intentionally has INCOMPLETE/INVALID configuration to prevent
+# accidental use. Copy and customize this file to create your own build config.
+#
+# Example:
+#   cp params/foundry_template.params params/my_custom_build.params
+#   # Edit params/my_custom_build.params with your settings
+#   ./start_build.sh -p params/my_custom_build.params
+#
+# ==============================================================================
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# These parameters are essential for the build system to function.
+# Incorrect values will likely prevent the build from starting or completing.
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where kernel compilation occurs (can be on fast storage)
+#                      Mounted as /build inside the container
+# HOST_OUTPUT_DIR:     Where build artifacts are stored (each build creates build_<timestamp>)
+# USE_PARAM_SCOPED_DIRS: When true, repo-relative defaults are scoped per params name
+# 
+# Note: REPO_ROOT is auto-detected - no configuration needed
+#
+# ⚠️  REQUIRED: Set these to your actual paths!
+BUILD_WORKSPACE_DIR=""
+HOST_OUTPUT_DIR=""
+
+# When true, repo-relative defaults based on params file name
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
+# When false aboslute outpaths are respected 
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/
+USE_PARAM_SCOPED_DIRS="true"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Execution ---
+# The script within the container that Docker will execute.
+FOUNDRY_EXEC=""
+INCREMENTAL_BUILD="false"
+
+# --- Foundry artifact export configuration ---
+# If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
+# Right now SFTP and RSYNC are supported as delivery methods.
+# Both require previous configuration
+ARTIFCAT_DELIVERY="false"
+ARTIFCAT_COMMPRESSION=""
+ARTIFCAT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
+# --- Foundry Image Configuration ---
+# ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
+DOCKERFILE_PATH=""
+CONTAINER_IMAGE_NAME=""
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# These parameters define the specific kernel to be built.
+# ==============================================================================
+
+# --- Versioning & Tagging ---
+BUILD_ARCH_TAG=""
+RELEASE_TAG=""
+
+# --- Target Specifications ---
+# ⚠️  REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
+TARGET_ARCH=""
+
+KERNEL_CFLAGS=""
+CROSS_COMPILE_PREFIX=""
+DEBIAN_PACKAGE_NAME=""
+
+# --- Kernel Source Strategy (Plugin-based) ---
+# The kernel source plugin system maps KERNEL_SOURCE to specific fetching methods.
+# Supported values:
+#   - "kernel.org"  : Official vanilla upstream sources (fast, no Debian patches)
+#   - "debian"      : Debian apt-get source (includes Debian customizations)
+#   - "debian/trixie-backports" : Debian Trixie Backports (newer kernels with Debian patches)
+#   - "custom"      : Skip auto-fetch; implement your own logic in ci-build
+#   - "none"        : Skip auto-fetch; implement your own logic in ci-build
+# See: scripts/plugins/kernelsources/README.md
+KERNEL_SOURCE=""
+# KERNEL_VERSION supports semantic aliases (source-aware interpretation):
+#   - "" (empty) or omitted: Uses source defaults (kernel.org → 6.11.8, debian → latest, etc.)
+#   - "latest": Latest stable/available from source
+#   - "stable": Latest stable (same as latest for most sources)
+#   - "lts": Latest LTS kernel if available from source
+#   - "rc": Release candidates if available
+#   - Specific version: "6.11.8", "6.10.5", etc. (pins to exact version when available)
+# Examples:
+#   KERNEL_VERSION=""                  # Uses source defaults
+#   KERNEL_VERSION="latest"            # Always get newest available
+#   KERNEL_VERSION="lts"               # Get LTS variant
+#   KERNEL_VERSION="6.11.8"            # Pin to specific version
+KERNEL_VERSION=""
+
+DEB_HOST_ARCH=""
+HOST_QEMU_STATIC=""
+
+BUILD_DEB_BUILD_ARCH=""
+BUILD_DEB_TARGET_ARCH=""
+BUILD_CC=""
+BUILD_HOSTLD=""
+BUILD_HOSTCFLAGS=""
+BUILD_HOSTLDFLAGS=""
+BUILD_LLVM="1"
+
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# These parameters control the build process and specific kernel features.
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
+PARALLEL_JOBS=""
+
+# --- Build Strategy ---
+# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+BASE_CONFIG=""
+TUNING_CONFIG=""
+
+# Note: KERNEL_VERSION is used by kernel source plugins to determine which kernel
+# version to fetch. It's optional - see KERNEL_VERSION documentation above.
+
+# --- Scheduler Patch ---
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# These parameters control post-build validation and testing.
+# ==============================================================================
+
+# --- QA Flags ---
+BYPASS_QA="false"
+ENABLE_QEMU_TESTS="false"
+QA_MODE="RELAXED"
+
+QA_TESTS=(
+)
+
+QA_TEST_PACKAGE=(
+)
+
+# --- Chemical Audit: Critical (Must Pass) ---
+QA_CRITICAL_CHECKS=( 
+)
+
+# --- Chemical Audit: Optional (Warn Only) ---
+QA_OPTIONAL_CHECKS=(
+)
+
+# --- VM Proving Ground Specs (for QEMU testing) ---
+QA_VM_MEMORY="1G"
+QA_VM_CORES="4"
+QA_VM_TIMEOUT="30s"
+
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()
+# ==============================================================================
+EOF
+}
+
+genereate_foundry_params
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
+PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry_template.params}"
 
 echo "🔍 Validating Foundry Parameters..."
 echo "📄 File: $PARAMS_FILE"
 echo ""
 
-# if [ ! -f "$PARAMS_FILE" ]; then
-#     echo "❌ ERROR: Params file not found: $PARAMS_FILE"
-#     exit 1
-# fi
+if [ ! -f "$PARAMS_FILE" ]; then
+    echo "❌ ERROR: Params file not found: $PARAMS_FILE"
+    exit 1
+fi
 
 # Load the params file
-# set -a
-# # shellcheck source=/dev/null
-# source "$PARAMS_FILE"
-# set +a
+set -a
+# shellcheck source=/dev/null
+source "$PARAMS_FILE"
+set +a
 
 ERRORS=0
 WARNINGS=0
