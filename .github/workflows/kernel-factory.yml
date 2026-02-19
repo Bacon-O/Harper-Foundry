@@ -100,7 +100,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
           ARGS: ${{ steps.set-args.outputs.args }}
         run: |
-          bash ./scripts/validate.sh "$ARGS"
+          bash ./scripts/validate.sh $ARGS
 
   smelt:
     needs: preheat
@@ -113,7 +113,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/launch.sh "$ARGS"
+          bash ./scripts/launch.sh $ARGS
 
   analysis:
     needs: [preheat, smelt]
@@ -127,7 +127,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/material_analysis.sh "$ARGS"
+          bash ./scripts/material_analysis.sh $ARGS
 
   delivery:
     needs: [preheat, smelt, analysis]
@@ -141,7 +141,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/artifact_export.sh "$ARGS"
+          bash ./scripts/artifact_export.sh $ARGS
           
   cleanup:
     needs: [preheat, analysis]
@@ -155,10 +155,10 @@ jobs:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/clean.sh "$ARGS"
+          bash ./scripts/clean.sh $ARGS
       - name: Post Hooks Configure
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/post_build_hooks.sh "$ARGS"
+          bash ./scripts/post_build_hooks.sh $ARGS
