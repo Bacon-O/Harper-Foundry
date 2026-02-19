@@ -23,7 +23,7 @@ on:
         default: 'none'
         options:
           - 'none'
-          - 'testing.params (test output dir)'
+          - 'testing.params'
 
 jobs:
   # lint:
