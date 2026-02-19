@@ -19,9 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PARAMS_FILE="${1}"
 
-if [[ $PARAMS_FILE == "-p" ]] || [[ $PARAMS_FILE == "--params" ]]; then
-    PARAMS_FILE="${2}"
-fi
+source ./scripts/env_setup.sh "${BUILD_ARGS[@]}"
 
 export REPO_ROOT
 echo "🔍 Validating Foundry Parameters..."

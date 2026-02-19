@@ -361,6 +361,7 @@ fi
 
 # 2. Preheat (normal build mode)
 echo "🌡️  Phase 1: Validating prerequisites..."
+echo "${BUILD_ARGS[@]}"
 _command=("./scripts/validate_params.sh" "${BUILD_ARGS[@]}")
 if ! "${_command[@]}"; then
     echo "❌ Validation failed. Cannot proceed with build."
