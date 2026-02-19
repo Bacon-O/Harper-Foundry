@@ -75,15 +75,15 @@ jobs:
           echo "   Override: $OVERRIDE_PARAMS"
           
           # Check if override mode is selected
-          if [[ "$OVERRIDE_PARAMS" != "none" ]] && [[ "$OVERRIDE_PARAMS" == "*.params" ]]; then
+          if [[ "$OVERRIDE_PARAMS" != "none" ]]; then
             # Use _test_overrides.params with PRODUCTION_CONFIG env var
             BASE_FILE="params/$BASE_PARAMS"
-            OVERRIDE_FILE=="params/$OVERRIDE_PARAMS"
+            OVERRIDE_FILE="params/$OVERRIDE_PARAMS"
             echo "🧪 Applying testing overrides to $BASE_PARAMS"
             echo "args=--params-file $BASE_FILE --override-file $OVERRIDE_FILE" >> $GITHUB_OUTPUT
           else
             # Use base params directly (no override)
-            FILE="params/$BASE_PARAMS"
+            BASE_FILE="params/$BASE_PARAMS"
             echo "📦 Using $BASE_PARAMS directly (no overrides)"
             echo "args=--params-file $BASE_FILE" >> $GITHUB_OUTPUT
           fi
