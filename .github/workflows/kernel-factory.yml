@@ -89,7 +89,12 @@ jobs:
           fi
           
           echo "🚀 Selected Blueprint: $BASE_FILE"
-      
+      - name: Pre Hooks Configure
+        env:
+          PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
+          ARGS: ${{ steps.set-args.outputs.args }}
+        run: |
+          bash ./scripts/pre_hooks.sh "$ARGS"
       - name: Charge Audit
         env:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
@@ -151,3 +156,9 @@ jobs:
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
           bash ./scripts/clean.sh "$ARGS"
+      - name: Post Hooks Configure
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/post_hooks.sh "$ARGS"
