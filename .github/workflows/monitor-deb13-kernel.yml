@@ -29,12 +29,12 @@ jobs:
           command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
       
       - name: Run kernel release trigger
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+          WORKSPACE_PATH: ${{ github.workspace }}
         run: |
-          cd ${{ github.workspace }}
-          
-          # Run the trigger orchestrator (handles detection, build, and callbacks)
-          if [ "${{ github.event.inputs.force_build }}" = "true" ]; then
-            # Force build even if version hasn't changed
+          cd "$WORKSPACE_PATH"
+          if [ "$FORCE_BUILD_INPUT" = "true" ]; then
             export FORCE_BUILD="true"
           fi
           
@@ -60,13 +60,11 @@ jobs:
           else
             echo "ℹ️  No new kernel version available"
           fi
-        env:
-          REPO_ROOT: ${{ github.workspace }}
       
       - name: Commit updated version tracking (if changed)
         if: success()
         run: |
-          cd ${{ github.workspace }}
+          cd "$WORKSPACE_PATH"
           
           # Check if version tracking file was updated by build_successful callback
           if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
