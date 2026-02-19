@@ -145,8 +145,8 @@ find "$CONTAINER_BUILD_ROOT" -maxdepth 2 -name "*.buildinfo" -exec mv -t "$CONTA
 
 
 BZ_PATH=$(find . -name bzImage | head -n1)
-[ -f "$BZ_PATH" ] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
-[ -f .config ] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
+[[ -f "$BZ_PATH" ]] && cp "$BZ_PATH" "$CONTAINER_OUTPUT_DIR/bzImage"
+[[ -f .config ]] && cp .config "$CONTAINER_OUTPUT_DIR/kernel.config"
 
 echo "✅ Harper Kernel Build Complete."
 

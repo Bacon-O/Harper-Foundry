@@ -120,7 +120,7 @@ harper_checkmk_check() {
         message="Build FAILED for kernel $kernel_version (date: $build_date)"
         
         # Always notify on failures (don't check notification state)
-        if [[ "$last_notified_version" != "$kernel_version" ] || [ "$last_notified_status" != "failed" ]]; then
+        if [[ "$last_notified_version" != "$kernel_version" ]] || [[ "$last_notified_status" != "failed" ]]; then
             should_update_state=true
         fi
     

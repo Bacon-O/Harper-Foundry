@@ -64,7 +64,7 @@ log_to_file "=== Starting Harper Trigger Cron Job ==="
 # STEP 1: Source the Trigger Plugin Runner
 # ==============================================================================
 
-if [[! -f "$REPO_ROOT/scripts/plugins/triggers/runner.sh" ]]; then
+if [[ ! -f "$REPO_ROOT/scripts/plugins/triggers/runner.sh" ]]; then
     log_to_file "ERROR: Trigger runner not found at $REPO_ROOT/scripts/plugins/triggers/runner.sh"
     exit 1
 fi

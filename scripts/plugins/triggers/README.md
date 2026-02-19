@@ -100,7 +100,7 @@ my_custom_trigger() {
     local last_version="${VERSION:-unknown}"
     
     # 3. Compare and decide
-    if [["$latest_version" != "$last_version" ]]; then
+    if [[ "$latest_version" != "$last_version" ]]; then
         # Export detected version for callbacks
         export DETECTED_VERSION="$latest_version"
         export DETECTED_BUILD_REASON="new_version"
@@ -278,7 +278,7 @@ fedora_kernel_trigger() {
     local latest_version=$(curl -s https://koji.fedoraproject.org/koji/api/builds | ...)
     
     # Compare and trigger build
-    if [["$latest_version" != "$current_version" ]]; then
+    if [[ "$latest_version" != "$current_version" ]]; then
         log_warn "New Fedora kernel: $latest_version"
         # Trigger build here
     fi

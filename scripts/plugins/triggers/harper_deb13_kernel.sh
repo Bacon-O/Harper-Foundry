@@ -88,7 +88,7 @@ harper_deb13_kernel_trigger() {
         return 1
     fi
     
-    if [[! -f "$VERSION_TRACKING_FILE" ]]; then
+    if [[ ! -f "$VERSION_TRACKING_FILE" ]]; then
         log_warn "Version tracking file not found at $VERSION_TRACKING_FILE"
         log_info "Initializing version tracking..."
         mkdir -p "$(dirname "$VERSION_TRACKING_FILE")"
@@ -110,7 +110,7 @@ EOF
     local api_response
     api_response=$(curl -s "$DEBIAN_SALSA_API" || echo "")
     
-    if [[-z "$api_response" ]]; then
+    if [[ -z "$api_response" ]]; then
         log_error "Failed to fetch from Debian Salsa API"
         return 1
     fi
@@ -150,11 +150,11 @@ EOF
     local build_needed=false
     local build_reason=""
     
-    if [["$force_build" = true ]]; then
+    if [[ "$force_build" = true ]]; then
         log_warn "FORCE BUILD requested via --force flag"
         build_needed=true
         build_reason="forced"
-    elif [["$latest_upstream_version" != "$last_compiled_version" ]]; then
+    elif [[ "$latest_upstream_version" != "$last_compiled_version" ]]; then
         log_warn "New version detected: $latest_upstream_version (previously: $last_compiled_version)"
         log_info "Triggering build for new kernel version"
         build_needed=true
@@ -172,7 +172,7 @@ EOF
     # This plugin ONLY detects if a build is needed - it does NOT execute builds
     # The caller (e.g., cron_example.sh) decides what to do based on exit code
     
-    if [["$build_needed" = true ]]; then
+    if [[ "$build_needed" = true ]]; then
         log_warn "Build needed for kernel $latest_upstream_version (reason: $build_reason)"
         log_info "Returning exit code 0 to indicate build is needed"
         
@@ -205,7 +205,7 @@ EOF
 harper_deb13_kernel_build_successful() {
     log_info "=== Build Success Callback ==="
     
-    if [[-z "${DETECTED_KERNEL_VERSION:-}" ]]; then
+    if [[ -z "${DETECTED_KERNEL_VERSION:-}" ]]; then
         log_error "DETECTED_KERNEL_VERSION not set. Did you run the trigger check first?"
         return 1
     fi
