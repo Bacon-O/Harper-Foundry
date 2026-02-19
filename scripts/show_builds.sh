@@ -9,7 +9,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry_template.params}"
 
 # Load configuration
-if [ -f "$PARAMS_FILE" ]; then
+if [[ -f "$PARAMS_FILE" ]]; then
     set -a
     # shellcheck source=/dev/null
     source "$PARAMS_FILE"
@@ -25,7 +25,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Check if output directory exists
-if [ ! -d "$HOST_OUTPUT_DIR" ]; then
+if [[ ! -d "$HOST_OUTPUT_DIR" ]]; then
     echo "📂 Output directory not found: $HOST_OUTPUT_DIR"
     echo "   No builds have been completed yet."
     exit 0
@@ -34,7 +34,7 @@ fi
 # Find all build directories
 mapfile -t BUILD_DIRS < <(find "$HOST_OUTPUT_DIR" -maxdepth 1 -type d -name "build_*" | sort -r)
 
-if [ ${#BUILD_DIRS[@]} -eq 0 ]; then
+if [[ ${#BUILD_DIRS[@]} -eq 0 ]]; then
     echo "📂 Output directory: $HOST_OUTPUT_DIR"
     echo "   No builds found."
     exit 0
@@ -57,7 +57,7 @@ for build_dir in "${BUILD_DIRS[@]}"; do
     # Count artifacts
     deb_count=$(find "$build_dir" -maxdepth 1 -name "*.deb" 2>/dev/null | wc -l)
     
-    if [ "$deb_count" -eq 0 ]; then
+    if [[ "$deb_count" -eq 0 ]]; then
         echo "   ⚠️  No .deb packages found (build may have failed)"
     else
         echo "   ✅ Debian packages: $deb_count"
@@ -71,12 +71,12 @@ for build_dir in "${BUILD_DIRS[@]}"; do
     fi
     
     # Check for kernel artifacts
-    if [ -f "$build_dir/bzImage" ]; then
+    if [[ -f "$build_dir/bzImage" ]]; then
         bzimage_size=$(du -h "$build_dir/bzImage" | cut -f1)
         echo "   ✅ Kernel image: bzImage ($bzimage_size)"
     fi
     
-    if [ -f "$build_dir/kernel.config" ]; then
+    if [[ -f "$build_dir/kernel.config" ]]; then
         config_size=$(du -h "$build_dir/kernel.config" | cut -f1)
         echo "   ✅ Kernel config: kernel.config ($config_size)"
     fi

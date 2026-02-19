@@ -16,7 +16,7 @@ WARNINGS=0
 # --- Bash Version Check ---
 echo "🐚 Checking Bash version..."
 BASH_VERSION_MAJOR="${BASH_VERSINFO[0]}"
-if [ "$BASH_VERSION_MAJOR" -ge 4 ]; then
+if [[ "$BASH_VERSION_MAJOR" -ge 4 ]]; then
     echo "  ✅ Bash $BASH_VERSION (>= 4.0 required)"
 else
     echo "  ❌ Bash $BASH_VERSION is too old (4.0+ required)"
@@ -54,7 +54,7 @@ fi
 echo ""
 echo "💾 Checking disk space..."
 AVAILABLE_GB=$(df -BG . | tail -1 | awk '{print $4}' | tr -d 'G')
-if [ "$AVAILABLE_GB" -ge 20 ]; then
+if [[ "$AVAILABLE_GB" -ge 20 ]]; then
     echo "  ✅ Available space: ${AVAILABLE_GB}GB (20GB+ recommended)"
 else
     echo "  ⚠️  WARNING: Only ${AVAILABLE_GB}GB available (20GB+ recommended)"
@@ -66,7 +66,7 @@ echo ""
 echo "🧠 Checking system memory..."
 TOTAL_MEM_MB=$(free -m | awk '/^Mem:/{print $2}')
 TOTAL_MEM_GB=$((TOTAL_MEM_MB / 1024))
-if [ "$TOTAL_MEM_GB" -ge 4 ]; then
+if [[ "$TOTAL_MEM_GB" -ge 4 ]]; then
     echo "  ✅ System RAM: ${TOTAL_MEM_GB}GB (4GB+ recommended)"
 else
     echo "  ⚠️  WARNING: Only ${TOTAL_MEM_GB}GB RAM (4GB+ recommended)"
@@ -79,7 +79,7 @@ echo ""
 echo "⚙️  Checking CPU..."
 CPU_CORES=$(nproc)
 echo "  ℹ️  CPU cores: $CPU_CORES"
-if [ "$CPU_CORES" -ge 4 ]; then
+if [[ "$CPU_CORES" -ge 4 ]]; then
     echo "  ✅ Sufficient cores for parallel builds"
 else
     echo "  ⚠️  WARNING: Limited cores ($CPU_CORES). Builds may be slow."
@@ -147,7 +147,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "📊 Summary"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
+if [[ $ERRORS -eq 0 ]] && [[ $WARNINGS -eq 0 ]]; then
     echo "✅ All prerequisites met! You're ready to build."
     echo ""
     echo "Next steps:"
@@ -155,7 +155,7 @@ if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
     echo "  2. Run ./scripts/validate_params.sh to verify config"
     echo "  3. Run ./start_build.sh to build your kernel"
     exit 0
-elif [ $ERRORS -eq 0 ]; then
+elif [[ $ERRORS -eq 0 ]]; then
     echo "⚠️  System is usable with $WARNINGS warning(s)"
     echo "You can proceed, but may encounter issues."
     echo ""
@@ -168,7 +168,7 @@ else
     echo "Please resolve the errors before proceeding."
     echo ""
     
-    if [ $ERRORS -gt 0 ]; then
+    if [[ $ERRORS -gt 0 ]]; then
         echo "Required fixes:"
         if ! command -v docker &> /dev/null; then
             echo "  • Install Docker: https://docs.docker.com/get-docker/"
@@ -176,7 +176,7 @@ else
         if ! command -v curl &> /dev/null; then
             echo "  • Install curl: sudo apt install curl"
         fi
-        if [ "$BASH_VERSION_MAJOR" -lt 4 ]; then
+        if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
             echo "  • Update Bash to version 4.0+"
         fi
     fi

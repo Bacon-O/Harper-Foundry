@@ -21,7 +21,7 @@ echo "📄 File: $PARAMS_FILE"
 echo ""
 
 
-if [ ! -f "$PARAMS_FILE" ]; then
+if [[ ! -f "$PARAMS_FILE" ]]; then
     echo "❌ ERROR: Params file not found: $PARAMS_FILE"
     exit 1    
 fi
@@ -50,14 +50,14 @@ REQUIRED_VARS=(
 )
 
 for var in "${REQUIRED_VARS[@]}"; do
-    if [ -z "${!var}" ]; then
-        if [ "$var" == "BUILD_WORKSPACE_DIR" ]; then
+    if [[ -z "${!var}" ]]; then
+        if [[ "$var" == "BUILD_WORKSPACE_DIR" ]]; then
             BUILD_WORKSPACE_DIR="${REPO_ROOT}/build-workspace"
             echo "  ⚠️  $var not set, defaulting to $BUILD_WORKSPACE_DIR"
             ((WARNINGS++))
             continue
         fi
-        if [ "$var" == "HOST_OUTPUT_DIR" ]; then
+        if [[ "$var" == "HOST_OUTPUT_DIR" ]]; then
             HOST_OUTPUT_DIR="${REPO_ROOT}/output"
             echo "  ⚠️  $var not set, defaulting to $HOST_OUTPUT_DIR"
             ((WARNINGS++))
@@ -86,7 +86,7 @@ fi
 
 # Check if configs exist
 if [[ "$BASE_CONFIG" != "defconfig" ]] && [[ "$BASE_CONFIG" != "tinyconfig" ]]; then
-    if [ -f "${REPO_ROOT}/configs/$BASE_CONFIG" ]; then
+    if [[ -f "${REPO_ROOT}/configs/$BASE_CONFIG" ]]; then
         echo "  ✅ Base config found: configs/$BASE_CONFIG"
     else
         echo "  ❌ ERROR: Base config not found: configs/$BASE_CONFIG"
@@ -94,8 +94,8 @@ if [[ "$BASE_CONFIG" != "defconfig" ]] && [[ "$BASE_CONFIG" != "tinyconfig" ]]; 
     fi
 fi
 
-if [ -n "$TUNING_CONFIG" ]; then
-    if [ -f "${REPO_ROOT}/configs/$TUNING_CONFIG" ]; then
+if [[ -n "$TUNING_CONFIG" ]]; then
+    if [[ -f "${REPO_ROOT}/configs/$TUNING_CONFIG" ]]; then
         echo "  ✅ Tuning config found: configs/$TUNING_CONFIG"
     else
         echo "  ❌ ERROR: Tuning config not found: configs/$TUNING_CONFIG"
@@ -105,18 +105,18 @@ fi
 
 # Check if foundry script exists (smart lookup: scripts.d/ first, then scripts/)
 foundry_found=false
-if [ -f "${REPO_ROOT}/scripts/scripts.d/$FOUNDRY_EXEC" ]; then
+if [[ -f "${REPO_ROOT}/scripts/scripts.d/$FOUNDRY_EXEC" ]]; then
     echo "  ✅ Foundry exec script found (custom): scripts/scripts.d/$FOUNDRY_EXEC"
     foundry_found=true
-elif [ -f "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
+elif [[ -f "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]]; then
     echo "  ✅ Foundry exec script found (official): scripts/$FOUNDRY_EXEC"
     foundry_found=true
-elif [ -L "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]; then
+elif [[ -L "${REPO_ROOT}/scripts/$FOUNDRY_EXEC" ]]; then
     echo "  ✅ Foundry exec script found (symlink): scripts/$FOUNDRY_EXEC"
     foundry_found=true
 fi
 
-if [ "$foundry_found" = false ]; then
+if [[ "$foundry_found" = false ]]; then
     echo "  ❌ ERROR: Foundry exec script not found: $FOUNDRY_EXEC"
     echo "     Checked: scripts/scripts.d/$FOUNDRY_EXEC, scripts/$FOUNDRY_EXEC"
     ((ERRORS++))
@@ -135,9 +135,9 @@ else
 fi
 
 # Check cross-compilation consistency
-if [ -n "$CROSS_COMPILE_PREFIX" ]; then
+if [[ -n "$CROSS_COMPILE_PREFIX" ]]; then
     echo "  ✅ Cross-compilation enabled: $CROSS_COMPILE_PREFIX"
-    if [ -z "$BUILD_CC" ]; then
+    if [[ -z "$BUILD_CC" ]]; then
         echo "  ⚠️  WARNING: CROSS_COMPILE_PREFIX set but BUILD_CC is empty"
         ((WARNINGS++))
     fi
@@ -147,14 +147,14 @@ echo ""
 echo "🛡️  Checking QA Configuration..."
 
 # --- QA Configuration ---
-if [ "$BYPASS_QA" == "true" ]; then
+if [[ "$BYPASS_QA" == "true" ]]; then
     echo "  ⚠️  WARNING: QA is bypassed (BYPASS_QA=true)"
     ((WARNINGS++))
 else
     echo "  ✅ QA enabled"
 fi
 
-if [ "$QA_MODE" != "RELAXED" ] && [ "$QA_MODE" != "ENFORCED" ]; then
+if [[ "$QA_MODE" != "RELAXED" ]] && [[ "$QA_MODE" != "ENFORCED" ]]; then
     echo "  ⚠️  WARNING: Invalid QA_MODE: $QA_MODE (should be RELAXED or ENFORCED)"
     ((WARNINGS++))
 else
@@ -162,10 +162,10 @@ else
 fi
 
 # Check if QA test scripts exist
-if [ ${#QA_TESTS[@]} -gt 0 ]; then
+if [[ ${#QA_TESTS[@]} -gt 0 ]]; then
     for test in "${QA_TESTS[@]}"; do
         test_path="${REPO_ROOT}/scripts/plugins/qatests/tests/${test}"
-        if [ -x "$test_path" ]; then
+        if [[ -x "$test_path" ]]; then
             echo "  ✅ QA test exists: $test"
         else
             echo "  ❌ ERROR: QA test missing or not executable: $test"
@@ -175,16 +175,16 @@ if [ ${#QA_TESTS[@]} -gt 0 ]; then
 fi
 
 # Check QA test packages (.lst files)
-if [ ${#QA_TEST_PACKAGE[@]} -gt 0 ]; then
+if [[ ${#QA_TEST_PACKAGE[@]} -gt 0 ]]; then
     for package in "${QA_TEST_PACKAGE[@]}"; do
         # Check custom packages first (scripts.d/plugins/qatests/packages/) - takes precedence
         custom_pkg="${REPO_ROOT}/scripts/scripts.d/plugins/qatests/packages/${package}.lst"
         # Then check project packages
         pkg_path="${REPO_ROOT}/scripts/plugins/qatests/packages/${package}.lst"
         
-        if [ -f "$custom_pkg" ]; then
+        if [[ -f "$custom_pkg" ]]; then
             echo "  ✅ QA test package exists (custom): $package"
-        elif [ -f "$pkg_path" ]; then
+        elif [[ -f "$pkg_path" ]]; then
             echo "  ✅ QA test package exists: $package"
         else
             echo "  ❌ ERROR: QA test package missing: $package"
@@ -197,10 +197,10 @@ echo ""
 echo "📊 Validation Summary"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
+if [[ $ERRORS -eq 0 ]] && [[ $WARNINGS -eq 0 ]]; then
     echo "✅ All checks passed! Configuration is valid."
     exit 0
-elif [ $ERRORS -eq 0 ]; then
+elif [[ $ERRORS -eq 0 ]]; then
     echo "⚠️  Configuration is valid with $WARNINGS warning(s)."
     exit 0
 else

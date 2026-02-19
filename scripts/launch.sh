@@ -2,7 +2,7 @@
 set -e
 
 # 1. MUST Load Environment First to define variables
-if [ -z "$REPO_ROOT" ]; then
+if [[ -z "$REPO_ROOT" ]]; then
     source "$(dirname "$0")/env_setup.sh" "$@"
 fi
 
@@ -25,7 +25,7 @@ echo "🚀 Launching Containerized Process: $FOUNDRY_EXEC"
 echo "Kernel version will be appended with: $LOCALVERSION"
 
 # Determine entrypoint based on mode
-if [ "$SHELL_MODE" == "true" ]; then
+if [[ "$SHELL_MODE" == "true" ]]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "🐚 HarperShell Mode Activated"
@@ -67,7 +67,7 @@ if [ "$SHELL_MODE" == "true" ]; then
     relative_params_path="${PARAMS_FILE#${REPO_ROOT}/}"
     CONTAINER_PARAMS_FILE="/opt/factory/$relative_params_path"
     CONTAINER_OVERRIDE_ARGS=""
-    if [ -n "$OVERRIDE_PARAMS" ]; then
+    if [[ -n "$OVERRIDE_PARAMS" ]]; then
         relative_override_path="${OVERRIDE_PARAMS#${REPO_ROOT}/}"
         CONTAINER_OVERRIDE_FILE="/opt/factory/$relative_override_path"
         CONTAINER_OVERRIDE_ARGS="-o \"$CONTAINER_OVERRIDE_FILE\""

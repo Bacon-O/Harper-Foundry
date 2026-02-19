@@ -7,7 +7,7 @@ source "$(dirname "$0")/env_setup.sh" "$@"
 echo "🌡️  Furnace Preheat: Auditing Charge Materials..."
 
 # 2. Audit the 'Blueprint' (Params)
-if [ -z "$TARGET_ARCH" ]; then
+if [[ -z "$TARGET_ARCH" ]]; then
     echo "❌ ERROR: Charge failed. TARGET_ARCH is missing from the blueprint."
     exit 1
 fi
@@ -43,7 +43,7 @@ if [[ "$BASE_CONFIG" != "defconfig" && "$BASE_CONFIG" != "tinyconfig" ]]; then
 fi
 
 # 4. Infrastructure Check
-if [ ! -d "$BUILD_WORKSPACE_DIR" ]; then
+if [[ ! -d "$BUILD_WORKSPACE_DIR" ]]; then
     echo "❌ ERROR: The Crucible (Block Volume) is not mounted at $BUILD_WORKSPACE_DIR"
     exit 1
 fi
@@ -51,7 +51,7 @@ fi
 # 5. Tooling Check (Synced with foundry_template.params)
 dependencies=(docker) 
 
-if [ "$ENABLE_QEMU_TESTS" == "true" ]; then
+if [[ "$ENABLE_QEMU_TESTS" == "true" ]]; then
     dependencies+=(qemu-system-x86_64)
     echo "🛡️  QA Mode Active: Ensuring QEMU tools are ready..."
 fi
@@ -65,8 +65,8 @@ done
 
 # Sanity check: ensure the QEMU bridge is accessible inside the container for cross-compilation
 # Only required when host architecture differs from target architecture
-if [ "$HOST_ARCH" != "x86_64" ] && [ "$TARGET_ARCH" == "x86_64" ]; then
-    if [ ! -f "/usr/bin/qemu-x86_64-static" ]; then
+if [[ "$HOST_ARCH" != "x86_64" ]] && [[ "$TARGET_ARCH" == "x86_64" ]]; then
+    if [[ ! -f "/usr/bin/qemu-x86_64-static" ]]; then
         echo "❌ ERROR: Cross-compilation detected (HOST: $HOST_ARCH, TARGET: x86_64)"
         echo "   QEMU static binary required: /usr/bin/qemu-x86_64-static"
         echo "   Ensure you are mounting it with: -v /usr/bin/qemu-x86_64-static:/usr/bin/qemu-x86_64-static:ro"

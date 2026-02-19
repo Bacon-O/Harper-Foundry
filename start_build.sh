@@ -8,8 +8,6 @@ echo "  Harper Foundry - Build Orchestrator ($VERSION)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Clean runtime state from previous builds (ensure fresh start)
-# rm -rf var/runtime 2>/dev/null || true
 
 # Pre-parse arguments for shell mode and menu (before env_setup)
 SHELL_MODE="false"
@@ -74,7 +72,7 @@ while [[ "$#" -gt 0 ]]; do
             export QA_ONLY
             BUILD_ARGS+=("--qa-only")
             shift
-            if [ -z "$1" ] || [[ "$1" == -* ]]; then
+            if [[ -z "$1" ]] || [[ "$1" == -* ]]; then
                 echo "❌ ERROR: --qa-only requires a build directory path"
                 echo "Usage: $0 --qa-only <BUILD_DIR>"
                 echo "Example: $0 --qa-only ./output/build_20260217_160524"
@@ -381,9 +379,9 @@ fi
 echo ""
 
 # 5. Export (Placeholder)
-if [ "$ARTIFCAT_DELIVERY" == "true" ] || [[ "$ARTIFACT_DELIVERY" == "TRUE" ]]; then
+if [[ "$ARTIFACT_DELIVERY" == "true" ]] || [[ "$ARTIFACT_DELIVERY" == "TRUE" ]]; then
     echo "📦 Phase 4: Exporting Artifacts to Remote Server (Not Implemented)..."
-    bash ./scripts/build_export.sh "${BUILD_ARGS[@]}"
+    bash ./scripts/artifact_export.sh "${BUILD_ARGS[@]}"
 else
     echo "📦 Phase 4: Exporting Artifacts skipped"
 fi

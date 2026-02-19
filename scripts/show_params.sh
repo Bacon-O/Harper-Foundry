@@ -15,7 +15,7 @@ mapfile -t project_params < <(find "${REPO_ROOT}/params" -maxdepth 1 -name "*.pa
 # Find all user custom params (from params/params.d/)
 mapfile -t user_params < <(find "${REPO_ROOT}/params/params.d" -maxdepth 1 -name "*.params" -type f 2>/dev/null | sort)
 
-if [ ${#project_params[@]} -eq 0 ] && [ ${#user_params[@]} -eq 0 ]; then
+if [[ ${#project_params[@]} -eq 0 ]] && [[ ${#user_params[@]} -eq 0 ]]; then
     echo "❌ No parameter files found"
     exit 1
 fi
@@ -30,7 +30,7 @@ get_param() {
 }
 
 # Display each config
-if [ ${#project_params[@]} -gt 0 ]; then
+if [[ ${#project_params[@]} -gt 0 ]]; then
     echo "📂 PROJECT CONFIGURATIONS (${#project_params[@]}):"
     echo ""
     
@@ -54,7 +54,7 @@ if [ ${#project_params[@]} -gt 0 ]; then
     done
 fi
 
-if [ ${#user_params[@]} -gt 0 ]; then
+if [[ ${#user_params[@]} -gt 0 ]]; then
     echo "📂 USER CUSTOM CONFIGURATIONS (${#user_params[@]}):"
     echo ""
     

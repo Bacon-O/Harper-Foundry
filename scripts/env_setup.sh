@@ -102,12 +102,12 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
-if [ "$TEST_RUN_MODE" == "true" ] && [ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry_template.params" ]; then
+if [[ "$TEST_RUN_MODE" == "true" ]] && [[ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry_template.params" ]]; then
     PARAMS_FILE="${REPO_ROOT}/params/tinyconfig.params"
 fi
 
-if [ "$QA_ONLY" == "true" ]; then
-    if [ ! -d "$QA_ONLY_BUILD_DIR" ]; then
+if [[ "$QA_ONLY" == "true" ]]; then
+    if [[ ! -d "$QA_ONLY_BUILD_DIR" ]]; then
         echo "❌ ERROR: --qa-only requires a build directory path"
         echo "Usage: $0 --qa-only <BUILD_DIR>"
         echo "Example: $0 --qa-only ./output/build_20260217_160524"
@@ -116,7 +116,7 @@ if [ "$QA_ONLY" == "true" ]; then
 fi
 
 # 3. Load the Params File
-if [ -f "$PARAMS_FILE" ]; then
+if [[ -f "$PARAMS_FILE" ]]; then
     echo "📖 Consulting the blueprint from $PARAMS_FILE..."
     set -a
     # shellcheck source=/dev/null
@@ -124,7 +124,7 @@ if [ -f "$PARAMS_FILE" ]; then
     set +a
     
     # Apply overrides if specified
-    if [ -n "$OVERRIDE_PARAMS" ] && [ -f "$OVERRIDE_PARAMS" ]; then
+    if [[ -n "$OVERRIDE_PARAMS" ]] && [[ -f "$OVERRIDE_PARAMS" ]]; then
         echo "🔄 Applying overrides from $(basename "$OVERRIDE_PARAMS")..."
         # Announce which variables are being changed
         while IFS= read -r line; do
@@ -184,7 +184,7 @@ if [ -f "$PARAMS_FILE" ]; then
     export BUILD_WORKSPACE_DIR HOST_OUTPUT_DIR
 
     # Create default host directories if running on host (skip in QA-only mode)
-    if [ "$QA_ONLY_MODE" != "true" ] && [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+    if [[ "$QA_ONLY_MODE" != "true" ]] && [[ ! -f /.dockerenv ]] && [[ ! -f /run/.containerenv ]]; then
         mkdir -p "$BUILD_WORKSPACE_DIR" "$HOST_OUTPUT_DIR"
     fi
     
@@ -197,7 +197,7 @@ if [ -f "$PARAMS_FILE" ]; then
         fi
         export FINAL_JOBS
         echo "🔥 Using default: $FINAL_JOBS core(s)."
-    elif [ "$PARALLEL_JOBS" == "ALL" ] || [ "$PARALLEL_JOBS" == "all" ]; then
+    elif [[ "$PARALLEL_JOBS" == "ALL" ]] || [[ "$PARALLEL_JOBS" == "all" ]]; then
         FINAL_JOBS=$(nproc)
         export FINAL_JOBS
         echo "🔥 Using all available cores: $FINAL_JOBS."
@@ -208,14 +208,14 @@ if [ -f "$PARAMS_FILE" ]; then
 
     # 4.5. Container Path Adjustments
     # Set default paths for host environment first
-    if [ -z "$PLUGIN_DIR" ]; then
+    if [[ -z "$PLUGIN_DIR" ]]; then
         export PLUGIN_DIR="${REPO_ROOT}/scripts/plugins/"
         export TEST_FUNCTIONS_DIR="${REPO_ROOT}/scripts/plugins/qatests/tests/"
         export TEST_PACKAGE_DIR="${REPO_ROOT}/scripts/plugins/qatests/packages/"
     fi
     
     # If running inside a container, translate host paths to container paths
-    if [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+    if [[ -f /.dockerenv ]] || [[ -f /run/.containerenv ]]; then
         # Inside container: plugins are mounted at /opt/factory/scripts/plugins
         export PLUGIN_DIR="/opt/factory/scripts/plugins/"
         export TEST_FUNCTIONS_DIR="/opt/factory/scripts/plugins/qatests/tests/"
@@ -223,19 +223,19 @@ if [ -f "$PARAMS_FILE" ]; then
     fi
 
     # 5. Apply Overrides (CLI Arguments > Params File)
-    if [ "$TEST_RUN_MODE" == "true" ]; then
+    if [[ "$TEST_RUN_MODE" == "true" ]]; then
         export BASE_CONFIG="tinyconfig"
         export ENABLE_QEMU_TESTS="false"
         echo "🧪 Test Run Mode: Overriding to tinyconfig and disabling QEMU."
     fi
 
-    if [ "$BYPASS_QA_CLI" == "true" ]; then
+    if [[ "$BYPASS_QA_CLI" == "true" ]]; then
         export BYPASS_QA="true"
     else
         export BYPASS_QA="${BYPASS_QA:-false}"
     fi
 
-    if [ -n "$EXEC_OVERRIDE" ]; then
+    if [[ -n "$EXEC_OVERRIDE" ]]; then
         export FOUNDRY_EXEC="$EXEC_OVERRIDE"
         echo "🕹️  Execution Override: Using $FOUNDRY_EXEC"
     fi
@@ -254,8 +254,8 @@ if [ -f "$PARAMS_FILE" ]; then
     export HOST_GID=${HOST_GID:-$(id -g)}
 
     # (Optional) If you want to use params-file overrides as a fallback:
-    [ -n "$FOUNDRY_UID" ] && export HOST_UID="$FOUNDRY_UID"
-    [ -n "$FOUNDRY_GID" ] && export HOST_GID="$FOUNDRY_GID"
+    [[ -n "$FOUNDRY_UID" ]] && export HOST_UID="$FOUNDRY_UID"
+    [[ -n "$FOUNDRY_GID" ]] && export HOST_GID="$FOUNDRY_GID"
 
 echo "👤 Identity: $HOST_UID:$HOST_GID"
 echo "🏗️  Host Architecture: $HOST_ARCH"
@@ -274,8 +274,8 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
 
     # 9. Metadata (Anchor the BUILD_ID to the GitHub Run)
     # Only calculate BUILD_ID if not already set (e.g., from start_build.sh)
-    if [ -z "$BUILD_ID" ]; then
-        if [ -n "$GITHUB_RUN_ID" ]; then
+    if [[ -z "$BUILD_ID" ]]; then
+        if [[ -n "$GITHUB_RUN_ID" ]]; then
             BUILD_ID="gh_${GITHUB_RUN_ID}"
         else
             BUILD_ID=$(date +%Y%m%d_%H%M%S)
@@ -284,7 +284,7 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     fi
     
     # Set BUILD_OUTPUT_DIR based on mode
-    if [ "$QA_ONLY_MODE" == "true" ]; then
+    if [[ "$QA_ONLY_MODE" == "true" ]]; then
         BUILD_OUTPUT_DIR=$QA_ONLY_BUILD_DIR
         echo "🔬 QA-Only Mode: Targeting existing build at $BUILD_OUTPUT_DIR"
     else
@@ -294,8 +294,8 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     
     # Only create output directory on host, not inside container (it's already mounted)
     # Skip creation in QA-only mode
-    if [ "$QA_ONLY_MODE" != "true" ]; then
-        if [ ! -f /.dockerenv ] && [ ! -f /run/.containerenv ]; then
+    if [[ "$QA_ONLY_MODE" != "true" ]]; then
+        if [[ ! -f /.dockerenv ]] && [[ ! -f /run/.containerenv ]]; then
             mkdir -p "$BUILD_OUTPUT_DIR"
             echo "📂 Artifact Target: $BUILD_OUTPUT_DIR"
         else
@@ -314,7 +314,7 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
     project_ext_dir="${REPO_ROOT}/scripts/plugins/env_extensions"
     
     # Load specified extensions (if any)
-    if [ -v ENV_EXTENSIONS ] && [ ${#ENV_EXTENSIONS[@]} -gt 0 ]; then
+    if [[ -v ENV_EXTENSIONS ]] && [[ ${#ENV_EXTENSIONS[@]} -gt 0 ]]; then
         # Load specified extensions in order
         for ext_name in "${ENV_EXTENSIONS[@]}"; do
             # Normalize: add .sh extension if not present
@@ -322,13 +322,13 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
             ext_found=false
             
             # Try custom location first (takes precedence)
-            if [ -f "$custom_ext_dir/$ext_file" ] && [ -x "$custom_ext_dir/$ext_file" ]; then
+            if [[ -f "$custom_ext_dir/$ext_file" ]] && [[ -x "$custom_ext_dir/$ext_file" ]]; then
                 echo "🔧 Loading extension: $ext_file (custom)"
                 # shellcheck source=/dev/null
                 source "$custom_ext_dir/$ext_file"
                 ext_found=true
             # Fall back to official location
-            elif [ -f "$project_ext_dir/$ext_file" ] && [ -x "$project_ext_dir/$ext_file" ]; then
+            elif [[ -f "$project_ext_dir/$ext_file" ]] && [[ -x "$project_ext_dir/$ext_file" ]]; then
                 echo "🔧 Loading extension: $ext_file (official)"
                 # shellcheck source=/dev/null
                 source "$project_ext_dir/$ext_file"
@@ -336,7 +336,7 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
             fi
             
             # Warn if extension not found
-            if [ "$ext_found" = false ]; then
+            if [[ "$ext_found" = false ]]; then
                 echo "⚠️  Warning: ENV_EXTENSIONS references unknown extension: $ext_name"
             fi
         done

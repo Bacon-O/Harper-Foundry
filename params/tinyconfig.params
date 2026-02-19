@@ -35,14 +35,25 @@ INCREMENTAL_BUILD="false"
 # Both require previous configuration
 
 # Artifact delivery is disabled for tinyconfig tests by default to avoid accidental uploads during quick testing.
-ARTIFCAT_DELIVERY="true"
-ARTIFCAT_COMMPRESSION="tar.gz"
-ARTIFCAT_DELIVERY_METHOD="sftp"
+# ARTIFCAT_DELIVERY="true"
+# ARTIFCAT_COMMPRESSION=""
+# ARTIFCAT_DELIVERY_METHOD="sftp"
+# REMOTE_DELIVERY_HOST="127.0.0.1"
+# REMOTE_DELIVERY_USER="matthew"
+# REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
+# ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+# LOCAL_DELIVERY_PATH=""
+
+
+ARTIFACT_DELIVERY="true"
+ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD="sftp"
 REMOTE_DELIVERY_HOST="127.0.0.1"
 REMOTE_DELIVERY_USER="matthew"
 REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
-ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
+
 
 # --- Foundry Image Configuration ---
 DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
