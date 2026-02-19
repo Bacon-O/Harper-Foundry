@@ -94,7 +94,7 @@ jobs:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
           ARGS: ${{ steps.set-args.outputs.args }}
         run: |
-          bash ./scripts/pre_hooks.sh "$ARGS"
+          bash ./scripts/pre_build_hooks.sh "$ARGS"
       - name: Charge Audit
         env:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
@@ -130,7 +130,7 @@ jobs:
           bash ./scripts/material_analysis.sh "$ARGS"
 
   delivery:
-    needs: [preheat, smelt]
+    needs: [preheat, smelt, analysis]
     if: always() && (github.event.inputs.override_params_gh == 'none')
     runs-on: self-hosted
     steps:
@@ -161,4 +161,4 @@ jobs:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
           ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/post_hooks.sh "$ARGS"
+          bash ./scripts/post_build_hooks.sh "$ARGS"
