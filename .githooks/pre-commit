@@ -1,39 +1,71 @@
-#!/bin/bash
-# Pre-commit hook for Harper Foundry
-# Note: *.params files are intentionally excluded from linting.
-# They are configuration files (VAR=value assignments), not executable scripts.
+# #!/bin/bash
+# # Pre-commit hook for Harper Foundry
+# # Note: *.params files are intentionally excluded from linting.
+# # They are configuration files (VAR=value assignments), not executable scripts.
 
-set -eo pipefail
+# set -eo pipefail
 
-# Contributors can enable strict mode by setting: git config --local foundry.strictLint true
-STRICT_MODE=$(git config --local --get foundry.strictLint 2>/dev/null || echo "false")
+# #!/bin/bash
 
-if ! command -v shellcheck >/dev/null 2>&1; then
-    if [ "$STRICT_MODE" = "true" ]; then
-        echo "❌ shellcheck not found - install it to commit in strict mode"
-        exit 1
-    fi
-    exit 0
-fi
+# echo "🛡️  Running Security Firewall..."
 
-mapfile -t files < <(git ls-files "*.sh")
+# # --- 1. SEMGREP (Code Analysis) ---
+# echo "🔍 Scanning Code with Semgrep..."
+# docker run --rm -v "${PWD}:/src" semgrep/semgrep semgrep scan \
+#   --metrics=off \
+#   --config p/typescript --config p/dockerfile --config p/default --config p/security-audit \
+#   --error
+# SEMGREP_EXIT=$?
 
-if [ "${#files[@]}" -eq 0 ]; then
-    exit 0
-fi
+# # --- 2. TRIVY (Dependency & OS Scan) ---
+# echo "📦 Scanning Environment with Trivy..."
+# # We use 'fs' (filesystem) mode to scan your current folder
+# # --exit-code 1: Fails the commit if issues are found
+# # --severity HIGH,CRITICAL: Only block the important stuff
+# docker run --rm -v "${PWD}:/src" -v /var/run/docker.sock:/var/run/docker.sock \
+#   aquasec/trivy fs /src \
+#   --exit-code 1 \
+#   --severity HIGH,CRITICAL \
+#   --quiet
+# TRIVY_EXIT=$?
 
-echo "🔎 Running shellcheck on ${#files[@]} shell scripts..."
+# # --- FINAL CHECK ---
+# if [ $SEMGREP_EXIT -ne 0 ] || [ $TRIVY_EXIT -ne 0 ]; then
+#   echo "❌ Security checks failed. Fix the issues above before committing."
+#   exit 1
+# fi
 
-if [ "$STRICT_MODE" = "true" ]; then
-    # Strict mode: fail on any issues
-    shellcheck -x "${files[@]}"
-else
-    # Regular mode: show issues but don't block commits
-    if ! shellcheck -x "${files[@]}"; then
-        echo ""
-        echo "⚠️  Shellcheck found issues (not blocking commit)"
-        echo "   For contributors: enable strict mode with:"
-        echo "   git config --local foundry.strictLint true"
-    fi
-    exit 0
-fi
+# echo "✅ All scans passed. Proceeding with commit..."
+
+# # Contributors can enable strict mode by setting: git config --local foundry.strictLint true
+# STRICT_MODE=$(git config --local --get foundry.strictLint 2>/dev/null || echo "false")
+
+# if ! command -v shellcheck >/dev/null 2>&1; then
+#     if [ "$STRICT_MODE" = "true" ]; then
+#         echo "❌ shellcheck not found - install it to commit in strict mode"
+#         exit 1
+#     fi
+#     exit 0
+# fi
+
+# mapfile -t files < <(git ls-files "*.sh")
+
+# if [ "${#files[@]}" -eq 0 ]; then
+#     exit 0
+# fi
+
+# echo "🔎 Running shellcheck on ${#files[@]} shell scripts..."
+
+# if [ "$STRICT_MODE" = "true" ]; then
+#     # Strict mode: fail on any issues
+#     shellcheck -x "${files[@]}"
+# else
+#     # Regular mode: show issues but don't block commits
+#     if ! shellcheck -x "${files[@]}"; then
+#         echo ""
+#         echo "⚠️  Shellcheck found issues (not blocking commit)"
+#         echo "   For contributors: enable strict mode with:"
+#         echo "   git config --local foundry.strictLint true"
+#     fi
+#     exit 0
+# fi

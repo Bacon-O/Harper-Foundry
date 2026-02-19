@@ -52,3 +52,6 @@ desktop.ini
 
 # Custom Scripts (user customizations)
 scripts/scripts.d/        # Custom compile scripts and utilities
+
+#trivy
+trivy.yaml
