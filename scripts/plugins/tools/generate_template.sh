@@ -1,3 +1,7 @@
+#!/bin/bash
+
+genereate_foundry_params() {
+    cat <<EOF > "$1"
 # ==============================================================================
 # HARPER FOUNDRY: BLUEPRINT CONFIGURATION - TEMPLATE
 # ==============================================================================
@@ -181,3 +185,30 @@ QA_VM_TIMEOUT="30s"
 # Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=()
 # ==============================================================================
+EOF
+}
+
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+default_params_dir="${REPO_ROOT}/params"
+
+if [[ -d "$default_params_dir" ]]; then
+    echo "Found params directory: $default_params_dir"
+else
+    echo "❌ ERROR: Params directory not found at $default_params_dir"
+    exit 1
+fi
+if [[ -f "$default_params_dir/foundry_template.params" ]]; then
+    echo "⚠️  Warning: $default_params_dir/foundry_template.params already exists."
+    read -p "Do you want to overwrite it? (y/N) " -n 1 -r
+    echo ""
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+        echo "Overwriting existing foundry_template.params..."
+        genereate_foundry_params "$default_params_dir/foundry_template.params" 
+    fi
+else
+    echo "🛠  Generating foundry_template.params at $default_params_dir/foundry_template.params"
+    genereate_foundry_params "$default_params_dir/foundry_template.params"
+fi
+

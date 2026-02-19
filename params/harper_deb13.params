@@ -54,13 +54,13 @@ INCREMENTAL_BUILD="false"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFCAT_DELIVERY="false"
-ARTIFCAT_COMMPRESSION=""
-ARTIFCAT_DELIVERY_METHOD=""
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
 REMOTE_DELIVERY_HOST=""
 REMOTE_DELIVERY_USER=""
 REMOTE_DELIVERY_PATH=""
-ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 
