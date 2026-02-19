@@ -5,6 +5,14 @@
 # This script validates foundry_template.params files to catch common configuration
 # errors before running a build.
 
+#!/bin/bash
+# ==============================================================================
+# HARPER FOUNDRY: PARAMS VALIDATION SCRIPT
+# ==============================================================================
+# This script validates foundry_template.params files to catch common configuration
+# errors before running a build.
+# Note: Use ++VAR instead of VAR++ to avoid exit code 1 when VAR is 0 under set -e
+
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -48,28 +56,27 @@ REQUIRED_VARS=(
     "KERNEL_SOURCE"
     "BASE_CONFIG"
 )
-
 for var in "${REQUIRED_VARS[@]}"; do
     if [[ -z "${!var}" ]]; then
         if [[ "$var" == "BUILD_WORKSPACE_DIR" ]]; then
             BUILD_WORKSPACE_DIR="${REPO_ROOT}/build-workspace"
             echo "  ⚠️  $var not set, defaulting to $BUILD_WORKSPACE_DIR"
-            ((WARNINGS++))
+            ((++WARNINGS))
             continue
         fi
+        
         if [[ "$var" == "HOST_OUTPUT_DIR" ]]; then
             HOST_OUTPUT_DIR="${REPO_ROOT}/output"
             echo "  ⚠️  $var not set, defaulting to $HOST_OUTPUT_DIR"
-            ((WARNINGS++))
+            ((++WARNINGS))
             continue
         fi
         echo "  ❌ MISSING: $var is not set"
-        ((ERRORS++))
+        ((++ERRORS))
     else
         echo "  ✅ $var = ${!var}"
     fi
 done
-
 echo ""
 echo "🗂️  Checking Path Existence..."
 
@@ -81,7 +88,7 @@ elif [[ "$DOCKERFILE_PATH" =~ / ]]; then
     echo "  ℹ️  Registry image (will be pulled): $DOCKERFILE_PATH"
 else
     echo "  ⚠️  WARNING: Cannot verify image path: $DOCKERFILE_PATH"
-    ((WARNINGS++))
+    ((++WARNINGS))
 fi
 
 # Check if configs exist
@@ -90,7 +97,7 @@ if [[ "$BASE_CONFIG" != "defconfig" ]] && [[ "$BASE_CONFIG" != "tinyconfig" ]]; 
         echo "  ✅ Base config found: configs/$BASE_CONFIG"
     else
         echo "  ❌ ERROR: Base config not found: configs/$BASE_CONFIG"
-        ((ERRORS++))
+        ((++ERRORS))
     fi
 fi
 
@@ -99,7 +106,7 @@ if [[ -n "$TUNING_CONFIG" ]]; then
         echo "  ✅ Tuning config found: configs/$TUNING_CONFIG"
     else
         echo "  ❌ ERROR: Tuning config not found: configs/$TUNING_CONFIG"
-        ((ERRORS++))
+        ((++ERRORS))
     fi
 fi
 
@@ -119,7 +126,7 @@ fi
 if [[ "$foundry_found" = false ]]; then
     echo "  ❌ ERROR: Foundry exec script not found: $FOUNDRY_EXEC"
     echo "     Checked: scripts/scripts.d/$FOUNDRY_EXEC, scripts/$FOUNDRY_EXEC"
-    ((ERRORS++))
+    ((++ERRORS))
 fi
 
 echo ""
@@ -129,7 +136,7 @@ echo "🧪 Checking Architecture Configuration..."
 VALID_ARCHES=("x86_64" "aarch64" "arm64" "armv7l")
 if [[ ! " ${VALID_ARCHES[*]} " =~ ${TARGET_ARCH} ]]; then
     echo "  ⚠️  WARNING: Unusual TARGET_ARCH: $TARGET_ARCH"
-    ((WARNINGS++))
+    ((++WARNINGS))
 else
     echo "  ✅ Valid TARGET_ARCH: $TARGET_ARCH"
 fi
@@ -139,7 +146,7 @@ if [[ -n "$CROSS_COMPILE_PREFIX" ]]; then
     echo "  ✅ Cross-compilation enabled: $CROSS_COMPILE_PREFIX"
     if [[ -z "$BUILD_CC" ]]; then
         echo "  ⚠️  WARNING: CROSS_COMPILE_PREFIX set but BUILD_CC is empty"
-        ((WARNINGS++))
+        ((++WARNINGS))
     fi
 fi
 
@@ -149,14 +156,14 @@ echo "🛡️  Checking QA Configuration..."
 # --- QA Configuration ---
 if [[ "$BYPASS_QA" == "true" ]]; then
     echo "  ⚠️  WARNING: QA is bypassed (BYPASS_QA=true)"
-    ((WARNINGS++))
+    ((++WARNINGS))
 else
     echo "  ✅ QA enabled"
 fi
 
 if [[ "$QA_MODE" != "RELAXED" ]] && [[ "$QA_MODE" != "ENFORCED" ]]; then
     echo "  ⚠️  WARNING: Invalid QA_MODE: $QA_MODE (should be RELAXED or ENFORCED)"
-    ((WARNINGS++))
+    ((++WARNINGS))
 else
     echo "  ✅ QA_MODE: $QA_MODE"
 fi
@@ -169,7 +176,7 @@ if [[ ${#QA_TESTS[@]} -gt 0 ]]; then
             echo "  ✅ QA test exists: $test"
         else
             echo "  ❌ ERROR: QA test missing or not executable: $test"
-            ((ERRORS++))
+            ((++ERRORS))
         fi
     done
 fi
@@ -188,7 +195,7 @@ if [[ ${#QA_TEST_PACKAGE[@]} -gt 0 ]]; then
             echo "  ✅ QA test package exists: $package"
         else
             echo "  ❌ ERROR: QA test package missing: $package"
-            ((ERRORS++))
+            ((++ERRORS))
         fi
     done
 fi
