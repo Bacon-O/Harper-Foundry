@@ -61,14 +61,14 @@ jobs:
       
       - name: Configure Arguments
         id: set-args
+        env:
+          BASE_PARAMS: ${{ github.event.inputs.base_params_gh }}
+          OVERRIDE_PARAMS: ${{ github.event.inputs.override_params_gh }}
         run: |
           OVERRIDE_FILE=""
 
-          
           # Manual dispatch is the only trigger for this public reference repo
-          # Use dual dropdown selection: base params + optional override
-          BASE_PARAMS="${{ github.event.inputs.base_params_gh }}"
-          OVERRIDE_PARAMS="${{ github.event.inputs.override_params_gh }}"
+          # Use dual dropdown selection: base params + optional overrided
           
           echo "🕹️ Manual Dispatch"
           echo "   Base: $BASE_PARAMS"
@@ -93,8 +93,9 @@ jobs:
       - name: Charge Audit
         env:
           PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
+          ARGS: ${{ steps.set-args.outputs.args }}
         run: |
-          bash ./scripts/validate.sh ${{ steps.set-args.outputs.args }}
+          bash ./scripts/validate.sh "$ARGS"
 
   smelt:
     needs: preheat
@@ -105,8 +106,9 @@ jobs:
       - name: Ignition
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/launch.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/launch.sh "$ARGS"
 
   analysis:
     needs: [preheat, smelt]
@@ -118,8 +120,9 @@ jobs:
       - name: Material QA
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/material_analysis.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/material_analysis.sh "$ARGS"
 
   cleanup:
     needs: [preheat, analysis]
@@ -131,5 +134,6 @@ jobs:
       - name: Purge Slag
         env:
           PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
         run: |
-          bash ./scripts/clean.sh ${{ needs.preheat.outputs.args }}
+          bash ./scripts/clean.sh "$ARGS"
