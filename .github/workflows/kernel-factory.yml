@@ -23,7 +23,7 @@ on:
         default: 'none'
         options:
           - 'none'
-          - 'testing.params'
+          - '_test_overrides.params'
 
 jobs:
   # lint:
@@ -80,7 +80,7 @@ jobs:
             BASE_FILE="params/$BASE_PARAMS"
             OVERRIDE_FILE="params/$OVERRIDE_PARAMS"
             echo "🧪 Applying testing overrides to $BASE_PARAMS"
-            echo "args=--params-file $BASE_FILE --override-file $OVERRIDE_FILE" >> $GITHUB_OUTPUT
+            echo "args=--params-file $BASE_FILE --overrides $OVERRIDE_FILE" >> $GITHUB_OUTPUT
           else
             # Use base params directly (no override)
             BASE_FILE="params/$BASE_PARAMS"
