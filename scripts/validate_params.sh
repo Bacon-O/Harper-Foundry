@@ -6,25 +6,25 @@
 # errors before running a build.
 
 set -e
-
+source "$(dirname "$0")/env_setup.sh" "$@"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PARAMS_FILE="${1:-${REPO_ROOT}/params/foundry_template.params}"
+
 
 echo "🔍 Validating Foundry Parameters..."
 echo "📄 File: $PARAMS_FILE"
 echo ""
 
-if [ ! -f "$PARAMS_FILE" ]; then
-    echo "❌ ERROR: Params file not found: $PARAMS_FILE"
-    exit 1
-fi
+# if [ ! -f "$PARAMS_FILE" ]; then
+#     echo "❌ ERROR: Params file not found: $PARAMS_FILE"
+#     exit 1
+# fi
 
 # Load the params file
-set -a
-# shellcheck source=/dev/null
-source "$PARAMS_FILE"
-set +a
+# set -a
+# # shellcheck source=/dev/null
+# source "$PARAMS_FILE"
+# set +a
 
 ERRORS=0
 WARNINGS=0

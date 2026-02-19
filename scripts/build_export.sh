@@ -23,8 +23,17 @@ echo "🚀 Export functionality is not yet implemented. Stay tuned for updates!"
 
 # Validation check for remote delivery configuration (if enabled)
 if [[ "$ARTIFCAT_DELIVERY" == "true" ]]; then
-    echo "⚠️  ARTIFCAT_DELIVERY is enabled, but export functionality is not implemented. Please disable ARTIFCAT_DELIVERY or wait for future updates."
-    
+    echo "ARTIFCAT_DELIVERY is enabled"
+    _commpression_command=()
+    if [[ "$ARTIFCAT_COMMPRESSION" == "tar.gz" ]]; then
+        echo "Artifact compression: tar.gz"
+        _commpression_command=("tar" "-czf" "${BUILD_OUTPUT_DIR}.tar.gz" "-C" "${BUILD_OUTPUT_DIR}" ".")
+    elif [[ "$ARTIFCAT_COMMPRESSION" == "zip" ]]; then
+        echo "Artifact compression: zip"
+        _commpression_command=("zip" "-r" "${BUILD_OUTPUT_DIR}.zip" "${BUILD_OUTPUT_DIR}")
+    else
+        echo "No valid ARTIFCAT_COMMPRESSION method specified"
+    fi
 
     if [[ "$ARTIFCAT_DELIVERY_METHOD" == "sftp" ]] || [[ "$ARTIFCAT_DELIVERY_METHOD" == "SFTP" ]] || 
         [[ "$ARTIFCAT_DELIVERY_METHOD" == "scp" ]] || [[ "$ARTIFCAT_DELIVERY_METHOD" == "SCP" ]]; then
@@ -59,7 +68,7 @@ if [[ "$ARTIFCAT_DELIVERY" == "true" ]]; then
         fi
         
         _sftp_cmd+=("-r" "${BUILD_OUTPUT_DIR}" "${REMOTE_DELIVERY_USER}@${REMOTE_DELIVERY_HOST}:${REMOTE_DELIVERY_PATH}")
-        
+        "${_commpression_command[@]}"
         "${_sftp_cmd[@]}"
 
     elif [[ "$ARTIFCAT_DELIVERY_METHOD" == "rsync" ]] || [[ "$ARTIFCAT_DELIVERY_METHOD" == "RSYNC" ]]; then
@@ -83,15 +92,24 @@ if [[ "$ARTIFCAT_DELIVERY" == "true" ]]; then
             echo "   → No REMOTE_DELIVERY_PATH specified."
             exit 1
         fi 
-        echo "⚠️  RSYNC delivery method is not yet implemented. Please wait for future updates."
-        # Placeholder for RSYNC upload command
-        echo "🧪 [DRY RUN] Placeholder command for RSYNC upload:"
-        echo "rsync -avz ${BUILD_OUTPUT_DIR}/ ${REMOTE_DELIVERY_USER}@${REMOTE_DELIVERY_HOST}:${REMOTE_DELIVERY_PATH}"
+        
+        _rsync_cmd=("rsync" "-avz")
+        # Ensure rsync fails fast on connection errors (BatchMode) just like SCP
+        _ssh_opts="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+        if [[ -n "$ARTIFCAT_SSH_KEY" ]]; then
+            echo "   → SSH Key: SET (${ARTIFCAT_SSH_KEY})"
+            _ssh_opts+=" -i '$ARTIFCAT_SSH_KEY'"
+        fi
+        _rsync_cmd+=("-e" "$_ssh_opts" "${BUILD_OUTPUT_DIR}" "${REMOTE_DELIVERY_USER}@${REMOTE_DELIVERY_HOST}:${REMOTE_DELIVERY_PATH}")
+        
+        "${_commpression_command[@]}"
+        "${_rsync_cmd[@]}"
 
     elif [[ "$ARTIFCAT_DELIVERY_METHOD" == "local_copy" ]] || [[ "$ARTIFCAT_DELIVERY_METHOD" == "LOCAL_COPY" ]]; then
-        echo "⚠️  LOCAL_COPY delivery method is not yet implemented. Please wait for future updates."
+        echo "LOCAL_COPY delivery selected."
         if [[ -d "$LOCAL_DELIVERY_PATH" ]]; then
             echo "   → Local Delivery Path: $LOCAL_DELIVERY_PATH"
+            "${_commpression_command[@]}"
             cp -r "${BUILD_OUTPUT_DIR}/" "${LOCAL_DELIVERY_PATH}/"
             echo "   → Artifacts copied to ${LOCAL_DELIVERY_PATH}/"
         else
@@ -100,9 +118,10 @@ if [[ "$ARTIFCAT_DELIVERY" == "true" ]]; then
         fi
 
     elif [[ "$ARTIFCAT_DELIVERY_METHOD" == "local_move" ]] || [[ "$ARTIFCAT_DELIVERY_METHOD" == "LOCAL_MOVE" ]]; then
-        echo "⚠️  LOCAL_MOVE delivery method is not yet implemented. Please wait for future updates."
+        echo "LOCAL_MOVE delivery selected."
         if [[ -d "$LOCAL_DELIVERY_PATH" ]]; then
             echo "   → Local Delivery Path: $LOCAL_DELIVERY_PATH"
+            "${_commpression_command[@]}"
             mv -f "${BUILD_OUTPUT_DIR}/" "${LOCAL_DELIVERY_PATH}/"
             echo "   → Artifacts moved to ${LOCAL_DELIVERY_PATH}/"
         else

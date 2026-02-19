@@ -55,10 +55,14 @@ INCREMENTAL_BUILD="false"
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
 ARTIFCAT_DELIVERY="false"
+ARTIFCAT_COMMPRESSION=""
 ARTIFCAT_DELIVERY_METHOD=""
 REMOTE_DELIVERY_HOST=""
 REMOTE_DELIVERY_USER=""
 REMOTE_DELIVERY_PATH=""
+ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
 
 # --- Foundry Image Configuration ---
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")

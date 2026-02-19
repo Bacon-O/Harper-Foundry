@@ -36,8 +36,9 @@ INCREMENTAL_BUILD="false"
 
 # Artifact delivery is disabled for tinyconfig tests by default to avoid accidental uploads during quick testing.
 ARTIFCAT_DELIVERY="true"
+ARTIFCAT_COMMPRESSION="tar.gz"
 ARTIFCAT_DELIVERY_METHOD="sftp"
-REMOTE_DELIVERY_HOST="127.0.0.2"
+REMOTE_DELIVERY_HOST="127.0.0.1"
 REMOTE_DELIVERY_USER="matthew"
 REMOTE_DELIVERY_PATH="/home/matthew@int.faushaus.net/devel/testing/delivery_test"
 ARTIFCAT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
