@@ -296,7 +296,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         fi
     fi
 done < "$SOURCE_PARAMS_FILE"
-
+# At this point, current_values contains all simple variables and their current values,
 # --- Prompting Function ---
 prompt_for_variable() {
     local var_name="$1"
