@@ -116,6 +116,10 @@ KERNEL_VERSION=""
 DEB_HOST_ARCH=""
 HOST_QEMU_STATIC=""
 
+# Will clean up build workspace dir (where compiling happens)
+# during the cleanup phase in case of failed builds
+CLEAN_BUILD_WORKSPACE_DIR=""
+
 BUILD_DEB_BUILD_ARCH=""
 BUILD_DEB_TARGET_ARCH=""
 BUILD_CC=""

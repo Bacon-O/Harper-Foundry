@@ -98,6 +98,10 @@ KERNEL_VERSION="latest"
 DEB_HOST_ARCH="amd64"
 HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
 
+# Will clean up build workspace dir (where compiling happens)
+# during the cleanup phase in case of failed builds
+CLEAN_BUILD_WORKSPACE_DIR="true"
+
 BUILD_DEB_BUILD_ARCH="arm64"
 BUILD_DEB_TARGET_ARCH="amd64"
 BUILD_CC="clang --target=x86_64-linux-gnu"

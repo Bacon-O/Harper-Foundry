@@ -50,3 +50,11 @@ else
         echo "⚠️  Valid Dist directory not found at $HOST_OUTPUT_DIR."
     fi
 fi
+
+#3. Optional: Clean up build workspace if configured to do so
+if [[ "$CLEAN_BUILD_WORKSPACE_DIR" == "true" ]]; then
+    echo "🧹 Cleaning build workspace directories: $BUILD_WORKSPACE_DIR"
+    if [[ -d "$BUILD_WORKSPACE_DIR" ]]; then
+        rm -rf "${BUILD_WORKSPACE_DIR:?}"/*
+    fi
+fi
