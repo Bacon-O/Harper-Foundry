@@ -180,6 +180,80 @@ For tests you want to contribute back:
 
 All tests run on the host system after the Docker build completes.
 
+## QEMU Test
+
+Creating a safe initrd.img on ARM64
+Find the latest binaries for busybox. Was tested on 1.35.0-x86_64-linux-musl
+
+https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/
+
+Below will test for ntsync compiled Kernel
+```
+# 1. Get the binary and set up the 'bin' folder
+wget -O busybox https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
+chmod +x busybox
+mkdir -p initrd_root/bin
+cp busybox initrd_root/bin/busybox  # <--- Crucial: The interpreter must be here
+
+# 2. Write the automated test script to /bin/sh
+cat << 'EOF' > initrd_root/bin/sh
+#!/bin/busybox sh
+/bin/busybox mount -t devtmpfs devtmpfs /dev
+/bin/busybox mount -t proc proc /proc
+/bin/busybox mount -t sysfs sysfs /sys
+
+echo "==========================================="
+echo "      KERNEL NTSYNC TEST ENVIRONMENT       "
+echo "==========================================="
+
+# Comment out if you just want to test boot
+if [ -c /dev/ntsync ]; then
+    echo "[ OK ] NTSYNC Device found."
+    echo -n "Probing NTSYNC integrity: "
+    for i in 1 2 3 4 5 6 7 8 9 10; do
+        /bin/busybox cat /dev/ntsync > /dev/null 2>&1
+        echo -n "."
+    done
+    echo " [ PASSED ]"
+else
+    echo "[ FAIL ] NTSYNC Device NOT found!"
+    # Ensure we exit with an error status if possible
+    /bin/busybox sleep 2
+    /bin/busybox poweroff -f
+fi
+
+echo "-------------------------------------------"
+echo "SANITY CHECK COMPLETE: KERNEL IS STABLE"
+echo "-------------------------------------------"
+
+
+# If you want to drop to shell for manual inspection if needed
+#exec /bin/busybox sh
+
+# 3. Shutdown the VM automatically
+/bin/busybox poweroff -f
+EOF
+
+chmod +x initrd_root/bin/sh
+
+# 3. Pack it up
+cd initrd_root
+find . | cpio -o -H newc | gzip > ../safe_initrd.img
+cd ..
+
+# 4. Run the Automated QEMU Test
+# Added '-no-reboot' so it closes on poweroff
+qemu-system-x86_64 \
+  -m 2G \
+  -smp 2 \
+  -cpu max \
+  -kernel bzImage \
+  -initrd safe_initrd.img \
+  -append "console=ttyS0 nokaslr rdinit=/bin/sh" \
+  -nographic \
+  -no-reboot
+```
+
 ## Design Notes
 
 Test packages use simple `.lst` files instead of directories. This design choice:
