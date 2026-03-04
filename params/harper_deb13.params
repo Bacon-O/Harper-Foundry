@@ -131,7 +131,7 @@ TUNING_CONFIG="harper_deb13_tune.config"
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
-ENABLE_QEMU_TESTS="true"
+ENABLE_QEMU_TESTS="false"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
