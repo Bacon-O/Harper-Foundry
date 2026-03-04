@@ -55,7 +55,7 @@ INCREMENTAL_BUILD="false"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFACT_DELIVERY="true"
+ARTIFACT_DELIVERY="false"
 ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
 ARTIFACT_DELIVERY_METHOD="sftp"
 REMOTE_DELIVERY_HOST="10.21.0.11"
