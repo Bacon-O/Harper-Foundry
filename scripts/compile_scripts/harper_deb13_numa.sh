@@ -119,7 +119,8 @@ echo "📦 Debian Pkg Version (apt):  ${KDEB_PKGVERSION}"
 echo "🏗️ Compiling Kernel..."
 # nice -n -20 numactl --interleave=all make -j40
 #make -j"$FINAL_JOBS" \
-nice -n -20 numactl --interleave=all make -j"$FINAL_JOBS" \
+#nice -n -20 numactl --interleave=all make -j"$FINAL_JOBS" \
+numactl --interleave=all make -j"$FINAL_JOBS" \
     LLVM="$BUILD_LLVM" \
     ARCH="$TARGET_ARCH" \
     CROSS_COMPILE="$CROSS_COMPILE_PREFIX" \
