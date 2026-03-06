@@ -2,4 +2,4 @@
 
 BUILD_WORKSPACE_DIR="/mnt/ramdisk"
 FOUNDRY_EXEC="compile_scripts/harper_deb13_numa.sh"
-PARALLEL_JOBS="40"
+PARALLEL_JOBS="44"
