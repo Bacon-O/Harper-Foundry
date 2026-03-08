@@ -25,8 +25,8 @@ jobs:
       - name: Set up monitoring environment
         run: |
           # Ensure curl and jq are available
-          command -v curl > /dev/null || (apt-get update && apt-get install -y curl)
-          command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
+          command -v curl > /dev/null || (sudo apt-get update && apt-get install -y curl)
+          command -v jq > /dev/null || (sudo apt-get update && apt-get install -y jq)
       
       - name: Run kernel release trigger
         env:
