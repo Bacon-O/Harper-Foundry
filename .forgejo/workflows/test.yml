@@ -9,4 +9,4 @@ jobs:
         run: |
           hostname
           whoami
-          echo "I am running on Forgejo!"
+          echo "I am running on Forgejo! lets hope this worked!"
