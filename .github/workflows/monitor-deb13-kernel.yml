@@ -1,0 +1,85 @@
+name: Monitor Debian Trixie Kernel Releases
+
+# Trigger on schedule (check for new releases every 6 hours)
+on:
+  # schedule:
+  #   - cron: '0 */6 * * *'  # Every 6 hours
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even if version unchanged'
+        required: false
+        default: 'false'
+
+jobs:
+  monitor-and-trigger:
+    runs-on: self-hosted
+    name: Check for Debian Trixie Kernel Updates
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up monitoring environment
+        run: |
+          # Ensure curl and jq are available
+          # command -v curl > /dev/null || (apt-get update && apt-get install -y curl)
+          # command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
+      
+      - name: Run kernel release trigger
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+          WORKSPACE_PATH: ${{ github.workspace }}
+        run: |
+          cd "$WORKSPACE_PATH"
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            export FORCE_BUILD="true"
+          fi
+          
+          # Source runner and execute trigger check
+          source ./scripts/plugins/triggers/runner.sh
+          
+          check_if_build_is_needed harper_deb13_kernel --force
+          BUILD_NEEDED=$?
+          
+          if [[ $BUILD_NEEDED -eq 0 ]]; then
+            echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
+            
+            # Execute build with tinyconfig for CI testing
+            if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a /tmp/build.log; then
+              echo "✅ Build completed successfully"
+              # Update tracking via plugin callback
+              build_successful harper_deb13_kernel
+            else
+              echo "❌ Build failed"
+              # Handle failure via plugin callback
+              build_failed harper_deb13_kernel "ci_build_failed"
+            fi
+          else
+            echo "ℹ️  No new kernel version available"
+          fi
+      
+      - name: Commit updated version tracking (if changed)
+        if: success()
+        run: |
+          cd "$WORKSPACE_PATH"
+          
+          # Check if version tracking file was updated by build_successful callback
+          if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
+            echo "ℹ️  No version changes to commit"
+          else
+            echo "✅ Version tracking updated - committing changes"
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add version_tracking/harper_deb13_latest_kernel.txt
+            git commit -m "Update tracked kernel version [skip ci]"
+            git push || echo "⚠️  Could not push (may be read-only)"
+          fi
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Kernel release check failed"
+          exit 1

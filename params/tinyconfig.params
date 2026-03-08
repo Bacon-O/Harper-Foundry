@@ -1,0 +1,162 @@
+# ==============================================================================
+# HARPER FOUNDRY: TINYCONFIG QUICK TEST CONFIGURATION
+# ==============================================================================
+# This configuration is designed for FAST pipeline testing, not production use.
+# Build time: 2-5 minutes vs 30-60+ minutes for full builds.
+# Use this to quickly validate changes to the foundry itself.
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
+# HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
+# Note: REPO_ROOT is auto-detected
+BUILD_WORKSPACE_DIR=""
+HOST_OUTPUT_DIR=""
+
+# When true, repo-relative defaults based on params file name
+# When false aboslute outpaths are respected 
+USE_PARAM_SCOPED_DIRS="true"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# Prestart config
+PRE_BUILD_HOOKS=(
+    "mount_tpmfs.sh"
+)
+POST_BUILD_HOOKS=(
+    "umount_tpmfs.sh"
+    "sleep.sh"
+)
+
+TPMFS_MOUNT_POINT="/tmp/tpmfs"
+
+# --- Foundry Execution ---
+# Using the tinyconfig quick test build script
+FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
+INCREMENTAL_BUILD="false"
+
+# --- Foundry artifact export configuration ---
+# If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
+# Right now SFTP and RSYNC are supported as delivery methods.
+# Both require previous configuration
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD="sftp"
+REMOTE_DELIVERY_HOST="127.0.0.1"
+REMOTE_DELIVERY_USER="debian"
+REMOTE_DELIVERY_PATH="/mnt/build-data/remote-test/"
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
+
+# --- Foundry Image Configuration ---
+DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# ==============================================================================
+
+# Versioning & Tagging
+BUILD_ARCH_TAG="amd64v3"
+RELEASE_TAG="harper-test"
+
+# --- Target Specifications ---
+TARGET_ARCH="x86_64"
+CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
+
+# --- Kernel Source Strategy (Plugin-based) ---
+# Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
+KERNEL_SOURCE="kernel.org"
+# Use latest LTS kernel by default (stable, long-term support)
+KERNEL_VERSION="lts"
+# Other options:
+#   KERNEL_VERSION="latest"  # Latest stable release
+#   KERNEL_VERSION="rc"      # Latest mainline/RC
+#   KERNEL_VERSION="6.11.8"  # Specific version
+
+DEB_HOST_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+
+BUILD_DEB_BUILD_ARCH="arm64"
+BUILD_DEB_TARGET_ARCH="amd64"
+BUILD_CC="clang --target=x86_64-linux-gnu"
+BUILD_HOSTLD="x86_64-linux-gnu-ld"
+BUILD_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+BUILD_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+BUILD_LLVM="1"
+
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Defaults to nproc-1 (min 1) when empty
+# Set to "ALL" to use all available cores, or specify a number (e.g., 4)
+PARALLEL_JOBS="ALL"
+
+# --- Build Strategy ---
+# Tinyconfig is a kbuild target, not a file - handles minimal kernel generation
+BASE_CONFIG="tinyconfig"
+# No tuning config for tinyconfig - we want absolute minimum
+TUNING_CONFIG=""
+
+# --- Patches if any ---
+
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# ==============================================================================
+
+# --- QA Flags ---
+# For quick tests, we only do minimal validation
+BYPASS_QA="false"
+ENABLE_QEMU_TESTS="false"
+
+# Use RELAXED mode - warn but don't fail on missing nice-to-haves
+QA_MODE="RELAXED"
+
+# Only run essential file validation tests
+QA_TESTS=(
+    "filesexists.sh"
+)
+
+# No test packages for quick builds
+QA_TEST_PACKAGE=(
+    
+)
+
+# --- Chemical Audit: Critical (Must Pass) ---
+# For tinyconfig, we only check absolute essentials
+QA_CRITICAL_CHECKS=( 
+    "CONFIG_TTY=y"
+    "CONFIG_PRINTK=y"
+)
+
+# --- Chemical Audit: Optional (Warn Only) ---
+# Much shorter list for tinyconfig tests
+QA_OPTIONAL_CHECKS=(
+    "CONFIG_BLK_DEV=y"
+    "CONFIG_EXT4_FS=y"
+    "CONFIG_PROC_FS=y"
+    "CONFIG_SYSFS=y"
+)
+
+# --- VM Proving Ground Specs (Not used for quick tests) ---
+QA_VM_MEMORY="512M"
+QA_VM_CORES="2"
+QA_VM_TIMEOUT="15s"
+
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()

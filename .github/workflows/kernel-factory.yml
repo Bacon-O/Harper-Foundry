@@ -1,18 +1,165 @@
 name: Harper Kernel Factory
+
+# Build Strategy:
+# - Manual dispatch only: Dual dropdown - select base params + optional testing overrides
+# - This is a public reference repo - shadow repo has production pipelines
+
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: # Allows you to trigger it manually from the "Actions" tab
+  workflow_dispatch:
+    inputs:
+      base_params_gh:
+        description: 'Base Configuration'
+        type: choice
+        required: true
+        default: 'tinyconfig.params'
+        options:
+          - 'tinyconfig.params'
+          - 'harper_deb13.params'
+      
+      override_params_gh:
+        description: 'Apply Override'
+        type: choice
+        required: true
+        default: 'none'
+        options:
+          - 'none'
+          - '_test_overrides.params'
+          - '_harper_numa.params'
 
 jobs:
-  kernel-pipeline:
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Install shellcheck
+  #       run: |
+  #         sudo apt-get update -y
+  #         sudo apt-get install -y shellcheck
+
+  #     # Note: *.params files are intentionally excluded from linting.
+  #     # They are configuration files (VAR=value assignments), not executable scripts.
+  #     - name: Shellcheck
+  #       run: |
+  #         mapfile -t files < <(git ls-files "*.sh")
+  #         if [[ "${#files[@]}" -eq 0 ]]; then
+  #           echo "No shell scripts found."
+  #           exit 0
+  #         fi
+  #         shellcheck -x "${files[@]}"
+
+  preheat:
+    # TODO: Re-enable lint job once all shellcheck issues are resolved
+    # needs: lint
+    runs-on: self-hosted
+    outputs:
+      args: ${{ steps.set-args.outputs.args }}
+      production_config: ${{ steps.set-args.outputs.production_config }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Configure Arguments
+        id: set-args
+        env:
+          BASE_PARAMS: ${{ github.event.inputs.base_params_gh }}
+          OVERRIDE_PARAMS: ${{ github.event.inputs.override_params_gh }}
+        run: |
+          OVERRIDE_FILE=""
+
+          # Manual dispatch is the only trigger for this public reference repo
+          # Use dual dropdown selection: base params + optional overrided
+          
+          echo "🕹️ Manual Dispatch"
+          echo "   Base: $BASE_PARAMS"
+          echo "   Override: $OVERRIDE_PARAMS"
+          
+          # Check if override mode is selected
+          if [[ "$OVERRIDE_PARAMS" != "none" ]]; then
+            # Use _test_overrides.params with PRODUCTION_CONFIG env var
+            BASE_FILE="params/$BASE_PARAMS"
+            OVERRIDE_FILE="params/$OVERRIDE_PARAMS"
+            echo "🧪 Applying testing overrides to $BASE_PARAMS"
+            echo "args=--params-file $BASE_FILE --overrides $OVERRIDE_FILE" >> $GITHUB_OUTPUT
+          else
+            # Use base params directly (no override)
+            BASE_FILE="params/$BASE_PARAMS"
+            echo "📦 Using $BASE_PARAMS directly (no overrides)"
+            echo "args=--params-file $BASE_FILE" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "🚀 Selected Blueprint: $BASE_FILE"
+      - name: Pre Hooks Configure
+        env:
+          PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
+          ARGS: ${{ steps.set-args.outputs.args }}
+        run: |
+          bash ./scripts/pre_build_hooks.sh $ARGS
+      - name: Charge Audit
+        env:
+          PRODUCTION_CONFIG: ${{ steps.set-args.outputs.production_config }}
+          ARGS: ${{ steps.set-args.outputs.args }}
+        run: |
+          bash ./scripts/validate.sh $ARGS
+
+  smelt:
+    needs: preheat
     runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      
+      - name: Ignition
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/launch.sh $ARGS
 
-      - name: Foundry (Build)
-        run: bash ./start_build.sh
+  analysis:
+    needs: [preheat, smelt]
+    if: always()
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Material QA
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/material_analysis.sh $ARGS
 
-      - name: Proving Ground (Test)
-        run: bash ./scripts/smoke_test.sh
+  delivery:
+    needs: [preheat, smelt, analysis]
+    if: always() && (github.event.inputs.override_params_gh == 'none')
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Artifact Export
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/artifact_export.sh $ARGS
+          
+  cleanup:
+    needs: [preheat, analysis, smelt, delivery]
+    if: always() 
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Purge Slag
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/clean.sh $ARGS
+      - name: Post Hooks Configure
+        env:
+          PRODUCTION_CONFIG: ${{ needs.preheat.outputs.production_config }}
+          ARGS: ${{ needs.preheat.outputs.args }}
+        run: |
+          bash ./scripts/post_build_hooks.sh $ARGS
