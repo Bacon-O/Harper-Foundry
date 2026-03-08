@@ -58,7 +58,7 @@ jobs:
       production_config: ${{ steps.set-args.outputs.production_config }}
     steps:
       - name: Checkout Repository
-        uses: https://github.com/actions/checkout@v4
+        uses: actions/checkout@v4
       
       - name: Configure Arguments
         id: set-args
@@ -107,7 +107,7 @@ jobs:
     needs: preheat
     runs-on: self-hosted
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: Ignition
         env:
