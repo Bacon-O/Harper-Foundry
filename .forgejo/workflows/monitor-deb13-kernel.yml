@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build even if version unchanged'
+        description: 'Force build'
         type: boolean
         required: false
         default: 'false'
@@ -37,7 +37,10 @@ jobs:
         run: |
           cd "$WORKSPACE_PATH"
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Forcing build"
             export FORCE_BUILD="true"
+          else
+            echo "No build forced - normal operation"
           fi
           
           # Source runner and execute trigger check
