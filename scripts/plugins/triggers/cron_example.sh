@@ -103,7 +103,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # ==============================================================================
 
 # OPTION A: Build directly with Docker
-# if [[$BUILD_NEEDED -eq 0 ]]; then
+# if [[ $BUILD_NEEDED -eq 0 ]]; then
 #     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
 #     log_to_file "Executing build with tinyconfig for testing..."
     
@@ -132,7 +132,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # fi
 
 # OPTION B: Use a dedicated build execution script
-# if [[$BUILD_NEEDED -eq 0 ]]; then
+# if [[ $BUILD_NEEDED -eq 0 ]]; then
 #     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
 #     
 #     if "$REPO_ROOT/scripts/execute_triggered_build.sh" 2>&1 | tee -a "$LOGFILE"; then
@@ -145,14 +145,15 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # fi
 
 # OPTION C: Queue the build for later execution
-# if [[$BUILD_NEEDED -eq 0 ]]; then
-#     # Queue includes the detected version (exported by check function)
-#     echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_KERNEL_VERSION}" >> "$REPO_ROOT/build_queue.txt"
-#     log_to_file "Build queued for kernel version ${DETECTED_KERNEL_VERSION}"
-#     
-#     # Note: When processing queue, call build_successful/build_failed callbacks
-#     # to update version tracking after build completes
-# fi
+if [[ $BUILD_NEEDED -eq 0 ]]; then
+    # Queue includes the detected version (exported by check function)
+    echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_KERNEL_VERSION}" >> "$REPO_ROOT/build_queue.txt"
+    log_to_file "Build queued for kernel version ${DETECTED_KERNEL_VERSION}"
+    
+    # Note: When processing queue, call build_successful/build_failed callbacks
+    build_failed harper_deb13_kernel > >(tee -a "$LOGFILE") 2>&1
+    # to update version tracking after build completes
+fi
 
 log_to_file "=== Trigger Cron Job Complete ==="
 
