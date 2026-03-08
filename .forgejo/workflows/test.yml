@@ -1,0 +1,12 @@
+name: Alice Check-in
+on: [push]
+
+jobs:
+  hello-alice:
+    runs-on: self-hosted
+    steps:
+      - name: Who am I?
+        run: |
+          hostname
+          whoami
+          echo "I am running on Forgejo!"
