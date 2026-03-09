@@ -43,7 +43,7 @@ jobs:
           
           check_if_build_is_needed harper_deb13_kernel $FORCE_OPT
           build_return_code=$?
-          if [[ build_return -eq 0 ]]; then
+          if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
             echo "🚀 New kernel found. Waking Alice..."
             /scripts/alice_power.sh on
