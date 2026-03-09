@@ -26,11 +26,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check Kernel & Power On
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+          WORKSPACE_PATH: ${{ github.workspace }}
         id: check
         run: |
           source ./scripts/plugins/triggers/runner.sh
-          check_if_build_is_needed harper_deb13_kernel
+          cd "$WORKSPACE_PATH"
+          FORCE_OPT=""
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Forcing build"
+            FORCE_OPT="--force"
+          else
+            echo "No build forced - normal operation"
+          fi
           
+          check_if_build_is_needed harper_deb13_kernel $FORCE_OPT
+
           if [[ $? -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
             echo "🚀 New kernel found. Waking Alice..."
