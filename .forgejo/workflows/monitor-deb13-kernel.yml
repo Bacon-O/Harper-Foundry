@@ -56,7 +56,7 @@ jobs:
     name: Build Harper Kernel
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true'
-    runs-on: [self-hosted, alice-builder]  # This must match the label on Alice's runner  
+    runs-on: alice-builder  # This must match the label on Alice's runner  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
