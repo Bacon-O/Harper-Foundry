@@ -16,19 +16,38 @@ on:
 
 
 jobs:
-  monitor-and-trigger:
-    runs-on: self-hosted
-    name: Check for Debian Trixie Kernel Updates
-    
+  monitor-and-power:
+    name: Check Version and Power On Alice
+    runs-on: power-control  # This is your Debian container runner
+    outputs:
+      build_needed: ${{ steps.check.outputs.force_build }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Kernel & Power On
+        id: check
+        run: |
+          source ./scripts/plugins/triggers/runner.sh
+          check_if_build_is_needed harper_deb13_kernel
+          
+          if [[ $? -eq 0 ]]; then
+            echo "build_needed=true" >> $GITHUB_OUTPUT
+            echo "🚀 New kernel found. Waking Alice..."
+            /data/scripts/alice_power.sh on
+          else
+            echo "build_needed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No update needed."
+          fi
+  
+  compile-on-alice:
+    name: Build Harper Kernel
+    needs: monitor-and-power
+    if: needs.monitor-and-power.outputs.build_needed == 'true'
+    runs-on: alice-builder  # This must match the label on Alice's runner  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Set up monitoring environment
-        run: |
-          # Ensure curl and jq are available
-          # command -v curl > /dev/null || (apt-get update && apt-get install -y curl)
-          # command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
       
       - name: Run kernel release trigger
         env:
