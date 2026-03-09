@@ -20,7 +20,7 @@ jobs:
     name: Check Version and Power On Alice
     runs-on: power-control  # This is your Debian container runner
     outputs:
-      build_needed: ${{ steps.check.outputs.force_build }}
+      build_needed: ${{ steps.check.outputs.build_needed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
