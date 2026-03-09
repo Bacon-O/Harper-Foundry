@@ -36,9 +36,10 @@ jobs:
           WORKSPACE_PATH: ${{ github.workspace }}
         run: |
           cd "$WORKSPACE_PATH"
+          FORCE_OPT=""
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
             echo "Forcing build"
-            export FORCE_BUILD="true"
+            FORCE_OPT="--force"
           else
             echo "No build forced - normal operation"
           fi
@@ -46,9 +47,7 @@ jobs:
           # Source runner and execute trigger check
           source ./scripts/plugins/triggers/runner.sh
           
-          #check_if_build_is_needed harper_deb13_kernel --force
-          check_if_build_is_needed harper_deb13_kernel
-          
+          check_if_build_is_needed harper_deb13_kernel $FORCE_OPT
           BUILD_NEEDED=$?
           
           if [[ $BUILD_NEEDED -eq 0 ]]; then
