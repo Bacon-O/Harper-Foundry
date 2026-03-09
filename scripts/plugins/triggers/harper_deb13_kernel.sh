@@ -248,12 +248,12 @@ harper_deb13_kernel_build_failed() {
     # This prevents retrying the same failed version repeatedly
     # Uncomment if you want to skip failed versions:
     #
-    # cat > "$VERSION_TRACKING_FILE" << EOF
-# KERNEL_VERSION=${DETECTED_KERNEL_VERSION:-unknown}
-# LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
-# BUILD_STATUS=failed
-# BUILD_ERROR=$error_info
-# EOF
+    cat > "$VERSION_TRACKING_FILE" << EOF
+KERNEL_VERSION=${DETECTED_KERNEL_VERSION:-unknown}
+LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+BUILD_STATUS=failed
+BUILD_ERROR=$error_info
+EOF
     
     log_warn "Version tracking NOT updated - will retry this version on next trigger check"
     

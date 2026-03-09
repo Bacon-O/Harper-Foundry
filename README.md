@@ -610,3 +610,4 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 *   Improve plugins/triggers
 *   Improve plugins/notifiers
 *   Refine "harvest" steps
+*   Builder pre-reqs (Forgejo: npm, node, jq)
