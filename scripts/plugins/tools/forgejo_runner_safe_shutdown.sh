@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-#_ORIG_ARGS=("$@")
-#set --
-#source "$(dirname "$0")/../../env_setup.sh"
-#set -- "${_ORIG_ARGS[@]}"
+_ORIG_ARGS=("$@")
+ENV_SETUP_ALLOW_UNKNOWN_ARGS=true
+source "$(dirname "$0")/../../env_setup.sh" "${_ORIG_ARGS[@]}"
 
 usage() {
     echo "Usage: $0 [--forgejo-url <url>] [--api-token <token>] [--forgejo-label <label>]"

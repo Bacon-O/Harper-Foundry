@@ -11,6 +11,7 @@ DOCKER_REBUILD="false"
 BYPASS_QA_CLI="false"
 INCREMENTAL_BUILD="false"
 EXEC_OVERRIDE=""
+UNKNOWN_ARGS=()
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -93,13 +94,21 @@ while [[ "$#" -gt 0 ]]; do
             QA_ONLY_BUILD_DIR="$1"
             ;;
         *)
-            echo "❌ Env_Setup: Error: Unknown option '$1'"
-            echo "Run with --help for a list of available options."
-            exit 1
+            if [[ "${ENV_SETUP_ALLOW_UNKNOWN_ARGS:-false}" == "true" ]]; then
+                UNKNOWN_ARGS+=("$1")
+            else
+                echo "❌ Env_Setup: Error: Unknown option '$1'"
+                echo "Run with --help for a list of available options."
+                exit 1
+            fi
             ;;
     esac
     shift 
 done
+
+if [[ "${ENV_SETUP_ALLOW_UNKNOWN_ARGS:-false}" == "true" ]]; then
+    set -- "${UNKNOWN_ARGS[@]}"
+fi
 
 # Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
 if [[ "$TEST_RUN_MODE" == "true" ]] && [[ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry_template.params" ]]; then
