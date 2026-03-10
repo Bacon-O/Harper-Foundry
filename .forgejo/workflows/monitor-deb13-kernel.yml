@@ -133,4 +133,4 @@ jobs:
           ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
             --api-token "$FORGEJO_API_TOKEN" \
             --forgejo-url "$FORGEJO_URL" \
-            --forgejo-runner-label "$FORGEJO_RUNNER_LABEL"
+            --forgejo-label "$FORGEJO_RUNNER_LABEL"
