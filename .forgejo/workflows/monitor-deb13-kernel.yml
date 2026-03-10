@@ -2,17 +2,6 @@ name: Monitor Debian Trixie Kernel Releases
 
 # Trigger on schedule (check for new releases every 6 hours)
 on:
-  env:
-    YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
-    YML__FORGEJO_URL: ${{ github.server_url }} 
-    YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
-    YML__WORKSPACE_PATH: ${{ github.workspace }}
-    YML__FORGEJO_RUNNER_BUILDER: alice-builder
-    YML__FORGEJO_RUNNER_TRIGGER: power-control
-    YML__PARAMS_FILE: params/tinyconfig.params
-    YML__KERNEL_TITLE: Harper
-    YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
-    YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
   # schedule:
   #   - cron: '0 */6 * * *'  # Every 6 hours
   
@@ -25,6 +14,17 @@ on:
         required: false
         default: 'false'
 
+env:
+  YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
+  YML__FORGEJO_URL: ${{ github.server_url }} 
+  YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+  YML__WORKSPACE_PATH: ${{ github.workspace }}
+  YML__FORGEJO_RUNNER_BUILDER: alice-builder
+  YML__FORGEJO_RUNNER_TRIGGER: power-control
+  YML__PARAMS_FILE: params/tinyconfig.params
+  YML__KERNEL_TITLE: Harper
+  YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
+  YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
 
 jobs:
   monitor-and-power:
@@ -137,7 +137,7 @@ jobs:
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
           ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
-            --params-file "$YML__PARAMS_FILE"
+            --params-file "$YML__PARAMS_FILE" \
             --api-token "$YML__API_TOKEN" \
             --forgejo-url "$YML__FORGEJO_URL" \
-            --forgejo-label "$YML__FORGEJO_RUNNER_LABEL"
+            --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
