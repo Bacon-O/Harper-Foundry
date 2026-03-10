@@ -29,7 +29,7 @@ env:
 jobs:
   monitor-and-power:
     name: Check Version and Power On Builder
-    runs-on: ${{ env.YML__FORGEJO_RUNNER_TRIGGER}}  # This is your Debian container runner
+    runs-on: power-control  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
     steps:
@@ -66,7 +66,7 @@ jobs:
     name: Build Kernel on Builder
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true'
-    runs-on: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}  # This must match the label on a builder runner
+    runs-on: alice-builder  # This must match the label on a builder runner
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
