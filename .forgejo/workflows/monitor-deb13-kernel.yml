@@ -28,7 +28,7 @@ on:
 
 jobs:
   monitor-and-power:
-    name: Check Version and Power On Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
+    name: Check Version and Power On Builder
     runs-on: ${{ env.YML__FORGEJO_RUNNER_TRIGGER}}  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
@@ -63,7 +63,7 @@ jobs:
           fi
   
   compile-on-builder:
-    name: Build ${{ env.YML__KERNEL_TITLE }} Kernel on Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
+    name: Build Kernel on Builder
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true'
     runs-on: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}  # This must match the label on a builder runner
@@ -131,7 +131,7 @@ jobs:
           exit 1
       
       # Ensure this runs regardless of previous step outcomes to power off Alice
-      - name: Check Queue then Power Off Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
+      - name: Check Queue then Power Off Builder
         if: always()
         run: |
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
