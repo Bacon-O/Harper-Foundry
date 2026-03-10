@@ -14,7 +14,7 @@ set -e
 # enviroment variable used:
 #   - SHUTDOWN_DELAY_SECONDS - Optional environment variable to specify a delay (in seconds) before the shutdown command is executed. If not set, the shutdown will proceed immediately.
 
-source "$(dirname "$0")/../../env_setup.sh" "$@"
+#source "$(dirname "$0")/../../env_setup.sh" "$@"
 
 
 host_shutdown() {

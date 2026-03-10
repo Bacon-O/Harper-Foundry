@@ -93,7 +93,7 @@ while [[ "$#" -gt 0 ]]; do
             QA_ONLY_BUILD_DIR="$1"
             ;;
         *)
-            echo "❌ Error: Unknown option '$1'"
+            echo "❌ Env_Setup: Error: Unknown option '$1'"
             echo "Run with --help for a list of available options."
             exit 1
             ;;
@@ -342,6 +342,6 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         done
     fi
 else
-    echo "❌ Error: $PARAMS_FILE not found!"
+    echo "❌ Env_Setup: Error: Params File: $PARAMS_FILE not found!"
     exit 1
 fi

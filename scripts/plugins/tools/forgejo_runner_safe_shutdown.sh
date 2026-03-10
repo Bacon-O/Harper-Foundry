@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-# TODO check if we need to pass "$@" still
-source "$(dirname "$0")/../../env_setup.sh"
+#_ORIG_ARGS=("$@")
+#set --
+#source "$(dirname "$0")/../../env_setup.sh"
+#set -- "${_ORIG_ARGS[@]}"
 
 usage() {
     echo "Usage: $0 [--forgejo-url <url>] [--api-token <token>] [--forgejo-label <label>]"
@@ -42,15 +44,15 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            echo "Error: Unknown option '$1'."
+            echo "Forgejo: Error: Unknown option '$1'."
             usage
             exit 1
             ;;
     esac
 done
 
-source "$(dirname "$0")/forgejo_que_clear.sh" "$@"
-source "$(dirname "$0")/power_off.sh" "$@"
+source "$(dirname "$0")/forgejo_que_clear.sh"
+source "$(dirname "$0")/power_off.sh"
 
 echo "Checking if Forgejo queue is empty for runner label '$FORGEJO_RUNNER_LABEL' before shutting down..."
 if forgejo_is_que_empty; then
