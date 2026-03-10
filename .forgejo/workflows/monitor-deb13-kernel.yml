@@ -2,6 +2,17 @@ name: Monitor Debian Trixie Kernel Releases
 
 # Trigger on schedule (check for new releases every 6 hours)
 on:
+  env:
+    YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
+    YML__FORGEJO_URL: ${{ github.server_url }} 
+    YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+    YML__WORKSPACE_PATH: ${{ github.workspace }}
+    YML__FORGEJO_RUNNER_BUILDER: alice-builder
+    YML__FORGEJO_RUNNER_TRIGGER: power-control
+    YML__PARAMS_FILE: params/tinyconfig.params
+    YML__KERNEL_TITLE: Harper
+    YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
+    YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
   # schedule:
   #   - cron: '0 */6 * * *'  # Every 6 hours
   
@@ -17,8 +28,8 @@ on:
 
 jobs:
   monitor-and-power:
-    name: Check Version and Power On Alice
-    runs-on: power-control  # This is your Debian container runner
+    name: Check Version and Power On Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
+    runs-on: ${{ env.YML__FORGEJO_RUNNER_TRIGGER}}  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
     steps:
@@ -28,11 +39,10 @@ jobs:
       - name: Check Kernel & Power On
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
-          WORKSPACE_PATH: ${{ github.workspace }}
         id: check
         run: |
+          cd "$YML__WORKSPACE_PATH"
           source ./scripts/plugins/triggers/runner.sh
-          cd "$WORKSPACE_PATH"
           FORCE_OPT=""
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
             echo "Forcing build"
@@ -41,22 +51,22 @@ jobs:
             echo "No build forced - normal operation"
           fi
           
-          check_if_build_is_needed harper_deb13_kernel $FORCE_OPT
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
           build_return_code=$?
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
-            echo "🚀 New kernel found. Waking Alice..."
+            echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
             /scripts/alice_power.sh on
           else
             echo "build_needed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No update needed."
           fi
   
-  compile-on-alice:
-    name: Build Harper Kernel
+  compile-on-builder:
+    name: Build ${{ env.YML__KERNEL_TITLE }} Kernel on Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true'
-    runs-on: alice-builder  # This must match the label on Alice's runner  
+    runs-on: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}  # This must match the label on a builder runner
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,9 +74,8 @@ jobs:
       - name: Run kernel release trigger
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
-          WORKSPACE_PATH: ${{ github.workspace }}
         run: |
-          cd "$WORKSPACE_PATH"
+          cd "$YML__WORKSPACE_PATH"
           FORCE_OPT=""
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
             echo "Forcing build"
@@ -78,21 +87,21 @@ jobs:
           # Source runner and execute trigger check
           source ./scripts/plugins/triggers/runner.sh
           
-          check_if_build_is_needed harper_deb13_kernel $FORCE_OPT
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
           BUILD_NEEDED=$?
           
           if [[ $BUILD_NEEDED -eq 0 ]]; then
             echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
             
             # Execute build with tinyconfig for CI testing
-            if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a /tmp/build.log; then
+            if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
               # Update tracking via plugin callback
-              build_successful harper_deb13_kernel
+              build_successful $YML__KERNEL_TRIGGER_LABEL
             else
               echo "❌ Build failed"
               # Handle failure via plugin callback
-              build_failed harper_deb13_kernel "ci_build_failed"
+              build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
             fi
           else
             echo "ℹ️  No new kernel version available"
@@ -101,16 +110,16 @@ jobs:
       - name: Commit updated version tracking (if changed)
         if: success()
         run: |
-          cd "$WORKSPACE_PATH"
+          cd "$YML__WORKSPACE_PATH"
           
           # Check if version tracking file was updated by build_successful callback
-          if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
+          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
             echo "✅ Version tracking updated - committing changes"
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add version_tracking/harper_deb13_latest_kernel.txt
+            git config --local user.email "$YML__FORGEJO_RUNNER_BUILDER@localhost.com"
+            git config --local user.name "$YML__FORGEJO_RUNNER_BUILDER"
+            git add $YML__KERNEL_TRACKING_FILE
             git commit -m "Update tracked kernel version [skip ci]"
             git push || echo "⚠️  Could not push (may be read-only)"
           fi
@@ -122,15 +131,13 @@ jobs:
           exit 1
       
       # Ensure this runs regardless of previous step outcomes to power off Alice
-      - name: Check Queue then Power Off Alice
+      - name: Check Queue then Power Off Builder: ${{ env.YML__FORGEJO_RUNNER_BUILDER }}
         if: always()
-        env:
-          FORGEJO_API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
-          FORGEJO_URL: ${{ github.server_url }} 
-          FORGEJO_RUNNER_LABEL: alice-builder
         run: |
-          echo "Checking if build queue is empty before powering off Alice..."
+          echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
+          cd "$YML__WORKSPACE_PATH"
           ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
-            --api-token "$FORGEJO_API_TOKEN" \
-            --forgejo-url "$FORGEJO_URL" \
-            --forgejo-label "$FORGEJO_RUNNER_LABEL"
+            --params-file "$YML__PARAMS_FILE"
+            --api-token "$YML__API_TOKEN" \
+            --forgejo-url "$YML__FORGEJO_URL" \
+            --forgejo-label "$YML__FORGEJO_RUNNER_LABEL"
