@@ -9,6 +9,9 @@ usage() {
     echo "Usage: $0 [--forgejo-url <url>] [--api-token <token>] [--forgejo-label <label>]"
 }
 
+echo "current args:"
+ehco "${[@]}"
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --api-token)
