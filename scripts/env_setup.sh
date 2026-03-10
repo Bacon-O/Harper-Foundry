@@ -107,6 +107,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [[ "${ENV_SETUP_ALLOW_UNKNOWN_ARGS:-false}" == "true" ]]; then
+    echo "The following parameters have not been consumed by env_setup.eh:"
+    echo "${UNKNOWN_ARGS[@]}"
     set -- "${UNKNOWN_ARGS[@]}"
 fi
 
