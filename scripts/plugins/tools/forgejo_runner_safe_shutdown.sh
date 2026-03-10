@@ -10,7 +10,7 @@ usage() {
 }
 
 echo "current args:"
-ehco "${[@]}"
+ehco "$@""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
