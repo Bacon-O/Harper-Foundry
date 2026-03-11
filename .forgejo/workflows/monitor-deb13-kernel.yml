@@ -73,14 +73,14 @@ jobs:
   
   compile-on-builder:
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
-    name: Build Kernel on Builder
+    name: Build Kernel
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true' && needs.monitor-and-power.outputs.detected_kernel_version != ''
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Run kernel release trigger
+      - name: Build Kernel: start_build.sh 
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
           DETECTED_KERNEL_VERSION: ${{ needs.monitor-and-power.outputs.detected_kernel_version }}
@@ -139,10 +139,9 @@ jobs:
         run: |
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
-          disabled for testing - re-enable once stable
+          
           ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
             --params-file "$YML__PARAMS_FILE" \
             --api-token "$YML__API_TOKEN" \
             --forgejo-url "$YML__FORGEJO_URL" \
             --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
-          # echo "⚠️  Safe shutdown script is currently disabled for testing - skipping power off"
