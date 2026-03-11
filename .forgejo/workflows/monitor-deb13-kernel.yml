@@ -1,11 +1,11 @@
 name: Monitor Debian Trixie Kernel Releases
 
 # Trigger on schedule
-# m H * * *
+# m h * * *
 # CDT to UTC, CDT + 5
 on:
   schedule:
-    - cron: '37 18 * * *'
+    - cron: '35 19 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
