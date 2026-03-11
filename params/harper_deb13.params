@@ -33,7 +33,7 @@
 #
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-BUILD_WORKSPACE_DIR=""
+BUILD_WORKSPACE_DIR="/mnt/ramdisk/"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
 # When true, repo-relative defaults based on params file name
@@ -65,7 +65,7 @@ INCREMENTAL_BUILD="false"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFACT_DELIVERY="false"
+ARTIFACT_DELIVERY="true"
 ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
 ARTIFACT_DELIVERY_METHOD="sftp"
 REMOTE_DELIVERY_HOST="10.21.0.11"

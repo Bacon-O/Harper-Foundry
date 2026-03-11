@@ -135,7 +135,8 @@ EOF
     local last_compiled_version="${KERNEL_VERSION:-unknown}"
     local last_build_date="${LAST_BUILD_DATE:-unknown}"
     local build_status="${BUILD_STATUS:-unknown}"
-    local last_sched_priority="${SCHED_PRIORITY:-1}"
+    # currenlty now used
+    # local last_sched_priority="${SCHED_PRIORITY:-1}"
     
     log_ok "Last compiled version: $last_compiled_version"
     log_ok "Last build date: $last_build_date"

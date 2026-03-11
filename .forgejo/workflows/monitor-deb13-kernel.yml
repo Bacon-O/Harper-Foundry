@@ -3,7 +3,7 @@ name: Monitor Debian Trixie Kernel Releases
 # Trigger on schedule (check for new releases every 6 hours)
 on:
   schedule:
-    - cron: '15 17 * * *'
+    - cron: '15 35 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
@@ -19,7 +19,8 @@ env:
   YML__FORGEJO_URL: ${{ github.api_url }} 
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  YML__PARAMS_FILE: params/tinyconfig.params
+  # YML__PARAMS_FILE: params/tinyconfig.params
+  YML__PARAMS_FILE: params/params/harper_deb13.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
@@ -136,10 +137,10 @@ jobs:
         run: |
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
-          # disabled for testing - re-enable once stable
-          # ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
-          #   --params-file "$YML__PARAMS_FILE" \
-          #   --api-token "$YML__API_TOKEN" \
-          #   --forgejo-url "$YML__FORGEJO_URL" \
-          #   --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
-          echo "⚠️  Safe shutdown script is currently disabled for testing - skipping power off"
+          disabled for testing - re-enable once stable
+          ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
+            --params-file "$YML__PARAMS_FILE" \
+            --api-token "$YML__API_TOKEN" \
+            --forgejo-url "$YML__FORGEJO_URL" \
+            --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
+          # echo "⚠️  Safe shutdown script is currently disabled for testing - skipping power off"
