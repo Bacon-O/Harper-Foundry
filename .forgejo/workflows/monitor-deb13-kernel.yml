@@ -16,20 +16,21 @@ on:
 
 env:
   YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
-  YML__FORGEJO_URL: ${{ github.server_url }} 
+  YML__FORGEJO_URL: ${{ github.api_url }} 
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  YML__FORGEJO_RUNNER_BUILDER: alice-builder
-  YML__FORGEJO_RUNNER_TRIGGER: power-control
   YML__PARAMS_FILE: params/tinyconfig.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+  # web UI vars - Are here for reference
+  # vars.RUNNER_BUILDER_LABEL 
+  # vars.RUNNER_TRIGGER_LABEL
 
 jobs:
   monitor-and-power:
     name: Check Version and Power On Builder
-    runs-on: power-control  # This is your Debian container runner
+    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
     steps:
@@ -55,6 +56,7 @@ jobs:
           build_return_code=$?
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
+            echo "dectected kernel version: ${DETECTED_KERNEL_VERSION}"
             echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
             /scripts/alice_power.sh on
           else

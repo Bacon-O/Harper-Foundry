@@ -107,12 +107,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [[ "${ENV_SETUP_ALLOW_UNKNOWN_ARGS:-false}" == "true" ]]; then
-    echo "The following parameters have not been consumed by env_setup.eh:"
+    echo "The following parameters have not been consumed by env_setup.sh:"
     echo "${UNKNOWN_ARGS[@]}"
     set -- "${UNKNOWN_ARGS[@]}"
 fi
-
-echo "115 current args: $@"
 
 # Auto-select tinyconfig params if test-run mode is enabled and no custom config specified
 if [[ "$TEST_RUN_MODE" == "true" ]] && [[ "$PARAMS_FILE" == "${REPO_ROOT}/params/foundry_template.params" ]]; then
@@ -163,8 +161,6 @@ if [[ -f "$PARAMS_FILE" ]]; then
         source "$OVERRIDE_PARAMS"
         set +a
     fi
-
-    echo "167 current args: $@"
 
     # 3.5 Default host paths if not set in params
     USE_PARAM_SCOPED_DIRS="${USE_PARAM_SCOPED_DIRS:-true}"
@@ -357,7 +353,6 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
         done
     fi
 
-    echo "360 current args: $@"
 else
     echo "❌ Env_Setup: Error: Params File: $PARAMS_FILE not found!"
     exit 1

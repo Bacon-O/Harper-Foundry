@@ -2,15 +2,12 @@
 set -e
 
 _ORIG_ARGS=("$@")
-ENV_SETUP_ALLOW_UNKNOWN_ARGS=true
+export ENV_SETUP_ALLOW_UNKNOWN_ARGS=true
 source "$(dirname "$0")/../../env_setup.sh"
 
 usage() {
     echo "Usage: $0 [--forgejo-url <url>] [--api-token <token>] [--forgejo-label <label>]"
 }
-
-echo "current args:"
-echo "$@"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in

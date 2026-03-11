@@ -26,11 +26,26 @@ set -e
 ##########################################################################################################
 #
 # Security and permission commands
+# sudo nano /etc/polkit-1/rules.d/15-ramdisk.rules
+# Group permission configuration
+# polkit.addRule(function(action, subject) {
+#     if (action.id == "org.freedesktop.systemd1.manage-units" &&
+#         action.lookup("unit") == "ramdisk-48GB.service") {
+#         if (subject.isInGroup("GROUPNAME")) {
+#             return polkit.Result.YES;
+#         }
+#     }
+# });
 #
-# nano /etc/sudoers.d/debian-ramdisk.conf
-# Allows the debian user to run the ramdisk-48GB service
-# debian ALL=(ALL) NOPASSWD: /usr/bin/systemctl status ramdisk-48GB.service, /usr/bin/systemctl start ramdisk-48GB.service, /usr/bin/systemctl stop ramdisk-48GB.service, /usr/bin/systemctl restart ramdisk-48GB.service
-
+# User permission configuration
+# polkit.addRule(function(action, subject) {
+#     if (action.id == "org.freedesktop.systemd1.manage-units" &&
+#         action.lookup("unit") == "ramdisk-48GB.service") {
+#         if (subject.user == "USERNAME") {
+#             return polkit.Result.YES;
+#         }
+#     }
+# });
 # Required env vars:
 # RAMDISK_MOUNT_POINT - The mount point for the RAM disk (e.g., /mnt/ramdisk)
 # RAMDISK_SERVICE_NAME - The name of the systemd service managing the RAM disk (e.g., ramdisk-48GB.service)
@@ -68,7 +83,7 @@ ramkdisk_control() {
         exit 1
     fi
 
-    echo "Executing: sudo systemctl $command $RAMDISK_SERVICE_NAME"
-    sudo systemctl "$command" "$RAMDISK_SERVICE_NAME"
+    echo "Executing: systemctl $command $RAMDISK_SERVICE_NAME"
+    systemctl "$command" "$RAMDISK_SERVICE_NAME"
     return 0
 }
