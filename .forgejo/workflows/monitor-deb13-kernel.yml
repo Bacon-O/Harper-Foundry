@@ -57,7 +57,7 @@ jobs:
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
             echo "dectected kernel version: ${DETECTED_KERNEL_VERSION}"
-            echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
+            echo "🚀 New kernel found. Waking ${{ vars.RUNNER_BUILDER_LABEL }}..."
             /scripts/alice_power.sh on
           else
             echo "build_needed=false" >> $GITHUB_OUTPUT
