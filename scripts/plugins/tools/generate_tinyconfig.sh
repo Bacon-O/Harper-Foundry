@@ -37,8 +37,6 @@ POST_BUILD_HOOKS=(
     "sleep.sh"
 )
 
-TPMFS_MOUNT_POINT="/tmp/tpmfs"
-
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"

@@ -31,8 +31,8 @@ env:
 
 jobs:
   monitor-and-power:
+    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
     name: Check Version and Power On Builder
-    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
       detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
@@ -69,10 +69,10 @@ jobs:
           fi
   
   compile-on-builder:
+    runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
     name: Build Kernel on Builder
     needs: monitor-and-power
     if: needs.monitor-and-power.outputs.build_needed == 'true' && needs.monitor-and-power.outputs.detected_kernel_version != ''
-    runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}  # This must match the label on a builder runner
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -84,25 +84,9 @@ jobs:
           BUILD_NEEDED: ${{ needs.monitor-and-power.outputs.build_needed }}
         run: |
           cd "$YML__WORKSPACE_PATH"
-          # FORCE_OPT=""
-          # if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
-          #   echo "Forcing build"
-          #   FORCE_OPT="--force"
-          # else
-          #   echo "No build forced - normal operation"
-          # fi
-          
-          # Source runner and execute trigger check
 
           export DETECTED_KERNEL_VERSION
-
           source ./scripts/plugins/triggers/runner.sh
-          
-          ########################################################################
-          ### TODO START HERE AND FIX LOGIC WITH BUILD NEEDED FLAG ###
-          ########################################################################
-          #check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
-          #BUILD_NEEDED=$?
           
           if [[ $BUILD_NEEDED == "true" ]]; then
             echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
@@ -110,10 +94,12 @@ jobs:
             # Execute build with tinyconfig for CI testing
             if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
+              
               # Update tracking via plugin callback
               build_successful $YML__KERNEL_TRIGGER_LABEL
             else
               echo "❌ Build failed"
+              
               # Handle failure via plugin callback
               build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
             fi
@@ -125,7 +111,7 @@ jobs:
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-
+          # TODO script this
           # Check if version tracking file was updated by build_successful callback
           if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
@@ -156,3 +142,4 @@ jobs:
           #   --api-token "$YML__API_TOKEN" \
           #   --forgejo-url "$YML__FORGEJO_URL" \
           #   --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
+          echo "⚠️  Safe shutdown script is currently disabled for testing - skipping power off"

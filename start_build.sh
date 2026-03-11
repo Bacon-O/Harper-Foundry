@@ -409,7 +409,7 @@ else
 fi
 echo ""
 
-# 5. Export (Placeholder)
+# 5. Export
 if [[ "$ARTIFACT_DELIVERY" == "true" ]] || [[ "$ARTIFACT_DELIVERY" == "TRUE" ]]; then
     echo "📦 Phase 4: Exporting Artifacts to Remote Server (Not Implemented)..."
     _command=("./scripts/artifact_export.sh" "${BUILD_ARGS[@]}")

@@ -13,7 +13,7 @@
 # BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
 # HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
 # Note: REPO_ROOT is auto-detected
-BUILD_WORKSPACE_DIR=""
+BUILD_WORKSPACE_DIR="/mnt/ramdisk"
 HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
@@ -26,14 +26,12 @@ FOUNDRY_GID=""
 
 # Prestart config
 PRE_BUILD_HOOKS=(
-    "mount_tpmfs.sh"
-)
-POST_BUILD_HOOKS=(
-    "umount_tpmfs.sh"
-    "sleep.sh"
+    "ramdisk_mount.sh"
 )
 
-TPMFS_MOUNT_POINT="/tmp/tpmfs"
+# Post-build config
+POST_BUILD_HOOKS=(
+)
 
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
@@ -159,4 +157,6 @@ QA_VM_TIMEOUT="15s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+    "ramdisk_control_ext.sh"
+)

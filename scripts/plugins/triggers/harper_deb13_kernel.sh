@@ -37,8 +37,8 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-.}"
-VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/harper_deb13_latest_kernel.txt"
-DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/18670/repository/tags?search=bpo13"
+VERSION_TRACKING_FILE="${VERSION_TRACKING_FILE:-$REPO_ROOT/version_tracking/harper_deb13_latest_kernel.txt}"
+DEBIAN_SALSA_API="${DEBIAN_SALSA_API:-https://salsa.debian.org/api/v4/projects/18670/repository/tags?search=bpo13}"
 
 # ==============================================================================
 # FUNCTION: harper_deb13_kernel_trigger
