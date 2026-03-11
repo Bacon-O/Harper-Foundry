@@ -46,6 +46,16 @@ USE_PARAM_SCOPED_DIRS="true"
 FOUNDRY_UID=""
 FOUNDRY_GID=""
 
+# Prestart config
+PRE_BUILD_HOOKS=(
+    "ramdisk_mount.sh"
+)
+
+# Post-build config
+POST_BUILD_HOOKS=(
+    "ramdisk_umount.sh"
+)
+
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
 FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
@@ -212,4 +222,7 @@ VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+    "ramdisk_control_ext.sh"
+    "forgeojo_ext.sh"
+)
