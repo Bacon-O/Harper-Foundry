@@ -3,7 +3,7 @@ name: Monitor Debian Trixie Kernel Releases
 # Trigger on schedule (check for new releases every 6 hours)
 on:
   schedule:
-    - cron: '15 35 * * *'
+    - cron: '15 38 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
@@ -20,7 +20,7 @@ env:
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
   # YML__PARAMS_FILE: params/tinyconfig.params
-  YML__PARAMS_FILE: params/params/harper_deb13.params
+  YML__PARAMS_FILE: params/harper_deb13.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
