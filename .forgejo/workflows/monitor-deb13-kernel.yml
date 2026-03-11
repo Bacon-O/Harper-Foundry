@@ -1,6 +1,8 @@
 name: Monitor Debian Trixie Kernel Releases
 
-# Trigger on schedule (check for new releases every 6 hours)
+# Trigger on schedule
+# m H * * *
+# CDT to UTC, CDT + 5
 on:
   schedule:
     - cron: '39 17 * * *'
