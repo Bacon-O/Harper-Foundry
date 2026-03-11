@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
                 usage
                 exit 1
             fi
-            expor FORGEJO_URL="$2"
+            export FORGEJO_URL="$2"
             shift 2
             ;;
         --forgejo-label)
@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
                 usage
                 exit 1
             fi
-            FORGEJO_RUNNER_LABEL="$2"
+            export FORGEJO_RUNNER_LABEL="$2"
             shift 2
             ;;
         --help|-h)
