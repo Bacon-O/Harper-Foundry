@@ -3,7 +3,7 @@ name: Monitor Debian Trixie Kernel Releases
 # Trigger on schedule (check for new releases every 6 hours)
 on:
   schedule:
-    - cron: '10 12 * * *'  # 12:10 noon
+    - cron: '15 17 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
