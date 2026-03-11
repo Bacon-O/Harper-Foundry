@@ -212,9 +212,6 @@ harper_deb13_kernel_build_successful() {
     
     log_ok "Updating version tracking for kernel $DETECTED_KERNEL_VERSION"
     
-    echo "Testing the pwd is: "
-    pwd
-
     # Update version tracking file
     cat > "$VERSION_TRACKING_FILE" << EOF
 KERNEL_VERSION=$DETECTED_KERNEL_VERSION

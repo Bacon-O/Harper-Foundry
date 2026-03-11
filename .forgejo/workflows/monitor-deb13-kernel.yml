@@ -115,16 +115,9 @@ jobs:
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          echo "the pwd is: "
-          pwd
-          echo "the ls is: "
-          ls -la
-
-          echo "The ls in version_tracking is: "
-          ls -la "$(dirname "$YML__KERNEL_TRACKING_FILE")"
 
           # Check if version tracking file was updated by build_successful callback
-          if git diff $YML__KERNEL_TRACKING_FILE; then
+          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
             echo "✅ Version tracking updated - committing changes"
