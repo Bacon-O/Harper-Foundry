@@ -115,9 +115,16 @@ jobs:
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          
+          echo "the pwd is: "
+          pwd
+          echo "the ls is: "
+          ls -la
+
+          echo "The ls in version_tracking is: "
+          ls -la "$(dirname "$YML__KERNEL_TRACKING_FILE")"
+
           # Check if version tracking file was updated by build_successful callback
-          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
+          if git diff $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
             echo "✅ Version tracking updated - committing changes"
@@ -140,8 +147,9 @@ jobs:
         run: |
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
-          ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
-            --params-file "$YML__PARAMS_FILE" \
-            --api-token "$YML__API_TOKEN" \
-            --forgejo-url "$YML__FORGEJO_URL" \
-            --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
+          # disabled for testing - re-enable once stable
+          # ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
+          #   --params-file "$YML__PARAMS_FILE" \
+          #   --api-token "$YML__API_TOKEN" \
+          #   --forgejo-url "$YML__FORGEJO_URL" \
+          #   --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
