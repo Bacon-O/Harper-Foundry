@@ -140,7 +140,7 @@ EOF
     
     log_ok "Last compiled version: $last_compiled_version"
     log_ok "Last build date: $last_build_date"
-    log_ok "Build status: $build_status"
+    log_ok "Last build status: $build_status"
     
     # ==========================================================================
     # STEP 4: Compare Versions and Determine if Build is Needed
@@ -160,6 +160,17 @@ EOF
         log_info "Triggering build for new kernel version"
         build_needed=true
         build_reason="new_version"
+    elif [[ "$build_status" == "failed" ]] && [[ "$last_compiled_version" == "$latest_upstream_version" ]]; then
+        log_warn "Previous build for version $last_compiled_version failed"
+        log_warn "Will not retry until:"
+        log_warn "   - a new version is detected"
+        log_warn "   - BUILD_STATUS=retry is set"
+        log_warn "   - version_tracking/harper_deb13_latest_kernel.txt is cleared"
+    elif [[ "$build_status" == "retry" ]] && [[ "$last_compiled_version" == "$latest_upstream_version" ]]; then
+        log_info "Previous build for version $last_compiled_version is marked for retry"
+        log_info "Will retry this version: $last_compiled_version"
+        build_needed=true
+        build_reason="retry_failed_version"
     else
         # Same version - no action needed
         log_ok "Version $last_compiled_version already built"
