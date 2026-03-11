@@ -52,7 +52,7 @@ jobs:
   preheat:
     # TODO: Re-enable lint job once all shellcheck issues are resolved
     # needs: lint
-    runs-on: self-hosted
+    runs-on: alice-builder
     outputs:
       args: ${{ steps.set-args.outputs.args }}
       production_config: ${{ steps.set-args.outputs.production_config }}
@@ -105,7 +105,7 @@ jobs:
 
   smelt:
     needs: preheat
-    runs-on: self-hosted
+    runs-on: alice-builder
     steps:
       - uses: actions/checkout@v4
       
@@ -119,7 +119,7 @@ jobs:
   analysis:
     needs: [preheat, smelt]
     if: always()
-    runs-on: self-hosted
+    runs-on: alice-builder
     steps:
       - uses: actions/checkout@v4
       
@@ -133,7 +133,7 @@ jobs:
   delivery:
     needs: [preheat, smelt, analysis]
     if: always() && (github.event.inputs.override_params_gh == 'none')
-    runs-on: self-hosted
+    runs-on: alice-builder
     steps:
       - uses: actions/checkout@v4
 
@@ -147,7 +147,7 @@ jobs:
   cleanup:
     needs: [preheat, analysis, smelt, delivery]
     if: always() 
-    runs-on: self-hosted
+    runs-on: alice-builder
     steps:
       - uses: actions/checkout@v4
 
