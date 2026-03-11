@@ -84,6 +84,23 @@ ramkdisk_control() {
     fi
 
     echo "Executing: systemctl $command $RAMDISK_SERVICE_NAME"
+
+    if [[ "$command" == "status" ]]; then
+        # systemctl status returns 3 when unit is inactive, which is informational.
+        if systemctl status "$RAMDISK_SERVICE_NAME"; then
+            return 0
+        fi
+
+        status_rc=$?
+        if [[ "$status_rc" -eq 3 ]]; then
+            echo "Service '$RAMDISK_SERVICE_NAME' is inactive (systemctl rc=3)."
+            return 0
+        fi
+
+        echo "Failed to query service status for '$RAMDISK_SERVICE_NAME' (rc=$status_rc)."
+        return "$status_rc"
+    fi
+
     systemctl "$command" "$RAMDISK_SERVICE_NAME"
     return 0
 }
