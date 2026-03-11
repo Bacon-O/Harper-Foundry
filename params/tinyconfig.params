@@ -31,6 +31,7 @@ PRE_BUILD_HOOKS=(
 
 # Post-build config
 POST_BUILD_HOOKS=(
+    "ramdisk_umount.sh"
 )
 
 # --- Foundry Execution ---
@@ -159,4 +160,5 @@ QA_VM_TIMEOUT="15s"
 # Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=(
     "ramdisk_control_ext.sh"
+    "forgeojo_ext.sh"
 )

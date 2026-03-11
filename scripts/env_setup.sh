@@ -332,12 +332,6 @@ echo "🏗️  Host Architecture: $HOST_ARCH"
             ext_file="${ext_name%.sh}.sh"
             ext_found=false
             
-            echo "debug: checking for extension: $custom_ext_dir"
-            ls -la "$custom_ext_dir"
-
-            echo "debug: checking for extension: $project_ext_dir"
-            ls -la "$project_ext_dir"
-
             # Try custom location first (takes precedence)
             if [[ -f "$custom_ext_dir/$ext_file" ]] && [[ -x "$custom_ext_dir/$ext_file" ]]; then
                 echo "🔧 Loading extension: $ext_file (custom)"
