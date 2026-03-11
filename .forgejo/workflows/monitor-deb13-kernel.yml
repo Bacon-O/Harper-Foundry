@@ -35,6 +35,7 @@ jobs:
     runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}  # This is your Debian container runner
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
+      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,7 +71,7 @@ jobs:
   compile-on-builder:
     name: Build Kernel on Builder
     needs: monitor-and-power
-    if: needs.monitor-and-power.outputs.build_needed == 'true'
+    if: needs.monitor-and-power.outputs.build_needed == 'true' && needs.monitor-and-power.outputs.detected_kernel_version != ''
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}  # This must match the label on a builder runner
     steps:
       - name: Checkout repository
@@ -80,26 +81,30 @@ jobs:
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
           DETECTED_KERNEL_VERSION: ${{ needs.monitor-and-power.outputs.detected_kernel_version }}
+          BUILD_NEEDED: ${{ needs.monitor-and-power.outputs.build_needed }}
         run: |
           cd "$YML__WORKSPACE_PATH"
-          FORCE_OPT=""
-          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
-            echo "Forcing build"
-            FORCE_OPT="--force"
-          else
-            echo "No build forced - normal operation"
-          fi
+          # FORCE_OPT=""
+          # if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+          #   echo "Forcing build"
+          #   FORCE_OPT="--force"
+          # else
+          #   echo "No build forced - normal operation"
+          # fi
           
           # Source runner and execute trigger check
+
+          export DETECTED_KERNEL_VERSION
+
           source ./scripts/plugins/triggers/runner.sh
           
           ########################################################################
           ### TODO START HERE AND FIX LOGIC WITH BUILD NEEDED FLAG ###
           ########################################################################
-          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
-          BUILD_NEEDED=$?
+          #check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
+          #BUILD_NEEDED=$?
           
-          if [[ $BUILD_NEEDED -eq 0 ]]; then
+          if [[ $BUILD_NEEDED == "true" ]]; then
             echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
             
             # Execute build with tinyconfig for CI testing

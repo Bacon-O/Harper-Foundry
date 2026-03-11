@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
                 usage
                 exit 1
             fi
-            FORGEJO_API_TOKEN="$2"
+            export FORGEJO_API_TOKEN="$2"
             shift 2
             ;;
         --forgejo-url)
@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
                 usage
                 exit 1
             fi
-            FORGEJO_URL="$2"
+            expor FORGEJO_URL="$2"
             shift 2
             ;;
         --forgejo-label)
