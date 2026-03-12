@@ -40,13 +40,13 @@ FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFACT_DELIVERY="true"
-ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
-ARTIFACT_DELIVERY_METHOD="sftp"
-REMOTE_DELIVERY_HOST="127.0.0.1"
-REMOTE_DELIVERY_USER="debian"
-REMOTE_DELIVERY_PATH="/mnt/build-data/remote-test/"
-ARTIFACT_SSH_KEY="~/.ssh/id_ed25519"  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 
@@ -112,7 +112,7 @@ TUNING_CONFIG=""
 # --- QA Flags ---
 # For quick tests, we only do minimal validation
 BYPASS_QA="false"
-ENABLE_QEMU_TESTS="false"
+ENABLE_QEMU_TESTS="true"
 
 # Use RELAXED mode - warn but don't fail on missing nice-to-haves
 QA_MODE="RELAXED"
@@ -156,6 +156,5 @@ QA_VM_TIMEOUT="15s"
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=(
-    "ramdisk_control_ext.sh"
-    "forgeojo_ext.sh"
+
 )
