@@ -22,7 +22,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "  -t, --test-run            Enable test mode (tinyconfig, no QEMU)."
             echo "  -r, --rebuild             Force Docker image rebuild."
             echo "  -b, --bypass-qa           Skip Material Analysis."
-            echo "  -i, --incremental         Skip 'make clean' for faster rebuilds."
+            # echo "  -i, --incremental         Skip 'make clean' for faster rebuilds." # more testing needed
             echo "  -e, --exec <script>       Override the container execution script."
             echo ""
             echo "Interactive Modes:"

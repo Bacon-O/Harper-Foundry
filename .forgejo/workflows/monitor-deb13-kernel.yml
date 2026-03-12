@@ -21,7 +21,6 @@ env:
   YML__FORGEJO_URL: ${{ github.api_url }} 
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  # YML__PARAMS_FILE: params/tinyconfig.params
   YML__PARAMS_FILE: params/harper_deb13.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
@@ -79,6 +78,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Charge Audit
+        run: |
+          ./scripts/validate.sh $YML__PARAMS_FILE
       
       - name: Build Kernel start_build.sh 
         env:

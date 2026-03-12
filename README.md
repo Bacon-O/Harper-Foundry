@@ -519,16 +519,6 @@ For detailed customization examples, see:
 - [scripts/scripts.d/README.md](scripts/scripts.d/README.md) - Compile scripts and utilities customization
 - [scripts/plugins/README.md](scripts/plugins/README.md) - Plugin customization
 
-### Incremental Builds
-
-Speed up development with incremental builds:
-
-```bash
-./start_build.sh --incremental
-```
-
-This skips `make mrproper` and reuses previous build state.
-
 ### Custom Docker Images
 
 You can use custom Docker images:

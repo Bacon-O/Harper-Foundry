@@ -300,17 +300,12 @@ ERROR [internal] load metadata for docker.io/library/debian:trixie-slim
    PARALLEL_JOBS=""  # Empty = use all cores
    ```
 
-2. Use incremental builds:
-   ```bash
-   ./start_build.sh --incremental
-   ```
-
-3. Check CPU throttling:
+2. Check CPU throttling:
    ```bash
    cat /proc/cpuinfo | grep MHz
    ```
 
-4. Verify Docker has sufficient resources allocated
+3. Verify Docker has sufficient resources allocated
 
 ### Issue: Disk Space Filling Up
 
