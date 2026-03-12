@@ -71,12 +71,12 @@ echo "✅ safe_initrd.img generated successfully at $(realpath ../safe_initrd.im
 echo "Cleaning up temporary files..."
 rm -rf ./tmp_qemu
 
-if [[ -f "../safe_initrd.img" ]]; then
+if [[ -f "safe_initrd.img" ]]; then
     echo "✅ safe_initrd.img is ready for use in QEMU testing."
 else
     echo "❌ ERROR: safe_initrd.img was not created successfully."
     exit 1
 fi
-echo "✅ safe_initrd.img is ready for use in QEMU testing."
+
 echo "Move safe_initrd.img to scripts/plugins/qatests/tests/"
-echo "mv ../safe_initrd.img ../qatests/tests/safe_initrd.img"
+echo "mv safe_initrd.img ../qatests/tests/safe_initrd.img"

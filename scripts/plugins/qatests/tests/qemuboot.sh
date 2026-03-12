@@ -54,7 +54,7 @@ if [[ "$ENABLE_QEMU_TESTS" == "true" ]] && [[ "$TEST_RUN_MODE" != "true" ]]; the
         -smp "$VM_CORES" \
         -cpu max \
         -kernel "$KERNEL_IMAGE" \
-        -initrd safe_initrd.img \
+        -initrd "$(dirname "$0")/safe_initrd.img" \
         -append "console=ttyS0 nokaslr rdinit=/bin/sh" \
         -nographic \
         -no-reboot \
