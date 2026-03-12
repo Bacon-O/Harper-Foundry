@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
 ##########################################################################################################
-# Template for 48GB RAM disk, mounting ton /mnt/ramdisk
+# Template for 32GB RAM disk, mounting ton /mnt/ramdisk
 # TODO make a script to install and configure
 ##########################################################################################################
 # [Unit]
-# Description=Build RAM Disk 48GB
+# Description=Build RAM Disk 32GB
 # After=local-fs.target
 
 # [Service]
 # Type=oneshot
 # RemainAfterExit=yes
-# ExecStart=/usr/bin/mount -t tmpfs -o size=4G,mode=0755,uid=debian,gid=debian tmpfs /mnt/ramdisk
+# ExecStart=/usr/bin/mount -t tmpfs -o size=32G,mode=0755,uid=debian,gid=debian tmpfs /mnt/ramdisk
 # ExecStop=/usr/bin/umount /mnt/ramdisk
 
 # [Install]
@@ -20,9 +20,9 @@ set -e
 #
 # System commands to enabled server
 #
-# sudo nano /etc/systemd/system/ramdisk-48GB.service
+# sudo nano /etc/systemd/system/ramdisk-32GB.service
 # sudo systemctl daemon-reload
-# sudo systemctl status ramdisk-48GB.service 
+# sudo systemctl status ramdisk-32GB.service 
 ##########################################################################################################
 #
 # Security and permission commands
@@ -30,7 +30,7 @@ set -e
 # Group permission configuration
 # polkit.addRule(function(action, subject) {
 #     if (action.id == "org.freedesktop.systemd1.manage-units" &&
-#         action.lookup("unit") == "ramdisk-48GB.service") {
+#         action.lookup("unit") == "ramdisk-32GB.service") {
 #         if (subject.isInGroup("GROUPNAME")) {
 #             return polkit.Result.YES;
 #         }
@@ -40,7 +40,7 @@ set -e
 # User permission configuration
 # polkit.addRule(function(action, subject) {
 #     if (action.id == "org.freedesktop.systemd1.manage-units" &&
-#         action.lookup("unit") == "ramdisk-48GB.service") {
+#         action.lookup("unit") == "ramdisk-32GB.service") {
 #         if (subject.user == "USERNAME") {
 #             return polkit.Result.YES;
 #         }
@@ -48,7 +48,7 @@ set -e
 # });
 # Required env vars:
 # RAMDISK_MOUNT_POINT - The mount point for the RAM disk (e.g., /mnt/ramdisk)
-# RAMDISK_SERVICE_NAME - The name of the systemd service managing the RAM disk (e.g., ramdisk-48GB.service)
+# RAMDISK_SERVICE_NAME - The name of the systemd service managing the RAM disk (e.g., ramdisk-32GB.service)
 
 source "$(dirname "$0")/../../env_setup.sh" "$@"
 
