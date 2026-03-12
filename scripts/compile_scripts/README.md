@@ -178,7 +178,6 @@ All alloy mixture scripts must:
    - Exit 1 on failure with clear error message
 
 5. **Respect environment variables:**
-   - `INCREMENTAL_BUILD`
    - `FINAL_JOBS`
    - `TARGET_ARCH`
    - All MAKE_* variables

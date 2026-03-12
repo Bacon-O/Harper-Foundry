@@ -33,7 +33,7 @@
 #
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-BUILD_WORKSPACE_DIR="/mnt/ramdisk/"
+BUILD_WORKSPACE_DIR=""
 HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
 # When true, repo-relative defaults based on params file name
@@ -46,32 +46,21 @@ USE_PARAM_SCOPED_DIRS="true"
 FOUNDRY_UID=""
 FOUNDRY_GID=""
 
-# Prestart config
-PRE_BUILD_HOOKS=(
-    "ramdisk_mount.sh"
-)
-
-# Post-build config
-POST_BUILD_HOOKS=(
-    "ramdisk_umount.sh"
-)
-
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
 FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
-INCREMENTAL_BUILD="false"
 
 # --- Foundry artifact export configuration ---
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFACT_DELIVERY="true"
-ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
-ARTIFACT_DELIVERY_METHOD="sftp"
-REMOTE_DELIVERY_HOST="10.21.0.11"
-REMOTE_DELIVERY_USER="fidbuilder01"
-REMOTE_DELIVERY_PATH="/mnt/hdd-pool_01/aptly_repo/import/trixie_import/"
-ARTIFACT_SSH_KEY="/home/debian/.ssh/id_ed25519"  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 
@@ -141,7 +130,7 @@ TUNING_CONFIG="harper_deb13_tune.config"
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
-ENABLE_QEMU_TESTS="true"
+ENABLE_QEMU_TESTS="false"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
@@ -222,7 +211,4 @@ VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=(
-    "ramdisk_control_ext.sh"
-    "forgeojo_ext.sh"
-)
+ENV_EXTENSIONS=()

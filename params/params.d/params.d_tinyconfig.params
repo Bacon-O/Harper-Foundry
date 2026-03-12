@@ -27,7 +27,6 @@ FOUNDRY_GID=""
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
-INCREMENTAL_BUILD="false"
 
 # --- Foundry Image Configuration ---
 DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"

@@ -237,7 +237,6 @@ make build
 Both scripts respect the same environment variables:
 - `FINAL_JOBS` - Parallelism
 - `TARGET_ARCH` - Architecture
-- `INCREMENTAL_BUILD` - Clean vs incremental
 - `HOST_UID` / `HOST_GID` - File ownership
 - All `MAKE_*` variables
 

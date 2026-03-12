@@ -170,7 +170,6 @@ The foundry accepts several arguments to control the process:
 | `-t` | `--test-run` | Enable test mode (uses `tinyconfig`, disables QEMU, ignores non-critical QA). |
 | `-r` | `--rebuild` | Force a rebuild of the Docker builder image. |
 | `-b` | `--bypass-qa` | Skip the Material Analysis (QA) stage. |
-| `-i` | `--incremental` | Skip `make mrproper` for faster rebuilds. |
 | `-e` | `--exec <script>` | Override the script executed inside the container. |
 | `-h` | `--help` | Display help menu. |
 
@@ -600,4 +599,3 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 *   Improve plugins/triggers
 *   Improve plugins/notifiers
 *   Refine "harvest" steps
-*   Builder pre-reqs (Forgejo: npm, node, jq)
