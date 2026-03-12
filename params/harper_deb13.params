@@ -33,7 +33,7 @@
 #
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
-BUILD_WORKSPACE_DIR=""
+BUILD_WORKSPACE_DIR="/mnt/ramdisk"
 HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
 
 # When true, repo-relative defaults based on params file name
@@ -45,6 +45,17 @@ USE_PARAM_SCOPED_DIRS="true"
 # Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
 FOUNDRY_UID=""
 FOUNDRY_GID=""
+
+# Prestart config
+PRE_BUILD_HOOKS=(
+    "ramdisk_mount.sh"
+)
+
+# Post-build config
+POST_BUILD_HOOKS=(
+    "ramdisk_umount.sh"
+)
+
 
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
@@ -130,7 +141,7 @@ TUNING_CONFIG="harper_deb13_tune.config"
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
-ENABLE_QEMU_TESTS="false"
+ENABLE_QEMU_TESTS="true"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
@@ -201,9 +212,9 @@ QA_OPTIONAL_CHECKS=(
 )
 
 # --- VM Proving Ground Specs (for QEMU testing) ---
-VM_MEM="1G"
+VM_MEM="2G"
 VM_CORES="4"
-VM_TIMEOUT="30s"
+VM_TIMEOUT="60s"
 # ==============================================================================
 # ENVIRONMENT CUSTOMIZATION
 # ==============================================================================
@@ -211,4 +222,7 @@ VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+    "forgejo_ext.sh"
+    "ramdisk_control_ext.sh"
+)
