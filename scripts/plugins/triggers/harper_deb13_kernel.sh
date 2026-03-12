@@ -94,7 +94,7 @@ harper_deb13_kernel_trigger() {
         mkdir -p "$(dirname "$VERSION_TRACKING_FILE")"
         cat > "$VERSION_TRACKING_FILE" << 'EOF'
 KERNEL_VERSION=6.11.8
-LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
+LAST_BUILD_DATE=$(date +%Y-%m-%d_%R:%S_%Z)
 BUILD_STATUS=initialized
 SCHED_PRIORITY=1
 EOF
