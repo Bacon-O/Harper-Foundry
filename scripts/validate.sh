@@ -42,6 +42,15 @@ dependencies=(docker)
 if [[ "$ENABLE_QEMU_TESTS" == "true" ]]; then
     dependencies+=(qemu-system-x86_64)
     echo "🛡️  QA Mode Active: Ensuring QEMU tools are ready..."
+    
+    echo "Checking for safe_initrd.img for QEMU tests..."
+    if [[ ! -f "$(dirname "$0")/safe_initrd.img" ]]; then
+        echo "❌ ERROR: safe_initrd.img not found at $(dirname "$0")/safe_initrd.img"
+        echo "   This is required for QEMU boot testing. Please ensure it is present."
+        echo "   You can generate it using: scripts/plugins/tools/generate_safe_initrd.sh"
+        exit 1
+    fi
+    echo "File safe_initrd.img found."
 fi
 
 for cmd in "${dependencies[@]}"; do
