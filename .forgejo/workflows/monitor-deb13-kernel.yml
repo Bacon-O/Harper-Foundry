@@ -81,7 +81,7 @@ jobs:
       
       - name: Charge Audit
         run: |
-          ./scripts/validate.sh $YML__PARAMS_FILE
+          ./scripts/validate.sh --params-file "$YML__PARAMS_FILE"
       
       - name: Build Kernel start_build.sh 
         env:
