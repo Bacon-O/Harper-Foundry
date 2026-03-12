@@ -38,15 +38,29 @@ if [[ "$ENABLE_QEMU_TESTS" == "true" ]] && [[ "$TEST_RUN_MODE" != "true" ]]; the
     VM_CORES="${VM_CORES:-2}"
     VM_TIMEOUT="${VM_TIMEOUT:-15s}"
 
+    # QEMU_OUTPUT=$(timeout "$VM_TIMEOUT" \
+    #     qemu-system-x86_64 \
+    #     -m "$VM_MEM" \
+    #     -smp "$VM_CORES" \
+    #     -kernel "$KERNEL_IMAGE" \
+    #     -append "console=ttyS0 loglevel=4 panic=-1" \
+    #     -nographic \
+    #     -no-reboot \
+    #     2>&1 || true)
+
     QEMU_OUTPUT=$(timeout "$VM_TIMEOUT" \
         qemu-system-x86_64 \
         -m "$VM_MEM" \
         -smp "$VM_CORES" \
+        -cpu max \
         -kernel "$KERNEL_IMAGE" \
-        -append "console=ttyS0 loglevel=4 panic=-1" \
+        -initrd safe_initrd.img \
+        -append "console=ttyS0 nokaslr rdinit=/bin/sh" \
         -nographic \
         -no-reboot \
         2>&1 || true)
+
+
 
     if echo "$QEMU_OUTPUT" | grep -q "Linux version"; then
         echo "✅ QEMU boot check: kernel banner detected."
