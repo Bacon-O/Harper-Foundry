@@ -44,7 +44,6 @@ FOUNDRY_GID=""
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
 FOUNDRY_EXEC=""
-INCREMENTAL_BUILD="false"
 
 # Prestart config
 PRE_BUILD_HOOKS=(

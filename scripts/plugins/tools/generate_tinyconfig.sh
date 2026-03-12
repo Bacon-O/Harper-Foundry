@@ -40,7 +40,6 @@ POST_BUILD_HOOKS=(
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
-INCREMENTAL_BUILD="false"
 
 # --- Foundry artifact export configuration ---
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
