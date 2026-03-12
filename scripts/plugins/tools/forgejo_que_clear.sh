@@ -6,8 +6,9 @@ set -e
 # This script checks the Forgejo queue for a specific runner label.
 # Predicate functions follow shell conventions: return 0 when true.
 _forgejo_api_is_que_empty() {
-    response=$(curl -s -H "Authorization: token $FORGEJO_API_TOKEN" "$FORGEJO_URL/runners/jobs?labels=$FORGEJO_RUNNER_LABEL")
-    queue_length=$(echo "$response" | jq '.total')
+    echo "Checking Forgejo queue at: $FORGEJO_URL/admin/runners/jobs?labels=$FORGEJO_RUNNER_LABEL for runner label '$FORGEJO_RUNNER_LABEL'..."
+    response=$(curl -s -H "Authorization: token $FORGEJO_API_TOKEN" "$FORGEJO_URL/admin/runners/jobs?labels=$FORGEJO_RUNNER_LABEL")
+    queue_length=$(echo "$response" | jq 'length')
 
     if [[ "$queue_length" -eq 0 ]]; then
         echo "No items in the Forgejo queue for label '$FORGEJO_RUNNER_LABEL'."

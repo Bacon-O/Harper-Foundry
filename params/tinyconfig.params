@@ -13,7 +13,7 @@
 # BUILD_WORKSPACE_DIR: Where compilation happens (mounted as /build)
 # HOST_OUTPUT_DIR:     Where artifacts go (each build creates build_<timestamp> subdirectory)
 # Note: REPO_ROOT is auto-detected
-BUILD_WORKSPACE_DIR="/mnt/ramdisk"
+BUILD_WORKSPACE_DIR=""
 HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
@@ -26,12 +26,10 @@ FOUNDRY_GID=""
 
 # Prestart config
 PRE_BUILD_HOOKS=(
-    "ramdisk_mount.sh"
 )
 
 # Post-build config
 POST_BUILD_HOOKS=(
-    "ramdisk_umount.sh"
 )
 
 # --- Foundry Execution ---
