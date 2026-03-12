@@ -1,0 +1,3 @@
+# Minimal QA Test Suite
+filesexists.sh
+linuxconfig.sh

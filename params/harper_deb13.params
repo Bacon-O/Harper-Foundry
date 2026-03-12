@@ -1,0 +1,214 @@
+# ==============================================================================
+# HARPER FOUNDRY: HARPER DEB13 - amd64v3 Build
+# ==============================================================================
+# This is a COMPLETE, WORKING example configuration for building the Harper
+# kernel based Debian 13 (Trixie) backports 
+# with x86-64-v3 optimizations (AVX2, FMA, BMI2).
+#
+# Optimizations from base Debian config:
+#   • Architecture: x86-64-v3 baseline (modern CPU instructions)
+#   • Scheduler: Linux default (EEVDF)
+#   • Timer: 1000Hz (vs Debian's 250Hz) for reduced latency
+#   • Preemption: Full preemption for lower response times
+#   • CPU Frequency: Intel & AMD P-State with schedutil governor
+#   • Boot: ZSTD compression for faster kernel decompression
+#   • Target: Optimized for gaming/desktop workloads
+#
+# Use this as a reference or starting point for custom builds.
+# ==============================================================================
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# These parameters are essential for the build system to function.
+# Incorrect values will likely prevent the build from starting or completing.
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where kernel compilation occurs
+#                      This is mounted as /build inside the container
+# HOST_OUTPUT_DIR:     Base directory where build artifacts are stored
+#                      Each build creates a subdirectory: build_<timestamp>
+# 
+# Note: REPO_ROOT (repository location) is auto-detected and does not need configuration
+#
+# @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
+# @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
+BUILD_WORKSPACE_DIR=""
+HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
+
+# When true, repo-relative defaults based on params file name
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
+# When false aboslute outpaths are respected 
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/
+USE_PARAM_SCOPED_DIRS="true"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Execution ---
+# The script within the container that Docker will execute.
+FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
+
+# --- Foundry artifact export configuration ---
+# If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
+# Right now SFTP and RSYNC are supported as delivery methods.
+# Both require previous configuration
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
+
+# --- Foundry Image Configuration ---
+# Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
+DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# These parameters define the specific kernel to be built.
+# ==============================================================================
+# --- Target Specifications ----
+# Versioning & Tagging
+BUILD_ARCH_TAG="amd64v3"
+RELEASE_TAG="harper"
+
+# --- Target Specifications ---
+TARGET_ARCH="x86_64"
+
+# "haswell" is the canonical proxy for x86-64-v3 (AVX2 + FMA + BMI2)
+# The compiler accepts this as a concrete CPU model.
+KERNEL_CFLAGS="-march=haswell -mtune=haswell"
+CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
+DEBIAN_PACKAGE_NAME="linux-upstream-harper-v3"
+
+# --- Kernel Source Strategy (Plugin-based) ---
+# Using Debian Trixie Backports for newer kernels with full Debian integration
+KERNEL_SOURCE="debian/trixie-backports"
+# "latest" always fetches the most recent kernel available in trixie-backports
+# Other options: "lts" (latest LTS), "stable", "6.11.8" (specific version)
+KERNEL_VERSION="latest"
+
+DEB_HOST_ARCH="amd64"
+HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
+
+# Will clean up build workspace dir (where compiling happens)
+# during the cleanup phase in case of failed builds
+CLEAN_BUILD_WORKSPACE_DIR="true"
+
+BUILD_DEB_BUILD_ARCH="arm64"
+BUILD_DEB_TARGET_ARCH="amd64"
+BUILD_CC="clang --target=x86_64-linux-gnu"
+BUILD_HOSTLD="x86_64-linux-gnu-ld"
+BUILD_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+BUILD_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+BUILD_LLVM="1"
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# These parameters control the build process and specific kernel features.
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
+PARALLEL_JOBS="ALL"
+
+# --- Build Strategy ---
+# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+BASE_CONFIG="defconfig"
+TUNING_CONFIG="harper_deb13_tune.config"
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# These parameters control post-build validation and testing.
+# ==============================================================================
+# --- QA Flags ---
+# @NO_PROMPT (This is explicitly set to "false" by install.sh)
+BYPASS_QA="false"
+# Set to "false" to skip QEMU boot testing.
+ENABLE_QEMU_TESTS="false"
+
+# QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
+# while "ENFORCED" will fail the build on any QA test failure.
+QA_MODE="RELAXED"
+
+# A list of individual QA test scripts to run. 
+# These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
+QA_TESTS=(
+)
+
+# A list of QA packages to run /plugins/qatests/testpackages
+QA_TEST_PACKAGE=(
+    "harper"
+)
+
+# --- Chemical Audit: Critical (Must Pass) ---
+# Exact internal Kconfig names to verify. If any are missing, the build is considered BROKEN.
+QA_CRITICAL_CHECKS=( 
+)
+# --- Chemical Audit: Optional (Warn Only) ---
+# If these are missing, a warning is logged but the kernel is still shipped.
+QA_OPTIONAL_CHECKS=(
+    "CONFIG_BLK_WBT_MQ=y"
+    "CONFIG_BLK_WBT=y"
+    "CONFIG_CC_IS_CLANG=y"
+    "CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y"
+    "CONFIG_DEFAULT_BBR=y"
+    "CONFIG_DEFAULT_TCP_CONG=\"bbr\""
+    "CONFIG_DMIID=y"
+    "CONFIG_DRM_I915_PXP=y"
+    "CONFIG_FRAME_WARN=4096"
+    "CONFIG_FW_LOADER=y"
+    "CONFIG_GENERIC_CPU_V3=y"
+    "CONFIG_HZ_1000=y"
+    "CONFIG_HZ=1000"
+    "CONFIG_KERNEL_ZSTD=y"
+    "CONFIG_LRU_GEN_ENABLED=y"
+    "CONFIG_LRU_GEN=y"
+    "CONFIG_LTO_NONE=y"
+    "CONFIG_MODULE_COMPRESS_ZSTD=y"
+    "CONFIG_MODULE_SIG_ALL=n"
+    "CONFIG_MODULE_SIG=n"
+    "CONFIG_NTSYNC=y"
+    "CONFIG_PCI_MMCONFIG=y"
+    "CONFIG_PCI_REALLOC_ENABLE_AUTO=y"
+    "CONFIG_PCIEASPM_POWERSAVE=y"
+    "CONFIG_PCIEASPM=y"
+    "CONFIG_PM_ADVANCED_DEBUG=y"
+    "CONFIG_PM_DEBUG=y"
+    "CONFIG_PM_SLEEP=y"
+    "CONFIG_PM=y"
+    "CONFIG_PREEMPT_BUILD=y"
+    "CONFIG_PREEMPT=y"
+    "CONFIG_SCHED_CLUSTER=y"
+    "CONFIG_SCHED_MC_PRIO=y"
+    "CONFIG_SCHED_MC=y"
+    "CONFIG_SCHED_SMT=y"
+    "CONFIG_TCP_CONG_BBR=y"
+    "CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y"
+    "CONFIG_TRANSPARENT_HUGEPAGE=y"
+    "CONFIG_USERFAULTFD=y"
+    "CONFIG_X86_AMD_PSTATE_DEFAULT_MODE=3"
+    "CONFIG_X86_AMD_PSTATE=y"
+    "CONFIG_X86_INTEL_PSTATE=y"
+    "CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y"
+    "CONFIG_ZSWAP_DEFAULT_ON=y"
+    "CONFIG_ZSWAP=y"
+)
+
+# --- VM Proving Ground Specs (for QEMU testing) ---
+VM_MEM="1G"
+VM_CORES="4"
+VM_TIMEOUT="30s"
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()
