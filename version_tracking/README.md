@@ -7,10 +7,11 @@ This directory tracks the last successfully compiled kernel versions for each bu
 - **`harper_deb13_latest_kernel.txt`** - Last successful kernel version compiled with harper_deb13.
   - Format: 
     ```
-    KERNEL_VERSION=6.11.8
+    KERNEL_VERSION=6.18.12-1~bpo13+1
     LAST_BUILD_DATE=2026-02-15
     BUILD_STATUS=success
     ```
+  - Stores the plain Debian source version from the backports source index
   - Updated after successful build completion
   - Used by trigger jobs to detect new releases
 

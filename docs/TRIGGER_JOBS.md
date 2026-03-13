@@ -40,7 +40,7 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
 │  STEP 2: Trigger Detection Plugin                           │
 │  (scripts/plugins/triggers/harper_deb13_kernel.sh)         │
 │                                                             │
-│  1. Query Debian Salsa API for latest version               │
+│  1. Query Debian backports source index for latest version  │
 │  2. Load last successfully built version                    │
 │  3. Compare versions                                        │
 │  4. Export DETECTED_KERNEL_VERSION if new                   │
@@ -404,8 +404,11 @@ fi
 Modify the detection logic in `scripts/plugins/triggers/harper_deb13_kernel.sh`:
 
 ```bash
-# Change which kernel package to monitor
-DEBIAN_SALSA_API="https://salsa.debian.org/api/v4/projects/debian%2Flinux/..."  # Different package
+# Change which source package to monitor in Debian backports
+DEBIAN_SOURCE_PACKAGE="linux"  # Different source package name if needed
+
+# Change which published source index to monitor
+DEBIAN_BACKPORTS_SOURCES_URL="https://deb.debian.org/debian/dists/trixie-backports/main/source/Sources.xz"
 
 # Change where to store version tracking
 VERSION_TRACKING_FILE="$REPO_ROOT/version_tracking/PROFILE_NAME_latest.txt"
@@ -459,10 +462,10 @@ BUILD_STATUS=success               # success | failed | in_progress
 
 ## Troubleshooting
 
-### "API query failed"
+### "Source index query failed"
 - Check internet connectivity
-- Verify Debian Salsa API is accessible
-- Test manually: `curl https://salsa.debian.org/api/v4/projects/debian%2Flinux/repository/branches`
+- Verify Debian backports source index is accessible
+- Test manually: `curl https://deb.debian.org/debian/dists/trixie-backports/main/source/Sources.xz | xz -dc | grep '^Package: linux$'`
 
 ### "Version file not found"
 - Initialize: `mkdir -p version_tracking && touch version_tracking/harper_deb13_latest_kernel.txt`
@@ -507,6 +510,6 @@ BUILD_STATUS=success               # success | failed | in_progress
 
 ## References
 
-- [Debian Salsa Project API](https://docs.gitlab.com/ee/api/)
+- [Debian Package Repository](https://deb.debian.org/debian/)
 - [GitHub Actions Scheduling](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule)
 - [Cron Syntax Reference](https://crontab.guru/)

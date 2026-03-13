@@ -295,7 +295,7 @@ GitHub Actions workflow (`.github/workflows/kernel-factory.yml`) provides automa
 Harper includes a trigger job system (plugin-based) that monitors Debian Trixie Backports for new kernel releases and automatically builds when available.
 
 **Features:**
-- 📡 Monitors Debian Salsa API for upstream updates
+- 📡 Monitors published Debian backports source metadata for upstream updates
 - 🎯 Version tracking to avoid duplicate builds
 - ⚙️ Runs on configurable schedule (default: every 6 hours)
 - 🔧 Extensible plugin system for custom triggers
