@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build (skip version check)'
-        type: string
+        description: 'Force build'
+        type: boolean
         required: false
         default: 'false'
 
