@@ -114,7 +114,7 @@ Build artifacts will be stored in your configured `HOST_OUTPUT_DIR`.
 ## 📂 Project Structure
 
 *   `start_build.sh`: The main entry point for local builds.
-*   `params/`: Configuration files (e.g., `foundry_template.params`, `foundry_template.params`, `tinyconfig.params`).
+*   `params/`: Configuration files (e.g., `foundry_template.params`, `harper_deb13.params`, `tinyconfig.params`).
 *   `scripts/`: Build scripts.
     *   `env_setup.sh`: Argument parsing and environment setup.
     *   `launch.sh`: Docker container launch logic.
@@ -223,7 +223,7 @@ See [params/README.md](params/README.md#configuration-override-patterns) for det
 
 The foundry can support different build targest and configurations optimized for different purposes:
 
-### Compile Scripts
+### Available Mixtures
 
 | Mixture | Build Time | Purpose | Artifacts |
 |---------|------------|---------|-----------|
@@ -596,4 +596,3 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 *   Refine docker image(s)
 *   Improve plugins/triggers
 *   Improve plugins/notifiers
-*   Refine "harvest" steps
