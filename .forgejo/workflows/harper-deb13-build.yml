@@ -11,11 +11,6 @@ on:
         type: string
         required: false
         default: 'false'
-      detected_kernel_version:
-        description: 'Kernel version detected by trigger (informational)'
-        type: string
-        required: false
-        default: ''
 
 env:
   YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN }}
