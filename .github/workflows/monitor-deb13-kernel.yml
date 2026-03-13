@@ -1,79 +1,131 @@
+# This is an example/template workflow for monitoring Debian Trixie kernel releases and triggering builds
+# Only here for demonstration purposes
+# Something similar is in use on for the private Harper build pipeline
 name: Monitor Debian Trixie Kernel Releases
-
-# Trigger on schedule (check for new releases every 6 hours)
 on:
-  # schedule:
-  #   - cron: '0 */6 * * *'  # Every 6 hours
+  #schedule:
+  #  - cron: '0 */3 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build even if version unchanged'
+        description: 'Force build'
+        type: boolean
         required: false
         default: 'false'
 
+env:
+  YML__API_TOKEN: ${{ secrets.GITHUB_API }} }}
+  YML__GITHUB_URL: ${{ github.api_url }} 
+  YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+  YML__WORKSPACE_PATH: ${{ github.workspace }}
+  YML__PARAMS_FILE: params/harper_deb13.params
+  YML__KERNEL_TITLE: Harper
+  YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
+  YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+
 jobs:
-  monitor-and-trigger:
+  monitor-and-power:
     runs-on: self-hosted
-    name: Check for Debian Trixie Kernel Updates
-    
+    name: Check Version and Power On Builder
+    outputs:
+      build_needed: ${{ steps.check.outputs.build_needed }}
+      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for new kernel version
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+        id: check
+        run: |
+          cd "$YML__WORKSPACE_PATH"
+          source ./scripts/plugins/triggers/runner.sh
+          FORCE_OPT=""
+          
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Forcing build"
+            FORCE_OPT="--force"
+          else
+            echo "No build forced - normal operation"
+          fi
+          
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
+          build_return_code=$?
+          
+          if [[ "$build_return_code" -eq 0 ]]; then
+            echo "build_needed=true" >> $GITHUB_OUTPUT           
+          else
+            echo "build_needed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No update needed."
+          fi
+  
+  compile-on-builder:
+    runs-on: self-hosted
+    name: Build Kernel
+    needs: monitor-and-power
+    if: needs.monitor-and-power.outputs.build_needed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Set up monitoring environment
+      - name: Charge Audit
         run: |
-          # Ensure curl and jq are available
-          # command -v curl > /dev/null || (apt-get update && apt-get install -y curl)
-          # command -v jq > /dev/null || (apt-get update && apt-get install -y jq)
+          ./scripts/validate.sh --params-file "$YML__PARAMS_FILE"
       
-      - name: Run kernel release trigger
+      - name: Build Kernel start_build.sh 
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
-          WORKSPACE_PATH: ${{ github.workspace }}
         run: |
-          cd "$WORKSPACE_PATH"
-          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
-            export FORCE_BUILD="true"
-          fi
-          
-          # Source runner and execute trigger check
+          cd "$YML__WORKSPACE_PATH"
           source ./scripts/plugins/triggers/runner.sh
+
+          FORCE_OPT=""
           
-          check_if_build_is_needed harper_deb13_kernel --force
-          BUILD_NEEDED=$?
+          # Set force flag if set via workflow_dispatch input
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Build Forcing set"
+            FORCE_OPT="--force"
+          fi
+
+          # We check if build is needed again in case there has been a dual trigger
+          # This way if we already built the kernel between trigger and now we can skip this build
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
+          build_return_code=$?
           
-          if [[ $BUILD_NEEDED -eq 0 ]]; then
-            echo "✅ Build needed for detected kernel version: ${DETECTED_KERNEL_VERSION}"
-            
-            # Execute build with tinyconfig for CI testing
-            if ./start_build.sh --params-file params/tinyconfig.params 2>&1 | tee -a /tmp/build.log; then
+          if [[ "$build_return_code" -eq 0 ]]; then
+            echo "Starting build"
+            if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
+              
               # Update tracking via plugin callback
-              build_successful harper_deb13_kernel
+              build_successful $YML__KERNEL_TRIGGER_LABEL
             else
               echo "❌ Build failed"
+              
               # Handle failure via plugin callback
-              build_failed harper_deb13_kernel "ci_build_failed"
+              build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
             fi
           else
-            echo "ℹ️  No new kernel version available"
+            echo "Looks like there were multiple build triggers, but kernel build already executed"
+            echo "Skipping build, check version tracking file for latest build outcome"        
           fi
       
       - name: Commit updated version tracking (if changed)
         if: success()
         run: |
-          cd "$WORKSPACE_PATH"
-          
+          cd "$YML__WORKSPACE_PATH"
+          # TODO script this
           # Check if version tracking file was updated by build_successful callback
-          if git diff --quiet version_tracking/harper_deb13_latest_kernel.txt; then
+          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
             echo "✅ Version tracking updated - committing changes"
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add version_tracking/harper_deb13_latest_kernel.txt
+            git config --local user.email "github-runner@localhost.com"
+            git config --local user.name "github-runner"
+            git add $YML__KERNEL_TRACKING_FILE
             git commit -m "Update tracked kernel version [skip ci]"
             git push || echo "⚠️  Could not push (may be read-only)"
           fi
@@ -83,3 +135,4 @@ jobs:
         run: |
           echo "❌ Kernel release check failed"
           exit 1
+
