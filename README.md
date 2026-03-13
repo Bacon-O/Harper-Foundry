@@ -596,4 +596,3 @@ This project is licensed under the GNU General Public License v2.0 - see the [LI
 *   Refine docker image(s)
 *   Improve plugins/triggers
 *   Improve plugins/notifiers
-*   Refine "harvest" steps
