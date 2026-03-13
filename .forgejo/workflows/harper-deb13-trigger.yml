@@ -91,4 +91,4 @@ jobs:
             -H "Authorization: token $YML__API_TOKEN" \
             -H "Content-Type: application/json" \
             "$YML__FORGEJO_URL/repos/${{ github.repository }}/actions/workflows/harper-deb13-build.yml/dispatches" \
-            #-d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"force_build\":\"${{ github.event.inputs.force_build }}\",\"detected_kernel_version\":\"${{ needs.monitor_and_power.outputs.detected_kernel_version }}\"}}"
+            -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"force_build\":\"${{ github.event.inputs.force_build }}\"}}"
