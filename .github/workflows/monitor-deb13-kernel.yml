@@ -26,9 +26,9 @@ env:
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
 
 jobs:
-  monitor-and-power:
+  monitor:
     runs-on: self-hosted
-    name: Check Version and Power On Builder
+    name: Check Version
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
       detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
@@ -65,8 +65,8 @@ jobs:
   compile-on-builder:
     runs-on: self-hosted
     name: Build Kernel
-    needs: monitor-and-power
-    if: needs.monitor-and-power.outputs.build_needed == 'true'
+    needs: monitor
+    if: needs.monitor.outputs.build_needed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
