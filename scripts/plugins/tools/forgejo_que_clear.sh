@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-#source "$(dirname "$0")/../../env_setup.sh" "$@"
-
 # This script checks the Forgejo queue for a specific runner label.
 # Predicate functions follow shell conventions: return 0 when true.
 _forgejo_api_is_que_empty() {
