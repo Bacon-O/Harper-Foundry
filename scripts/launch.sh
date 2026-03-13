@@ -80,32 +80,6 @@ else
     CONTAINER_CMD="bash \"/opt/factory/scripts/${FOUNDRY_EXEC}\" \"\$@\""
 fi
 
-# eval "docker run $DOCKER_FLAGS --rm \
-#     --privileged \
-#     -v /sys/devices/system/node:/sys/devices/system/node:ro \
-#     -e CONTAINER_OUTPUT_DIR=\"/opt/factory/output\" \
-#     -e GITHUB_RUN_ID=\"$GITHUB_RUN_ID\" \
-#     -e INCREMENTAL_BUILD=\"$INCREMENTAL_BUILD\" \
-#     -e ARCH=\"$TARGET_ARCH\" \
-#     -e CROSS_COMPILE=\"$CROSS_COMPILE\" \
-#     -e KBUILD_BUILD_ARCH=\"$TARGET_ARCH\" \
-#     -e DEB_HOST_ARCH=\"$DEB_HOST_ARCH\" \
-#     -e PRODUCTION_CONFIG=\"$PRODUCTION_CONFIG\" \
-#     -e OVERRIDE_PARAMS=\"$OVERRIDE_PARAMS\" \
-#     -v \"${HOST_QEMU_STATIC=}\":/usr/bin/qemu-x86_64-static:ro \
-#     -v \"${BUILD_WORKSPACE_DIR}:/build\" \
-#     -v \"${REPO_ROOT}/scripts:/opt/factory/scripts:ro\" \
-#     -v \"${REPO_ROOT}/scripts/scripts.d:/opt/factory/scripts/scripts.d:ro\" \
-#     -v \"${REPO_ROOT}/configs:/opt/factory/configs:ro\" \
-#     -v \"${REPO_ROOT}/configs/configs.d:/opt/factory/configs/configs.d:ro\" \
-#     -v \"${REPO_ROOT}/params:/opt/factory/params:ro\" \
-#     -v \"${REPO_ROOT}/params/params.d:/opt/factory/params/params.d:ro\" \
-#     -v \"${BUILD_OUTPUT_DIR}:/opt/factory/output\" \
-#     -w \"/build\" \
-#     \"$CONTAINER_IMAGE_NAME\" \
-#     $CONTAINER_CMD"
-
-
 eval "docker run $DOCKER_FLAGS --rm \
     -e CONTAINER_OUTPUT_DIR=\"/opt/factory/output\" \
     -e GITHUB_RUN_ID=\"$GITHUB_RUN_ID\" \

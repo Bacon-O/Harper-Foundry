@@ -1,5 +1,0 @@
-# Overrides for NUMA node (TD340) compile
-
-BUILD_WORKSPACE_DIR="/mnt/ramdisk"
-FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
-PARALLEL_JOBS="38"

@@ -24,8 +24,6 @@ on:
         options:
           - 'none'
           - '_test_overrides.params'
-          - '_harper_numa.params'
-
 jobs:
   # lint:
   #   runs-on: ubuntu-latest
