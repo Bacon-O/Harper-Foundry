@@ -32,7 +32,7 @@ env:
   YML__FORGEJO_RUNNER_TRIGGER: ${{ vars.RUNNER_TRIGGER_LABEL }}
 
 jobs:
-  monitor-and-power:
+  monitor_and_power:
     runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
     name: Check Version and Power On Builder
     outputs:
@@ -79,11 +79,11 @@ jobs:
             exit 1 
           fi
   
-  compile-on-builder:
+  compile_on_builder:
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
     name: Build Kernel
-    needs: monitor-and-power
-    if: ${{ needs['monitor-and-power'].result == 'success' && needs['monitor-and-power'].outputs.build_needed == 'true' }}
+    needs: monitor_and_power
+    if: ${{ needs.monitor_and_power.result == 'success' && needs.monitor_and_power.outputs.build_needed == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
