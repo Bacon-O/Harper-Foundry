@@ -51,7 +51,7 @@ LOCAL_DELIVERY_PATH=""
 
 
 # --- Foundry Image Configuration ---
-DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # ==============================================================================

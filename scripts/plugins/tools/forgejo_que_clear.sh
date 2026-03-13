@@ -8,8 +8,9 @@ _forgejo_api_is_que_empty() {
     response=$(curl -s -H "Authorization: token $FORGEJO_API_TOKEN" "$FORGEJO_URL/admin/runners/jobs?labels=$FORGEJO_RUNNER_LABEL")
     queue_length=$(echo "$response" | jq 'length')
 
-    if [[ "$queue_length" -eq 0 ]]; then
-        echo "No items in the Forgejo queue for label '$FORGEJO_RUNNER_LABEL'."
+    # If queue is 1 then it could be the current job that is checking itself, so we want to consider that as empty for our purposes.
+    if [[ "$queue_length" -le 1 ]]; then
+        echo "No additional items in the Forgejo queue for label '$FORGEJO_RUNNER_LABEL'."
         return 0
     else
         echo "There are $queue_length items in the Forgejo queue for label '$FORGEJO_RUNNER_LABEL'."

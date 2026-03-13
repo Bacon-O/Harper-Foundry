@@ -59,8 +59,8 @@ jobs:
           fi
           
           echo "Checking if new $YML__KERNEL_TITLE kernel release is available..."
-          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
-          build_return_code=$?
+          build_return_code=0
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
           echo "check_if_build_is_needed returned code: $build_return_code"
           
           if [[ "$build_return_code" -eq 0 ]]; then
@@ -102,8 +102,8 @@ jobs:
 
           # We check if build is needed again in case there has been a dual trigger
           # This way if we already built the kernel between trigger and now we can skip this build
-          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
-          build_return_code=$?
+          build_return_code=0
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
           
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "Starting build"
