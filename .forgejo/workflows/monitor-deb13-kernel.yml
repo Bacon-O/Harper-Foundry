@@ -59,16 +59,20 @@ jobs:
           fi
           
           echo "Checking if new $YML__KERNEL_TITLE kernel release is available..."
+          # Default outputs so downstream job gating is deterministic.
+          echo "build_needed=false" >> $GITHUB_OUTPUT
+          echo "detected_kernel_version=" >> $GITHUB_OUTPUT
+
           build_return_code=0
           check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
           echo "check_if_build_is_needed returned code: $build_return_code"
           
           if [[ "$build_return_code" -eq 0 ]]; then
-            echo "build_needed=true" >> $GITHUB_OUTPUT           
+            echo "build_needed=true" >> $GITHUB_OUTPUT
+            echo "detected_kernel_version=${DETECTED_KERNEL_VERSION:-}" >> $GITHUB_OUTPUT
             echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
             /scripts/alice_power.sh on
           elif [[ "$build_return_code" -eq 2 ]]; then
-            echo "build_needed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No update needed."
           else
             echo "❌ Error checking for kernel update. See logs for details."
@@ -79,7 +83,7 @@ jobs:
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
     name: Build Kernel
     needs: monitor-and-power
-    if: needs.monitor-and-power.outputs.build_needed == 'true'
+    if: ${{ needs['monitor-and-power'].result == 'success' && needs['monitor-and-power'].outputs.build_needed == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -121,9 +125,11 @@ jobs:
               # Handle failure via plugin callback
               build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
             fi
+          elif [[ "$build_return_code" -eq 2 ]]; then
+            echo "No update needed at build stage; skipping build"
           else
-            echo "Looks like there were multiple build triggers, but kernel build already executed"
-            echo "Skipping build, check version tracking file for latest build outcome"        
+            echo "❌ Error re-checking build need in compile stage (code: $build_return_code)"
+            exit 1
           fi
       
       - name: Commit updated version tracking (if changed)
