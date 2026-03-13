@@ -82,7 +82,7 @@ jobs:
   compile_on_builder:
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
     name: Build Kernel
-    if: ${{ needs.monitor_and_power.outputs.build_needed == 'true' }}
+    if: needs.monitor_and_power.outputs.build_needed == 'true'
     needs: monitor_and_power
     steps:
       - name: Checkout repository
