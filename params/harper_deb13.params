@@ -145,7 +145,7 @@ ENABLE_QEMU_TESTS="true"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
-QA_MODE="RELAXED"
+QA_MODE="ENFORCED"
 
 # A list of individual QA test scripts to run. 
 # These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
@@ -174,7 +174,7 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_DRM_I915_PXP=y"
     "CONFIG_FRAME_WARN=4096"
     "CONFIG_FW_LOADER=y"
-    "CONFIG_GENERIC_CPU_V3=y"
+    #"CONFIG_GENERIC_CPU_V3=y"
     "CONFIG_HZ_1000=y"
     "CONFIG_HZ=1000"
     "CONFIG_KERNEL_ZSTD=y"
@@ -182,8 +182,8 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_LRU_GEN=y"
     "CONFIG_LTO_NONE=y"
     "CONFIG_MODULE_COMPRESS_ZSTD=y"
-    "CONFIG_MODULE_SIG_ALL=n"
-    "CONFIG_MODULE_SIG=n"
+    #"CONFIG_MODULE_SIG_ALL=n"
+    #"CONFIG_MODULE_SIG=n"
     "CONFIG_NTSYNC=y"
     "CONFIG_PCI_MMCONFIG=y"
     "CONFIG_PCI_REALLOC_ENABLE_AUTO=y"
