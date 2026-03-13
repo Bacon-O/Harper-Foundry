@@ -4,8 +4,8 @@ name: Monitor Debian Trixie Kernel Releases
 # m h * * *
 # CDT to UTC, CDT + 5
 on:
-  schedule:
-   - cron: '0 */3 * * *'
+  # schedule:
+  #  - cron: '0 */3 * * *'
   
   # Allow manual trigger
   workflow_dispatch:
@@ -58,8 +58,10 @@ jobs:
             echo "No build forced - normal operation"
           fi
           
+          echo "Checking if new $YML__KERNEL_TITLE kernel release is available..."
           check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT
           build_return_code=$?
+          echo "check_if_build_is_needed returned code: $build_return_code"
           
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT           
