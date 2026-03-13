@@ -1,98 +1,50 @@
-name: Monitor Debian Trixie Kernel Releases
+name: Harper Debian 13 Kernel Build
 
-# Trigger on schedule
-# m h * * *
-# CDT to UTC, CDT + 5
+# Dispatched by harper-deb13-trigger.yml when a new kernel version is detected.
+# Runs entirely on the builder runner — never on the trigger runner.
+
 on:
-  # schedule:
-  #  - cron: '0 */3 * * *'
-  
-  # Allow manual trigger
   workflow_dispatch:
     inputs:
       force_build:
-        description: 'Force build'
-        type: boolean
+        description: 'Force build (skip version check)'
+        type: string
         required: false
         default: 'false'
+      detected_kernel_version:
+        description: 'Kernel version detected by trigger (informational)'
+        type: string
+        required: false
+        default: ''
 
 env:
-  YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN  }}
-  YML__FORGEJO_URL: ${{ github.api_url }} 
+  YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN }}
+  YML__FORGEJO_URL: ${{ github.api_url }}
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
   YML__PARAMS_FILE: params/harper_deb13.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
-  # web UI vars - Are here for reference
-  # vars.RUNNER_BUILDER_LABEL 
+  # web UI vars - here for reference
+  # vars.RUNNER_BUILDER_LABEL
   # vars.RUNNER_TRIGGER_LABEL
   YML__FORGEJO_RUNNER_BUILDER: ${{ vars.RUNNER_BUILDER_LABEL }}
   YML__FORGEJO_RUNNER_TRIGGER: ${{ vars.RUNNER_TRIGGER_LABEL }}
 
 jobs:
-  monitor_and_power:
-    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
-    name: Check Version and Power On Builder
-    outputs:
-      build_needed: ${{ steps.check.outputs.build_needed }}
-      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check Kernel & Power On
-        env:
-          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
-        id: check
-        run: |
-          cd "$YML__WORKSPACE_PATH"
-          source ./scripts/plugins/triggers/runner.sh
-          FORCE_OPT=""
-          
-          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
-            echo "Forcing build"
-            FORCE_OPT="--force"
-          else
-            echo "No build forced - normal operation"
-          fi
-          
-          echo "Checking if new $YML__KERNEL_TITLE kernel release is available..."
-          # Default outputs so downstream job gating is deterministic.
-          echo "build_needed=false" >> $GITHUB_OUTPUT
-          echo "detected_kernel_version=" >> $GITHUB_OUTPUT
-
-          build_return_code=0
-          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
-          echo "check_if_build_is_needed returned code: $build_return_code"
-          
-          if [[ "$build_return_code" -eq 0 ]]; then
-            echo "build_needed=true" >> $GITHUB_OUTPUT
-            echo "detected_kernel_version=${DETECTED_KERNEL_VERSION:-}" >> $GITHUB_OUTPUT
-            echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
-            /scripts/alice_power.sh on
-          elif [[ "$build_return_code" -eq 2 ]]; then
-            echo "ℹ️ No update needed."
-          else
-            echo "❌ Error checking for kernel update. See logs for details."
-            exit 1 
-          fi
-  
   compile_on_builder:
     runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
     name: Build Kernel
-    if: 0 == 1
-    needs: monitor_and_power
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Charge Audit
         run: |
           ./scripts/validate.sh --params-file "$YML__PARAMS_FILE"
-      
-      - name: Build Kernel start_build.sh 
+
+      - name: Build Kernel
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
         run: |
@@ -100,44 +52,35 @@ jobs:
           source ./scripts/plugins/triggers/runner.sh
 
           FORCE_OPT=""
-          
-          # Set force flag if set via workflow_dispatch input
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
-            echo "Build Forcing set"
+            echo "Build forcing set"
             FORCE_OPT="--force"
           fi
 
-          # We check if build is needed again in case there has been a dual trigger
-          # This way if we already built the kernel between trigger and now we can skip this build
+          # Re-check in case a build already ran between trigger dispatch and now (dual-trigger guard)
           build_return_code=0
           check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
-          
+
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "Starting build"
             if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
-              
-              # Update tracking via plugin callback
               build_successful $YML__KERNEL_TRIGGER_LABEL
             else
               echo "❌ Build failed"
-              
-              # Handle failure via plugin callback
               build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
             fi
           elif [[ "$build_return_code" -eq 2 ]]; then
-            echo "No update needed at build stage; skipping build"
+            echo "ℹ️ No update needed at build stage; skipping build"
           else
             echo "❌ Error re-checking build need in compile stage (code: $build_return_code)"
             exit 1
           fi
-      
+
       - name: Commit updated version tracking (if changed)
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          # TODO script this
-          # Check if version tracking file was updated by build_successful callback
           if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
@@ -148,20 +91,19 @@ jobs:
             git commit -m "Update tracked kernel version [skip ci]"
             git push || echo "⚠️  Could not push (may be read-only)"
           fi
-      
+
       - name: Notify on failure
         if: failure()
         run: |
-          echo "❌ Kernel release check failed"
+          echo "❌ Kernel build failed"
           exit 1
-      
-      # Ensure this runs regardless of previous step outcomes to power off Alice
+
       - name: Check Queue then Power Off Builder
         if: always()
         run: |
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
-          
+
           ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
             --params-file "$YML__PARAMS_FILE" \
             --api-token "$YML__API_TOKEN" \
