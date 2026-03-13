@@ -178,8 +178,6 @@ The foundry accepts several arguments to control the process:
 **Run a fast test build (tinyconfig):**
 ```bash
 ./start_build.sh --params-file params/tinyconfig.params
-# Or simply:
-make test
 ```
 
 **Build using a specific params file:**
@@ -225,7 +223,7 @@ See [params/README.md](params/README.md#configuration-override-patterns) for det
 
 The foundry can support different build targest and configurations optimized for different purposes:
 
-### Available Mixtures
+### Compile Scripts
 
 | Mixture | Build Time | Purpose | Artifacts |
 |---------|------------|---------|-----------|

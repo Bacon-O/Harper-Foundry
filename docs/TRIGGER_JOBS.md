@@ -6,7 +6,7 @@ This document describes how to set up and customize automated trigger jobs for b
 
 ## Overview
 
-The trigger job system uses a **plugin-based architecture** to monitor upstream kernel releases (e.g., Debian Trixie Backports for Alloy Deb13) and automatically build new versions when detected. This enables:
+The trigger job system uses a **plugin-based architecture** to monitor upstream kernel releases (e.g., Debian Trixie Backports for Deb13) and automatically build new versions when detected. This enables:
 - **Zero-downtime updates**: New kernels built immediately upon release
 - **Version tracking**: Maintains history of which versions have been successfully built
 - **Flexible execution**: Background builds, scheduled jobs, or manual triggers
@@ -96,11 +96,11 @@ sudo apt-get install -y gh
 
 The `version_tracking/` directory maintains state for each build profile:
 
-**Example: Alloy Deb13**
+**Example: Deb13**
 ```
 version_tracking/
 ├── README.md                        # This directory's documentation
-└── harper_deb13_latest_kernel.txt    # Last successful kernel version (Alloy Deb13)
+└── harper_deb13_latest_kernel.txt    # Last successful kernel version (Deb13)
     ├── KERNEL_VERSION=6.11.8
     ├── LAST_BUILD_DATE=2026-02-15
     └── BUILD_STATUS=success
@@ -110,7 +110,7 @@ version_tracking/
 
 Trigger plugins live in `scripts/plugins/triggers/`:
 
-**Example: Alloy Deb13 plugin**
+**Example: Deb13 plugin**
 ```
 scripts/plugins/triggers/
 ├── runner.sh                 # Main dispatcher (routes to plugins)
@@ -120,7 +120,7 @@ scripts/plugins/triggers/
 
 ### 4. GitHub Actions Workflow
 
-The workflow `.github/workflows/monitor-deb13-kernel.yml` (configured for Alloy Deb13) runs on:
+The workflow `.github/workflows/monitor-deb13-kernel.yml` (configured for Deb13) runs on:
 - **Schedule**: Every 6 hours (configurable)
 - **Manual Dispatch**: Anytime via GitHub UI or `gh` CLI
 

@@ -32,7 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed `ci-build.sh` symlink; update any custom references
   - Updated `FOUNDRY_EXEC` in `foundry_template.params`
 
-- **README structure** - Added alloy mixtures section and comparison table
 
 ### Fixed
 - **Critical bug**: Removed duplicate `CROSS_COMPILE` variable definition in `foundry_template.params`

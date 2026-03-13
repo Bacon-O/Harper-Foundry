@@ -1,10 +1,10 @@
-# Alloy Mixtures - Build Script Variants
+# Compile Scripts - Build Script Variants
 
-This directory contains different "alloy mixtures" - build script variants optimized for different purposes. Think of them as different recipes for smelting the kernel, each tuned for specific goals.
+This directory contains different build scripts variants optimized for different purposes. Think of them as different recipes for smelting the kernel, each tuned for specific goals.
 
-## 🎯 Available Mixtures
+## 🎯 Available Builds
 
-### `harper_deb13.sh` - Harper Prime Alloy (Debian 13)
+### `harper_deb13.sh` - Harper (Debian 13)
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists  
 **Build Time:** 30-60+ minutes (depending on hardware)  
 **Artifacts:** Full .deb packages, headers, bzImage  
@@ -32,10 +32,10 @@ This directory contains different "alloy mixtures" - build script variants optim
 **Usage:**
 ```bash
 # In params/foundry_template.params or custom params file:
-FOUNDRY_EXEC="alloymixtures/harper_deb13.sh"
+FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
 
 # Or via command line:
-./start_build.sh --exec alloymixtures/harper_deb13.sh
+./start_build.sh --exec compile_scripts/harper_deb13.sh
 ```
 
 ---
@@ -60,7 +60,7 @@ FOUNDRY_EXEC="alloymixtures/harper_deb13.sh"
 ./start_build.sh --params-file params/tinyconfig.params
 
 # Or specify exec directly:
-./start_build.sh --exec alloymixtures/tinyconfig.sh
+./start_build.sh --exec compile_scripts/tinyconfig.sh
 
 # Or via make:
 make test  # Uses tinyconfig by default
@@ -98,13 +98,13 @@ make test  # Uses tinyconfig by default
 
 ---
 
-## 🔧 Creating New Mixtures
+## 🔧 Creating Build
 
-To add a new alloy mixture:
+To add a new compile script
 
 1. **Create the script:**
    ```bash
-   cp alloymixtures/harper_deb13.sh alloymixtures/my-custom.sh
+   cp compile_scripts/harper_deb13.sh compile_scripts/my-custom.sh
    ```
 
 2. **Modify for your needs:**
@@ -120,7 +120,7 @@ To add a new alloy mixture:
 
 4. **Update the params:**
    ```bash
-   FOUNDRY_EXEC="alloymixtures/my-custom.sh"
+   FOUNDRY_EXEC="compile_scripts/my-custom.sh"
    ```
 
 5. **Document in this README**
@@ -137,26 +137,10 @@ To add a new alloy mixture:
 
 ---
 
-## 🎨 Design Philosophy
-
-The "alloy mixture" metaphor reflects the foundry theme:
-
-- **Foundry** = Build system infrastructure
-- **Alloy** = Kernel configuration + build process
-- **Mixture** = Specific combination of settings
-
-Different alloys have different properties:
-- **harper_deb13.** = Strong, complete alloy (experimental enthusiast kernel)
-- **Tinyconfig** = Light, fast alloy (test sample)
-- **Custom builds** = Specialized alloys (specific applications)
-
-Just as a metallurgist chooses different alloy compositions for different purposes, we choose different build mixtures based on our goals.
-
----
 
 ## 📝 Script Requirements
 
-All alloy mixture scripts must:
+All comppile scripts must:
 
 1. **Source environment:**
    ```bash
@@ -194,21 +178,21 @@ All alloy mixture scripts must:
 ./start_build.sh --params-file params/tinyconfig.params
 
 # Custom mixture
-./start_build.sh --exec alloymixtures/my-custom.sh
+./start_build.sh --exec compile_scripts/my-custom.sh
 
 # Override just the exec script
-./start_build.sh -e alloymixtures/tinyconfig.sh
+./start_build.sh -e compile_scripts/tinyconfig.sh
 ```
 
 ---
 
-## 🧪 Testing New Mixtures
+## 🧪 Testing New Builds
 
 ⚠️ **Important:** All Harper builds are experimental. Before using on real hardware:
 
 1. **Test with tinyconfig first:**
    ```bash
-   ./start_build.sh --test-run --exec alloymixtures/my-new.sh
+   ./start_build.sh --test-run --exec compile_scripts/my-new.sh
    ```
 
 2. **Validate configuration:**
