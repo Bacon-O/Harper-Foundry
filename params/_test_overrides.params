@@ -43,7 +43,7 @@
 
 # --- Output Directory Override ---
 # Divert build artifacts to a testing/preprod directory instead of production
-HOST_OUTPUT_DIR="/mnt/build-data/testing"
+HOST_OUTPUT_DIR="/mnt/test-builds/example"
 
 # --- QA Testing Overrides ---
 # Enforce strict QA for testing builds (vs RELAXED for production)
