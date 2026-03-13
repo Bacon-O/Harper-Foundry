@@ -97,7 +97,8 @@ get_latest_published_backports_source_version() {
 #
 # Returns:
 #   0 - Build IS needed (new version detected or forced)
-#   1 - Build NOT needed (version already built)
+#   1 - Error occurred (e.g., network issue, parsing error)
+#   2 - Build NOT needed (version already built)
 #
 # ==============================================================================
 harper_deb13_kernel_trigger() {
@@ -245,8 +246,8 @@ EOF
         return 0  # 0 = build needed
     else
         log_ok "No action needed. Latest version already built."
-        log_info "Returning exit code 1 to indicate no build needed"
-        return 1  # non-zero = no build needed
+        log_info "Returning exit code 2 to indicate no build needed"
+        return 2  # 2 = no build needed
     fi
 }
 
