@@ -1,0 +1,178 @@
+# ==============================================================================
+# HARPER DEB13: PERFORMANCE TUNING
+# ==============================================================================
+# x86-64-v3 optimizations for gaming/desktop workloads
+
+
+# --- Modern x86-64-v3 Architecture Optimization ---
+# Disabling the generic 2004-era baseline and vendor-specific locks
+# CONFIG_GENERIC_CPU is not set
+# CONFIG_MZEN3 is not set
+CONFIG_GENERIC_CPU_V3=y
+
+# --- Windows / Proton Fast Synchronization (ntsync) ---
+# Direct support for WINE_NTSYNC=1 global environment variable
+CONFIG_NTSYNC=y
+
+# --- CPU Scheduler & Preemption (KDE/Gaming Responsiveness) ---
+# CONFIG_PREEMPT_NONE is not set
+# CONFIG_PREEMPT_VOLUNTARY is not set
+CONFIG_PREEMPT=y
+CONFIG_PREEMPT_BUILD=y
+
+# --- Internal Timer Frequency (1000Hz Desktop Latency) ---
+# CONFIG_HZ_250 is not set
+# CONFIG_HZ_300 is not set
+# CONFIG_HZ_500 is not set
+CONFIG_HZ_1000=y
+CONFIG_HZ=1000
+
+# --- Silicon-Level Power Management & Core Topology ---
+# Microsecond clock scaling and Alder Lake P/E core awareness
+CONFIG_X86_INTEL_PSTATE=y
+CONFIG_X86_AMD_PSTATE=y
+CONFIG_X86_AMD_PSTATE_DEFAULT_MODE=3
+CONFIG_SCHED_MC=y
+CONFIG_SCHED_MC_PRIO=y
+CONFIG_SCHED_CLUSTER=y
+CONFIG_SCHED_SMT=y
+
+# --- Software Frequency Scaling Fallback ---
+CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y
+
+# --- Fast Boot & Rapid Wake (ZSTD Compression) ---
+# Blistering decompression speeds for kernel and loadable modules
+# CONFIG_KERNEL_GZIP is not set
+# CONFIG_KERNEL_XZ is not set
+CONFIG_KERNEL_ZSTD=y
+# CONFIG_MODULE_COMPRESS_XZ is not set
+CONFIG_MODULE_COMPRESS_ZSTD=y
+
+# --- Memory Management (ZSWAP, LRU, Hugepages) ---
+# Prevents desktop "freeze" during heavy compilation or low-RAM events
+CONFIG_LRU_GEN=y
+CONFIG_LRU_GEN_ENABLED=y
+CONFIG_ZSWAP=y
+CONFIG_ZSWAP_DEFAULT_ON=y
+CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y
+CONFIG_TRANSPARENT_HUGEPAGE=y
+CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y
+CONFIG_USERFAULTFD=y
+
+# --- Hardware Precision & Gaming Performance ---
+# Smart Access Memory support and split-lock stutter fixes
+# CONFIG_X86_SPLIT_LOCK_MITIGATION is not set
+CONFIG_PCI_REALLOC_ENABLE_AUTO=y
+CONFIG_BLK_WBT=y
+CONFIG_BLK_WBT_MQ=y
+
+# --- Network Congestion Control (Low Latency Gaming) ---
+CONFIG_TCP_CONG_BBR=y
+CONFIG_DEFAULT_BBR=y
+CONFIG_DEFAULT_TCP_CONG="bbr"
+
+# --- Compiler Safety & Clang/LLVM Integration ---
+# Preventing AMD driver crashes and ensuring clean linking
+CONFIG_CC_IS_CLANG=y
+# CONFIG_WERROR is not set
+CONFIG_FRAME_WARN=4096
+CONFIG_LTO_NONE=y
+# CONFIG_LTO_CLANG_THIN is not set
+# CONFIG_CFI_CLANG is not set
+
+# Disable module signing to prevent SSL/Decoder errors
+CONFIG_MODULE_SIG=n
+CONFIG_MODULE_SIG_ALL=n
+
+# Clear the trusted/revocation key paths so the build doesn't look for them
+CONFIG_SYSTEM_TRUSTED_KEYS=""
+CONFIG_SYSTEM_REVOCATION_KEYS=""
+
+# Optional: Disable BTF debug info if you see errors related to 'pahole' 
+# (Common in containerized builds)
+# CONFIG_DEBUG_INFO_BTF=n
+
+CONFIG_FW_LOADER=y
+
+CONFIG_EXTRA_FIRMWARE=""
+CONFIG_EXTRA_FIRMWARE_DIR=""
+
+# Essential Power Management
+CONFIG_PM=y
+CONFIG_PM_SLEEP=y
+
+# Runtime Power Management for PCIe
+CONFIG_PCI_MMCONFIG=y
+CONFIG_PCIEASPM=y
+CONFIG_PCIEASPM_POWERSAVE=y
+
+CONFIG_PM_DEBUG=y
+CONFIG_PM_ADVANCED_DEBUG=y
+CONFIG_DMIID=y
+CONFIG_DRM_I915_PXP=y
+
+# Some more TUNING
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_BLK_DEV_RAM=y
+
+# sched-ext mandatory options
+#
+CONFIG_BPF=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_BPF_JIT=y
+CONFIG_DEBUG_INFO_BTF=y
+CONFIG_BPF_JIT_ALWAYS_ON=y
+CONFIG_BPF_JIT_DEFAULT_ON=y
+CONFIG_SCHED_CLASS_EXT=y
+
+# Required by some rust schedulers (e.g. scx_p2dq)
+#
+CONFIG_KALLSYMS_ALL=y
+
+# Required on arm64
+#
+# CONFIG_DEBUG_INFO_REDUCED is not set
+
+# LAVD tracks futex to give an additional time slice for futex holder
+# (i.e., avoiding lock holder preemption) for better system-wide progress.
+# LAVD first tries to use ftrace to trace futex function calls.
+# If that is not available, it tries to use a tracepoint.
+CONFIG_FUNCTION_TRACER=y
+
+# Enable scheduling debugging
+#
+CONFIG_SCHED_DEBUG=y
+
+# Enable extra scheduling features (for a better code coverage while testing
+# the schedulers)
+#
+CONFIG_SCHED_AUTOGROUP=y
+CONFIG_SCHED_CORE=y
+CONFIG_SCHED_MC=y
+
+# Enable fully preemptible kernel for a better test coverage of the schedulers
+#
+# CONFIG_PREEMPT_NONE is not set
+# CONFIG_PREEMPT_VOLUNTARY is not set
+CONFIG_PREEMPT=y
+CONFIG_PREEMPT_DYNAMIC=y
+
+# Additional debugging information (useful to catch potential locking issues)
+CONFIG_DEBUG_LOCKDEP=y
+CONFIG_DEBUG_ATOMIC_SLEEP=y
+CONFIG_PROVE_LOCKING=y
+
+# Bpftrace headers (for additional debug info)
+CONFIG_BPF_EVENTS=y
+CONFIG_FTRACE_SYSCALLS=y
+CONFIG_DYNAMIC_FTRACE=y
+CONFIG_KPROBES=y
+CONFIG_KPROBE_EVENTS=y
+CONFIG_UPROBES=y
+CONFIG_UPROBE_EVENTS=y
+CONFIG_DEBUG_FS=y
+
+# Enable access to kernel configuration and headers at runtime
+CONFIG_IKHEADERS=y
+CONFIG_IKCONFIG_PROC=y
+CONFIG_IKCONFIG=y
