@@ -94,11 +94,11 @@ fi
 # ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 # ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
 # ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
+# ./scripts/config --set-str MODULE_SIG_KEY "" # 🔑 The fix for the certs/signing_key.x509 crash 
+
 # ./scripts/config --disable DEBUG_INFO
 # ./scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
-# 🔑 The fix for the certs/signing_key.x509 crash
-# ./scripts/config --set-str MODULE_SIG_KEY ""
 
 # Protect the environment variables during this final dependency check
 # make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
@@ -116,16 +116,16 @@ echo "🧹 Surgical Stripping (Preserving SCX/BTF)..."
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
 ./scripts/config --set-str MODULE_SIG_KEY ""
 
-# 2. Kill the "No Debug" flag (The Culprit)
-./scripts/config --disable DEBUG_INFO_NONE
+# # 2. Kill the "No Debug" flag (The Culprit)
+# ./scripts/config --disable DEBUG_INFO_NONE
 
-# 3. Enable the "Engine" (Required for BTF)
-./scripts/config --enable DEBUG_INFO
-./scripts/config --enable DEBUG_INFO_BTF
-./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+# # 3. Enable the "Engine" (Required for BTF)
+# ./scripts/config --enable DEBUG_INFO
+# ./scripts/config --enable DEBUG_INFO_BTF
+# ./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
-# 4. Re-Assert the Feature
-./scripts/config --enable SCHED_CLASS_EXT
+# # 4. Re-Assert the Feature
+# ./scripts/config --enable SCHED_CLASS_EXT
 
 # 5. Final Sync
 make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
