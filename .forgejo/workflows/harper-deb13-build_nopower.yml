@@ -1,0 +1,106 @@
+name: Harper Debian 13 Kernel Build
+
+# Dispatched by harper-deb13-trigger.yml when a new kernel version is detected.
+# Runs entirely on the builder runner — never on the trigger runner.
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build'
+        type: boolean
+        required: false
+        default: 'false'
+
+env:
+  YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN }}
+  YML__FORGEJO_URL: ${{ github.api_url }}
+  YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+  YML__WORKSPACE_PATH: ${{ github.workspace }}
+  YML__PARAMS_FILE: params/harper_deb13.params
+  YML__KERNEL_TITLE: Harper
+  YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
+  YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+  # web UI vars - here for reference
+  # vars.RUNNER_BUILDER_LABEL
+  # vars.RUNNER_TRIGGER_LABEL
+  YML__FORGEJO_RUNNER_BUILDER: ${{ vars.RUNNER_BUILDER_LABEL }}
+  YML__FORGEJO_RUNNER_TRIGGER: ${{ vars.RUNNER_TRIGGER_LABEL }}
+
+jobs:
+  compile_on_builder:
+    runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
+    name: Build Kernel
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Charge Audit
+        run: |
+          ./scripts/validate.sh --params-file "$YML__PARAMS_FILE"
+
+      - name: Build Kernel
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+        run: |
+          cd "$YML__WORKSPACE_PATH"
+          source ./scripts/plugins/triggers/runner.sh
+
+          FORCE_OPT=""
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Build forcing set"
+            FORCE_OPT="--force"
+          fi
+
+          # Re-check in case a build already ran between trigger dispatch and now (dual-trigger guard)
+          build_return_code=0
+          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
+
+          if [[ "$build_return_code" -eq 0 ]]; then
+            echo "Starting build"
+            if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
+              echo "✅ Build completed successfully"
+              build_successful $YML__KERNEL_TRIGGER_LABEL
+            else
+              echo "❌ Build failed"
+              build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
+            fi
+          elif [[ "$build_return_code" -eq 2 ]]; then
+            echo "ℹ️ No update needed at build stage; skipping build"
+          else
+            echo "❌ Error re-checking build need in compile stage (code: $build_return_code)"
+            exit 1
+          fi
+
+      - name: Commit updated version tracking (if changed)
+        if: success()
+        run: |
+          cd "$YML__WORKSPACE_PATH"
+          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
+            echo "ℹ️  No version changes to commit"
+          else
+            echo "✅ Version tracking updated - committing changes"
+            git config --local user.email "$YML__FORGEJO_RUNNER_BUILDER@localhost.com"
+            git config --local user.name "$YML__FORGEJO_RUNNER_BUILDER"
+            git add $YML__KERNEL_TRACKING_FILE
+            git commit -m "Update tracked kernel version [skip ci]"
+            git push || echo "⚠️  Could not push (may be read-only)"
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Kernel build failed"
+          exit 1
+
+      # - name: Check Queue then Power Off Builder
+      #   if: always()
+      #   run: |
+      #     echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
+      #     cd "$YML__WORKSPACE_PATH"
+
+      #     ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
+      #       --params-file "$YML__PARAMS_FILE" \
+      #       --api-token "$YML__API_TOKEN" \
+      #       --forgejo-url "$YML__FORGEJO_URL" \
+      #       --forgejo-label "$YML__FORGEJO_RUNNER_BUILDER"
