@@ -131,8 +131,8 @@ PARALLEL_JOBS="ALL"
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
-TUNING_CONFIG="harper_deb13_tune.config"
-
+#TUNING_CONFIG="harper_deb13_tune.config"
+TUNING_CONFIG="harper_scx_deb13.config"
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
