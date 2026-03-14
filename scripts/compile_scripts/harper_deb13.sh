@@ -90,12 +90,29 @@ fi
 
 # 6️⃣ Sanitization (Keys, Debug)
 echo "🧹 Stripping Keys / Debug Options..."
+# ./scripts/config --disable SYSTEM_TRUSTED_KEYS
+# ./scripts/config --disable SYSTEM_REVOCATION_KEYS
+# ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
+# ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
+# ./scripts/config --disable DEBUG_INFO
+# ./scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+
+
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
-./scripts/config --disable DEBUG_INFO
-./scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+./scripts/config --set-str MODULE_SIG_KEY ""
+
+# DO NOT disable DEBUG_INFO entirely. 
+# Instead, ensure BTF is on and DWARF is minimal if you want to save space.
+./scripts/config --enable DEBUG_INFO
+./scripts/config --enable DEBUG_INFO_BTF
+./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+./scripts/config --enable SCHED_CLASS_EXT
+
+
+
 
 # 🔑 The fix for the certs/signing_key.x509 crash
 ./scripts/config --set-str MODULE_SIG_KEY ""
