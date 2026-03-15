@@ -102,38 +102,6 @@ echo "🧹 Stripping Keys / Debug Options..."
 # Protect the environment variables during this final dependency check
 make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
-###############################################################################
-# Testing
-# will be safe to delete after next test
-###############################################################################
-
-# echo "🧹 Surgical Stripping (Preserving SCX/BTF)..."
-
-# # 1. Kill the Keys (Safety)
-# ./scripts/config --disable SYSTEM_TRUSTED_KEYS
-# ./scripts/config --disable SYSTEM_REVOCATION_KEYS
-# ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
-# ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
-# ./scripts/config --set-str MODULE_SIG_KEY ""
-
-# # # 2. Kill the "No Debug" flag (The Culprit)
-# # ./scripts/config --disable DEBUG_INFO_NONE
-
-# # # 3. Enable the "Engine" (Required for BTF)
-# # ./scripts/config --enable DEBUG_INFO
-# # ./scripts/config --enable DEBUG_INFO_BTF
-# # ./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
-
-# # # 4. Re-Assert the Feature
-# # ./scripts/config --enable SCHED_CLASS_EXT
-
-# # 5. Final Sync
-# make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
-
-###############################################################################
-# Testing
-###############################################################################
-
 # 7️⃣ Versioning
 TIMESTAMP=$(date +%Y%m%d%M)
 KERNEL_VER=$(make -s kernelversion)

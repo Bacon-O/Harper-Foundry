@@ -61,15 +61,18 @@ jobs:
             if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
               build_successful $YML__KERNEL_TRIGGER_LABEL
+              echo "build_status=success" >> $GITHUB_OUTPUT
             else
               echo "❌ Build failed"
               build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
+              echo "build_status=failure" >> $GITHUB_OUTPUT
             fi
           elif [[ "$build_return_code" -eq 2 ]]; then
             echo "ℹ️ No update needed at build stage; skipping build"
+            echo "build_status=skipped" >> $GITHUB_OUTPUT
           else
             echo "❌ Error re-checking build need in compile stage (code: $build_return_code)"
-            exit 1
+            echo "build_status=failure" >> $GITHUB_OUTPUT
           fi
 
       - name: Commit updated version tracking (if changed)
@@ -88,7 +91,7 @@ jobs:
           fi
 
       - name: Notify on failure
-        if: failure()
+        if: ${{ failure() || needs.compile_on_builder.outputs.build_status == 'failure' }}
         run: |
           echo "❌ Kernel build failed"
           exit 1
