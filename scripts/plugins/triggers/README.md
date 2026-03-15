@@ -33,7 +33,7 @@ The trigger system monitors upstream sources and automatically initiates builds 
 
 **Available Plugins:**
 - `harper_deb13_kernel.sh` - Debian Trixie Backports kernel releases
-  - Monitors: Debian Salsa API
+    - Monitors: Debian backports published source index
   - Tracks: Version in `version_tracking/harper_deb13_latest_kernel.txt`
   - Exports: `DETECTED_KERNEL_VERSION` for use in callbacks
 

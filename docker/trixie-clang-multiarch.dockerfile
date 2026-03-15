@@ -10,6 +10,11 @@ RUN dpkg --add-architecture amd64
 
 # 2. Install native ARM64 tools (the "Engine")
 RUN apt-get update && apt-get install -y \
+    dwarves \
+    pahole \
+    libelf-dev \
+    libbpf-dev \
+    bpftool \
     build-essential \
     clang \
     llvm \

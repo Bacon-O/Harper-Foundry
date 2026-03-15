@@ -46,6 +46,17 @@ USE_PARAM_SCOPED_DIRS="true"
 FOUNDRY_UID=""
 FOUNDRY_GID=""
 
+# Prestart config
+PRE_BUILD_HOOKS=(
+
+)
+
+# Post-build config
+POST_BUILD_HOOKS=(
+
+)
+
+
 # --- Foundry Execution ---
 # The script within the container that Docker will execute.
 FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
@@ -66,7 +77,7 @@ LOCAL_DELIVERY_PATH=""
 
 # --- Foundry Image Configuration ---
 # Path to a local Dockerfile or a Registry image (e.g., "user/image:tag")
-DOCKERFILE_PATH="docker/docker_arm64_x86_cross_v2.dockerfile"
+DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # ==============================================================================
@@ -120,8 +131,8 @@ PARALLEL_JOBS="ALL"
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
-TUNING_CONFIG="harper_deb13_tune.config"
-
+#TUNING_CONFIG="harper_deb13_tune.config"
+TUNING_CONFIG="harper_scx_deb13.config"
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
 # These parameters control post-build validation and testing.
@@ -130,11 +141,11 @@ TUNING_CONFIG="harper_deb13_tune.config"
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
-ENABLE_QEMU_TESTS="false"
+ENABLE_QEMU_TESTS="true"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
-QA_MODE="RELAXED"
+QA_MODE="ENFORCED"
 
 # A list of individual QA test scripts to run. 
 # These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
@@ -163,7 +174,7 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_DRM_I915_PXP=y"
     "CONFIG_FRAME_WARN=4096"
     "CONFIG_FW_LOADER=y"
-    "CONFIG_GENERIC_CPU_V3=y"
+    #"CONFIG_GENERIC_CPU_V3=y"
     "CONFIG_HZ_1000=y"
     "CONFIG_HZ=1000"
     "CONFIG_KERNEL_ZSTD=y"
@@ -171,8 +182,8 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_LRU_GEN=y"
     "CONFIG_LTO_NONE=y"
     "CONFIG_MODULE_COMPRESS_ZSTD=y"
-    "CONFIG_MODULE_SIG_ALL=n"
-    "CONFIG_MODULE_SIG=n"
+    #"CONFIG_MODULE_SIG_ALL=n"
+    #"CONFIG_MODULE_SIG=n"
     "CONFIG_NTSYNC=y"
     "CONFIG_PCI_MMCONFIG=y"
     "CONFIG_PCI_REALLOC_ENABLE_AUTO=y"
@@ -201,9 +212,9 @@ QA_OPTIONAL_CHECKS=(
 )
 
 # --- VM Proving Ground Specs (for QEMU testing) ---
-VM_MEM="1G"
+VM_MEM="2G"
 VM_CORES="4"
-VM_TIMEOUT="30s"
+VM_TIMEOUT="60s"
 # ==============================================================================
 # ENVIRONMENT CUSTOMIZATION
 # ==============================================================================
@@ -211,4 +222,6 @@ VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+
+)

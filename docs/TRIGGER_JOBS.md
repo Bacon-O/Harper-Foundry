@@ -38,7 +38,7 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
 │  STEP 2: Trigger Detection Plugin                           │
 │  (scripts/plugins/triggers/<distro>_kernel.sh)          │
 │                                                             │
-│  1. Query Debian Salsa API for latest version               │
+│  1. Query Debian backports source index for latest version  │
 │  2. Load last successfully built version                    │
 │  3. Compare versions                                        │
 │  4. Export DETECTED_KERNEL_VERSION if new                   │
