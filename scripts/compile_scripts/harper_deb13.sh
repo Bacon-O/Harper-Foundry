@@ -96,10 +96,10 @@ echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
 ./scripts/config --set-str MODULE_SIG_KEY "" # 🔑 The fix for the certs/signing_key.x509 crash 
 
-stripping unnecessary debug options
+# stripping unnecessary debug options
 ./scripts/config --disable DEBUG_INFO
 
-Protect the environment variables during this final dependency check
+# Protect the environment variables during this final dependency check
 make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
 ###############################################################################
