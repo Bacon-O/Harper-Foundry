@@ -89,46 +89,46 @@ if [[ -n "$TUNING_CONFIG" ]]; then
 fi
 
 # 6️⃣ Sanitization (Keys, Debug)
-# echo "🧹 Stripping Keys / Debug Options..."
-# ./scripts/config --disable SYSTEM_TRUSTED_KEYS
-# ./scripts/config --disable SYSTEM_REVOCATION_KEYS
-# ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
-# ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
-# ./scripts/config --set-str MODULE_SIG_KEY "" # 🔑 The fix for the certs/signing_key.x509 crash 
-
-# ./scripts/config --disable DEBUG_INFO
-# ./scripts/config --disable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
-
-
-# Protect the environment variables during this final dependency check
-# make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
-
-###############################################################################
-# Testing
-###############################################################################
-
-echo "🧹 Surgical Stripping (Preserving SCX/BTF)..."
-
-# 1. Kill the Keys (Safety)
+echo "🧹 Stripping Keys / Debug Options..."
 ./scripts/config --disable SYSTEM_TRUSTED_KEYS
 ./scripts/config --disable SYSTEM_REVOCATION_KEYS
 ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
 ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
-./scripts/config --set-str MODULE_SIG_KEY ""
+./scripts/config --set-str MODULE_SIG_KEY "" # 🔑 The fix for the certs/signing_key.x509 crash 
 
-# # 2. Kill the "No Debug" flag (The Culprit)
-# ./scripts/config --disable DEBUG_INFO_NONE
+stripping unnecessary debug options
+./scripts/config --disable DEBUG_INFO
 
-# # 3. Enable the "Engine" (Required for BTF)
-# ./scripts/config --enable DEBUG_INFO
-# ./scripts/config --enable DEBUG_INFO_BTF
-# ./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
-
-# # 4. Re-Assert the Feature
-# ./scripts/config --enable SCHED_CLASS_EXT
-
-# 5. Final Sync
+Protect the environment variables during this final dependency check
 make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
+
+###############################################################################
+# Testing
+# will be safe to delete after next test
+###############################################################################
+
+# echo "🧹 Surgical Stripping (Preserving SCX/BTF)..."
+
+# # 1. Kill the Keys (Safety)
+# ./scripts/config --disable SYSTEM_TRUSTED_KEYS
+# ./scripts/config --disable SYSTEM_REVOCATION_KEYS
+# ./scripts/config --set-str SYSTEM_TRUSTED_KEYS ""
+# ./scripts/config --set-str SYSTEM_REVOCATION_KEYS ""
+# ./scripts/config --set-str MODULE_SIG_KEY ""
+
+# # # 2. Kill the "No Debug" flag (The Culprit)
+# # ./scripts/config --disable DEBUG_INFO_NONE
+
+# # # 3. Enable the "Engine" (Required for BTF)
+# # ./scripts/config --enable DEBUG_INFO
+# # ./scripts/config --enable DEBUG_INFO_BTF
+# # ./scripts/config --enable DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+
+# # # 4. Re-Assert the Feature
+# # ./scripts/config --enable SCHED_CLASS_EXT
+
+# # 5. Final Sync
+# make LLVM="$BUILD_LLVM" ARCH="$TARGET_ARCH" olddefconfig
 
 ###############################################################################
 # Testing
