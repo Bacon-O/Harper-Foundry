@@ -102,7 +102,7 @@ jobs:
           echo "Checking if build queue is empty before powering off $YML__FORGEJO_RUNNER_BUILDER..."
           cd "$YML__WORKSPACE_PATH"
 
-          ./scripts/plugins/tools/forgejo_runner_safe_shutdown.sh \
+          ./scripts/scripts.d/plugins/tools/forgejo_runner_safe_shutdown.sh \
             --params-file "$YML__PARAMS_FILE" \
             --api-token "$YML__API_TOKEN" \
             --forgejo-url "$YML__FORGEJO_URL" \

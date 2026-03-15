@@ -1,0 +1,23 @@
+[2026-03-09 20:20:34 UTC] === Starting Harper Trigger Cron Job ===
+[2026-03-09 20:20:34 UTC] Checking if new kernel versions are available...
+[0;34m[INFO][0m   Loading trigger plugin: harper_deb13_kernel
+[0;34m[INFO][0m   === Debian Trixie Kernel Release Monitor ===
+[0;34m[INFO][0m   Checking prerequisites...
+[0;34m[INFO][0m   Querying Debian Salsa API for linux-image versions...
+[0;34m[INFO][0m   Endpoint: https://salsa.debian.org/api/v4/projects/18670/repository/tags?search=bpo13
+[0;32m[OK][0m     Latest upstream version from API: debian/6.18.12-1_bpo13+1
+[0;34m[INFO][0m   Loading last compiled version from /home/matthew@int.faushaus.net/devel/forgejo/Harper-Foundry/version_tracking/harper_deb13_latest_kernel.txt
+[0;32m[OK][0m     Last compiled version: latest
+[0;32m[OK][0m     Last build date: 2026-03-09
+[0;32m[OK][0m     Build status: success
+[0;34m[INFO][0m   Comparing versions...
+[1;33m[WARN][0m   New version detected: debian/6.18.12-1_bpo13+1 (previously: latest)
+[0;34m[INFO][0m   Triggering build for new kernel version
+[1;33m[WARN][0m   Build needed for kernel debian/6.18.12-1_bpo13+1 (reason: new_version)
+[0;34m[INFO][0m   Returning exit code 0 to indicate build is needed
+[2026-03-09 20:20:34 UTC] Check completed with exit code: 0 (0=build needed, non-zero=no action)
+[2026-03-09 20:20:34 UTC] Build queued for kernel version debian/6.18.12-1_bpo13+1
+[0;34m[INFO][0m   === Build Failure Callback ===
+[0;31m[ERROR][0m  Build failed for kernel debian/6.18.12-1_bpo13+1: unknown
+[1;33m[WARN][0m   Version tracking NOT updated - will retry this version on next trigger check
+[2026-03-09 20:20:34 UTC] === Trigger Cron Job Complete ===
