@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source "$(dirname "$0")/../../env_setup.sh" "$@"
+source "$(dirname "$0")/../../../env_setup.sh" "$@"
 source "$(dirname "$0")/ramdisk_control.sh"
 
 echo "Mounting RAM disk for build environment..."

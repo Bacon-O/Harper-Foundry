@@ -50,7 +50,7 @@ set -e
 # RAMDISK_MOUNT_POINT - The mount point for the RAM disk (e.g., /mnt/ramdisk)
 # RAMDISK_SERVICE_NAME - The name of the systemd service managing the RAM disk (e.g., ramdisk-32GB.service)
 
-source "$(dirname "$0")/../../env_setup.sh" "$@"
+source "$(dirname "$0")/../../../env_setup.sh" "$@"
 
 ramkdisk_control() {
     command=""
