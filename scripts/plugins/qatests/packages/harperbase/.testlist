@@ -1,4 +1,4 @@
 filesexists.sh
 linuxconfig.sh
-debpackage.sh
+kernedebpkg.sh
 qemuboot.sh

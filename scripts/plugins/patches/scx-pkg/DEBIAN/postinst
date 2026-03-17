@@ -1,0 +1,44 @@
+#!/bin/sh
+set -e
+
+# Use deb-systemd-helper if available for better state management
+if [ -f /usr/bin/deb-systemd-helper ]; then
+    HELPERS=1
+fi
+
+case "$1" in
+    configure)
+        # 1. Reload systemd to recognize the new unit file
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload >/dev/null 2>&1 || true
+        fi
+
+        # 2. Enable the service
+        # This allows the scheduler to start on boot if configured
+        if [ "$HELPERS" = "1" ]; then
+            deb-systemd-helper enable scx.service >/dev/null 2>&1 || true
+        else
+            systemctl enable scx.service >/dev/null 2>&1 || true
+        fi
+
+        # 3. Feature Validation
+        # Check if the environment supports BPF/SCX
+        if [ ! -f /sys/kernel/btf/vmlinux ]; then
+            echo "Notice: /sys/kernel/btf/vmlinux not found."
+            echo "Ensure your kernel is compiled with CONFIG_DEBUG_INFO_BTF=y to use these schedulers."
+        fi
+
+        echo "scx-scheds-harper: Installed successfully."
+        echo "scx-scheds-harper: Edit /etc/default/scx to choose your scheduler."
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

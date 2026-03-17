@@ -14,7 +14,7 @@ set -e
 #   - Specific version: "6.11.8", "6.10.5", etc.
 #
 # Args:
-#   $1 - KERNEL_VERSION (e.g., "latest", "lts", "6.11.8")
+#   $1 - SOFTWARE_VERSION (e.g., "latest", "lts", "6.11.8")
 #   $2 - BUILD_ROOT directory (where to download/extract)
 #
 # Returns:
@@ -23,7 +23,7 @@ set -e
 
 # Resolve version alias to actual kernel version using kernel.org API
 # Uses grep/sed for parsing (no jq dependency required)
-resolve_kernel_version() {
+resolve_software_version() {
     local version_spec="${1:-latest}"
     local api_url="https://www.kernel.org/releases.json"
     
@@ -64,7 +64,7 @@ resolve_kernel_version() {
             
             if [[ -z "$version" ]]; then
                 echo "[WARN] API query failed, using fallback to latest stable" >&2
-                resolve_kernel_version "latest"
+                resolve_software_version "latest"
             else
                 echo "[INFO] Latest mainline from kernel.org: $version" >&2
                 echo "$version"
@@ -77,10 +77,10 @@ resolve_kernel_version() {
     esac
 }
 
-KERNEL_VERSION=$(resolve_kernel_version "${1:-}")
+SOFTWARE_VERSION=$(resolve_software_version "${1:-}")
 BUILD_ROOT="${2:-.}"
 
-echo "[INFO] kernel.org: Resolved version alias to: $KERNEL_VERSION" >&2
+echo "[INFO] kernel.org: Resolved version alias to: $SOFTWARE_VERSION" >&2
 
 # Ensure build root exists
 mkdir -p "$BUILD_ROOT"
@@ -88,15 +88,15 @@ cd "$BUILD_ROOT"
 
 # Determine kernel major version (6 from 6.12.71)
 # kernel.org stores all kernels under /v6.x/, not /v6.12.x/
-KERNEL_MAJOR="${KERNEL_VERSION%%.*}"
-KERNEL_TARBALL="linux-${KERNEL_VERSION}.tar.xz"
-KERNEL_EXTRACT_DIR="linux-${KERNEL_VERSION}"
+KERNEL_MAJOR="${SOFTWARE_VERSION%%.*}"
+KERNEL_TARBALL="linux-${SOFTWARE_VERSION}.tar.xz"
+KERNEL_EXTRACT_DIR="linux-${SOFTWARE_VERSION}"
 
-echo "[INFO] Fetching official kernel.org source: linux-${KERNEL_VERSION}" >&2
+echo "[INFO] Fetching official kernel.org source: linux-${SOFTWARE_VERSION}" >&2
 
 # Check if already downloaded
 if [[ ! -f "$KERNEL_TARBALL" ]]; then
-    echo "[INFO] Downloading linux-${KERNEL_VERSION}.tar.xz from kernel.org..." >&2
+    echo "[INFO] Downloading linux-${SOFTWARE_VERSION}.tar.xz from kernel.org..." >&2
     
     # Try to download with progress indicator
     # kernel.org stores all versions under /v{major}.x/ (e.g., /v6.x/)

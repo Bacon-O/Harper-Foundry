@@ -31,7 +31,7 @@ jobs:
     name: Check Version
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
-      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
+      detected_software_version: ${{ steps.check.outputs.detected_software_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,32 +1,34 @@
-# Kernel Source Plugins
+# Source Fetcher Plugins
 
-This directory contains the kernel source fetching plugin system. It allows flexible, parameterized kernel source handling for different kernel sources.
+This directory contains the source fetcher plugin system. It provides a generic namespace for scripts that acquire source trees, while the bundled implementations currently focus on Linux kernel sources.
 
 ## Directory Structure
 
 ```
-kernelsources/
+source_fetcher/
 ├── kernel_org.sh              # Fetch from kernel.org
 ├── debian.sh                  # Fetch from Debian sources
 ├── trixie_backports.sh        # Fetch from Trixie Backports
+├── linux_sched-ext-scx.sh     # Fetch sched-ext/scx from GitHub tags
 ├── custom.sh                  # Template for custom sources
 ├── runner.sh                  # Plugin router/dispatcher
 └── README.md                  # This file
 ```
 
-**Custom kernel sources go in:**
+**Custom source fetchers go in:**
 ```
-scripts/scripts.d/plugins/kernelsources/  # Your custom plugins (gitignored)
+scripts/scripts.d/plugins/source_fetcher/  # Your custom plugins (gitignored)
 └── (your custom plugins here)
 ```
 
 ## Overview
 
-Instead of hardcoding kernel source logic in build scripts, the plugin system maps the `KERNEL_SOURCE` parameter to specific source-fetching implementations:
+Instead of hardcoding source acquisition logic in build scripts, the plugin system maps the `SOFTWARE_SOURCE` parameter to specific fetcher implementations. The parameter name stays kernel-oriented because the current build flows still consume kernel trees.
 
 - **kernel.org**: Official vanilla upstream sources (ideal for tinyconfig)
 - **debian**: Debian apt-get source with patches (ideal for Harper/Debian tweaks)
 - **debian/trixie-backports**: Debian Trixie Backports (newer kernels with Debian integration)
+- **sched-ext/scx**: sched-ext/scx release tags from GitHub (ideal for SCX package builds)
 - **custom** or **none**: Skip automatic fetch; implement custom logic in your ci-build script
 
 ## Version Alias System
@@ -41,6 +43,8 @@ Instead of always specifying exact versions (e.g., "6.11.8"), you can use semant
 | `lts` | Latest LTS version | 6.1.112 | LTS if found | LTS if found |
 | `rc` | Release candidate | Latest RC | RCs if available | RCs if available |
 | `6.11.8` | Specific version | 6.11.8 exact | 6.11.8 exact | 6.11.8 exact |
+
+For `sched-ext/scx`, `latest`, `stable`, `lts`, and an empty version all resolve to the latest published GitHub release tag.
 
 ### Why Version Aliases?
 
@@ -57,12 +61,12 @@ This approach keeps your configs **forward-compatible** and **semantic**:
 ```bash
 #!/bin/bash
 
-# Load environment and kernel source plugin system
-source /opt/factory/scripts/plugins/kernelsources/runner.sh
+# Load environment and the source fetcher plugin system
+source /opt/factory/scripts/plugins/source_fetcher/runner.sh
 
-# Fetch kernel source based on KERNEL_SOURCE parameter
-# KERNEL_VERSION is optional - can be empty, "latest", or a specific version
-KERNEL_DIR=$(fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION")
+# Fetch the source tree selected by SOFTWARE_SOURCE
+# SOFTWARE_VERSION is optional - can be empty, "latest", or a specific version
+KERNEL_DIR=$(fetch_software_source "$SOFTWARE_SOURCE" "$SOFTWARE_VERSION")
 if [[ $? -ne 0 ]]; then
     echo "Failed to fetch kernel"
     exit 1
@@ -77,15 +81,15 @@ make -j$(nproc) bzImage
 ### In Parameter Files (e.g., foundry_template.params)
 
 ```bash
-# Choose kernel source strategy
-KERNEL_SOURCE="kernel.org"              # or "debian", "debian/trixie-backports"
+# Choose a source fetch strategy
+SOFTWARE_SOURCE="kernel.org"              # or "debian", "debian/trixie-backports"
 
 # Kernel version (optional - defaults shown below)
 # Leave empty to use defaults, set to "latest" for newest available
 # or specify exact version like "6.11.8"
-KERNEL_VERSION=""                       # Uses default (6.11.8 for kernel.org)
-# KERNEL_VERSION="latest"               # Fetches latest available
-# KERNEL_VERSION="6.11.8"               # Pins to exact version
+SOFTWARE_VERSION=""                       # Uses default (6.11.8 for kernel.org)
+# SOFTWARE_VERSION="latest"               # Fetches latest available
+# SOFTWARE_VERSION="6.11.8"               # Pins to exact version
 
 # Base kernel config (used by make target)
 BASE_CONFIG="tinyconfig"
@@ -93,23 +97,23 @@ BASE_CONFIG="tinyconfig"
 
 ### Custom Implementation
 
-If you need custom kernel source logic:
+If you need custom source fetch logic:
 
-1. Set `KERNEL_SOURCE="custom"` in your params file
+1. Set `SOFTWARE_SOURCE="custom"` in your params file
 2. The plugin runner will skip automatic fetch
 3. Implement your own fetching logic in your ci-build script:
 
 ```bash
 #!/bin/bash
 
-source /opt/factory/scripts/plugins/kernelsources/runner.sh
+source /opt/factory/scripts/plugins/source_fetcher/runner.sh
 
-if [[ "$KERNEL_SOURCE" == "custom" ]]; then
+if [[ "$SOFTWARE_SOURCE" == "custom" ]]; then
     # Your custom logic here
     git clone https://my-kernel-repo.com/kernel.git $BUILD_ROOT/kernel
     cd $BUILD_ROOT/kernel
     git checkout stable-6.11
-elif [[ "$KERNEL_SOURCE" == "internal-mirror" ]]; then
+elif [[ "$SOFTWARE_SOURCE" == "internal-mirror" ]]; then
     # Or handle other custom types
     rsync -av kernel-mirror.internal:/kernels/ $BUILD_ROOT/
 fi
@@ -130,7 +134,7 @@ make -j$(nproc) bzImage
 - Best for: Quick test builds, minimal configurations
 - **Default version**: 6.11.8
 
-**KERNEL_VERSION behavior**:
+**SOFTWARE_VERSION behavior**:
 - Empty or omitted: 6.11.8 (latest stable)
 - "latest": 6.11.8 (latest stable)
 - "stable": 6.11.8 (latest stable)
@@ -140,11 +144,11 @@ make -j$(nproc) bzImage
 
 **Examples**:
 ```bash
-KERNEL_SOURCE="kernel.org"
-# KERNEL_VERSION=""                     # Defaults to 6.11.8 stable
-# KERNEL_VERSION="latest"               # Gets 6.11.8 stable
-# KERNEL_VERSION="lts"                  # Gets 6.1.x LTS kernel
-# KERNEL_VERSION="6.10.5"               # Pins to specific version
+SOFTWARE_SOURCE="kernel.org"
+# SOFTWARE_VERSION=""                     # Defaults to 6.11.8 stable
+# SOFTWARE_VERSION="latest"               # Gets 6.11.8 stable
+# SOFTWARE_VERSION="lts"                  # Gets 6.1.x LTS kernel
+# SOFTWARE_VERSION="6.10.5"               # Pins to specific version
 ```
 
 ### debian.sh
@@ -156,7 +160,7 @@ KERNEL_SOURCE="kernel.org"
 - Requires: deb-src lines in /etc/apt/sources.list
 - Best for: Full builds with standard Debian tweaks
 
-**KERNEL_VERSION behavior**:
+**SOFTWARE_VERSION behavior**:
 - Empty or omitted: Latest available in Debian repos (no version constraint)
 - "latest": Latest available (same as empty)
 - "stable": Latest stable
@@ -166,11 +170,11 @@ KERNEL_SOURCE="kernel.org"
 
 **Examples**:
 ```bash
-KERNEL_SOURCE="debian"
-# KERNEL_VERSION=""                     # Fetches latest available
-# KERNEL_VERSION="latest"               # Same as empty
-# KERNEL_VERSION="lts"                  # Get LTS kernel if available
-# KERNEL_VERSION="6.11.8"               # Pin to specific version
+SOFTWARE_SOURCE="debian"
+# SOFTWARE_VERSION=""                     # Fetches latest available
+# SOFTWARE_VERSION="latest"               # Same as empty
+# SOFTWARE_VERSION="lts"                  # Get LTS kernel if available
+# SOFTWARE_VERSION="6.11.8"               # Pin to specific version
 ```
 
 **Requirements**:
@@ -189,7 +193,7 @@ sudo apt-get update
 - Requires: deb-src for trixie-backports in /etc/apt/sources.list
 - Best for: Harper builds needing newer kernels with full Debian integration
 
-**KERNEL_VERSION behavior**:
+**SOFTWARE_VERSION behavior**:
 - Empty or omitted: Latest available from trixie-backports (recommended for always-fresh builds)
 - "latest": Latest available (same as empty)
 - "stable": Latest stable from trixie-backports
@@ -199,11 +203,11 @@ sudo apt-get update
 
 **Examples**:
 ```bash
-KERNEL_SOURCE="debian/trixie-backports"
-# KERNEL_VERSION=""                     # Defaults to latest
-# KERNEL_VERSION="latest"               # Always newest from trixie-backports
-# KERNEL_VERSION="lts"                  # Get LTS from trixie-backports
-# KERNEL_VERSION="6.11.8"               # Pin to specific version
+SOFTWARE_SOURCE="debian/trixie-backports"
+# SOFTWARE_VERSION=""                     # Defaults to latest
+# SOFTWARE_VERSION="latest"               # Always newest from trixie-backports
+# SOFTWARE_VERSION="lts"                  # Get LTS from trixie-backports
+# SOFTWARE_VERSION="6.11.8"               # Pin to specific version
 ```
 
 **Aliases**: `debian/trixie-backports`, `trixie-backports`, `trixie`
@@ -223,22 +227,47 @@ sudo apt-get update
 - Backports provides those newer kernels for stable Debian systems
 - Includes all Debian's kernel patches and customizations
 - Better for projects like Harper that need recent kernel features
-- Setting `KERNEL_VERSION="latest"` ensures always building with newest kernel
+- Setting `SOFTWARE_VERSION="latest"` ensures always building with newest kernel
+
+### linux_sched-ext-scx.sh
+
+**Use case**: Build sched-ext/scx from upstream GitHub release tags
+
+- Uses: `https://github.com/sched-ext/scx`
+- Resolves `latest`, `stable`, `lts`, and empty version to the latest GitHub release tag
+- Accepts an explicit tag like `v1.1.0` or `1.1.0`
+- Best for: SCX package builds that should track upstream releases
+
+**SOFTWARE_VERSION behavior**:
+- Empty or omitted: Latest GitHub release tag
+- "latest": Latest GitHub release tag
+- "stable": Latest GitHub release tag
+- "lts": Same as latest GitHub release tag
+- Specific version: Exact tag, or the same version with a leading `v`
+
+**Examples**:
+```bash
+SOFTWARE_SOURCE="sched-ext/scx"
+# SOFTWARE_VERSION=""                     # Defaults to latest release tag
+# SOFTWARE_VERSION="latest"               # Same as empty
+# SOFTWARE_VERSION="lts"                  # Same as latest
+# SOFTWARE_VERSION="1.1.0"                # Resolves to 1.1.0 or v1.1.0
+```
 
 ## Plugin API
 
-### fetch_kernel_source()
+### fetch_software_source()
 
 Central function that routes to appropriate plugin.
 
 **Signature**:
 ```bash
-fetch_kernel_source <source_type> [kernel_version] [build_root]
+fetch_software_source <source_type> [SOFTWARE_VERSION] [build_root]
 ```
 
 **Arguments**:
-- `source_type`: One of kernel.org, debian, debian/trixie-backports, custom, none (case-insensitive)
-- `kernel_version`: Optional. Can be:
+- `source_type`: One of kernel.org, debian, debian/trixie-backports, sched-ext/scx, custom, none (case-insensitive)
+- `SOFTWARE_VERSION`: Optional. Can be:
   - Empty string or omitted: Uses plugin defaults
   - "latest": Fetches latest available from source
   - Specific version: "6.11.8", "6.10.5", etc.
@@ -251,66 +280,69 @@ fetch_kernel_source <source_type> [kernel_version] [build_root]
 **Examples**:
 ```bash
 # Use defaults (kernel.org with 6.11.8)
-KERNEL_DIR=$(fetch_kernel_source "kernel.org")
+KERNEL_DIR=$(fetch_software_source "kernel.org")
 
 # Always get latest from trixie-backports
-KERNEL_DIR=$(fetch_kernel_source "debian/trixie-backports" "latest")
+KERNEL_DIR=$(fetch_software_source "debian/trixie-backports" "latest")
+
+# Fetch the latest sched-ext/scx release tag
+KERNEL_DIR=$(fetch_software_source "sched-ext/scx" "latest")
 
 # Pin to specific version
-KERNEL_DIR=$(fetch_kernel_source "kernel.org" "6.10.5")
+KERNEL_DIR=$(fetch_software_source "kernel.org" "6.10.5")
 
 # Use latest from any source
-KERNEL_DIR=$(fetch_kernel_source "debian" "" "/tmp/build")
+KERNEL_DIR=$(fetch_software_source "debian" "" "/tmp/build")
 ```
 
-## Creating Custom Kernel Source Plugins
+## Creating Custom Source Fetcher Plugins
 
 ### Option 1: User Custom Plugins (Recommended)
 
-To add a custom kernel source plugin without modifying the project files:
+To add a custom source fetcher without modifying the project files:
 
-1. Create a plugin in `scripts/scripts.d/plugins/kernelsources/`:
+1. Create a plugin in `scripts/scripts.d/plugins/source_fetcher/`:
    ```bash
-   cat > scripts/scripts.d/plugins/kernelsources/myrepo.sh << 'EOF'
+    cat > scripts/scripts.d/plugins/source_fetcher/myrepo.sh << 'EOF'
    #!/bin/bash
    set -e
    
-   KERNEL_VERSION="${1:-6.11.8}"
+   SOFTWARE_VERSION="${1:-6.11.8}"
    BUILD_ROOT="${2:-.}"
    
    mkdir -p "$BUILD_ROOT"
    cd "$BUILD_ROOT"
    
-   # Your custom kernel fetch logic here
+    # Your custom source fetch logic here
    git clone https://my-kernel-repo.com/kernel.git kernel
    cd kernel
-   git checkout v"$KERNEL_VERSION"
+   git checkout v"$SOFTWARE_VERSION"
    
-   echo "[INFO] Kernel ready: $BUILD_ROOT/kernel" >&2
+    echo "[INFO] Source tree ready: $BUILD_ROOT/kernel" >&2
    echo "$BUILD_ROOT/kernel"
    EOF
-   chmod +x scripts/scripts.d/plugins/kernelsources/myrepo.sh
+    chmod +x scripts/scripts.d/plugins/source_fetcher/myrepo.sh
    ```
 
 2. Use in your params file:
    ```bash
-   KERNEL_SOURCE="myrepo"
-   KERNEL_VERSION="6.11.8"
+   SOFTWARE_SOURCE="myrepo"
+   SOFTWARE_VERSION="6.11.8"
    ```
 
 **Benefits**:
 - ✅ Keeps custom logic separate from project code
-- ✅ Easy to share different kernel sources across teams
+- ✅ Easy to share different source fetchers across teams
 - ✅ Safe from git conflicts during updates
 
 ### Option 2: Add to Project (Contributors)
 
-If you want to contribute a new kernel source to Harper Foundry:
+If you want to contribute a new source fetcher to Harper Foundry:
 
-1. Create `scripts/plugins/kernelsources/yourcustomsource.sh`
+1. Create `scripts/plugins/source_fetcher/yourcustomsource.sh`
 2. Implement the plugin interface:
-   - Accept `$1` = kernel_version, `$2` = build_root
-   - Create/extract kernel source
+   - Accept `$1` = SOFTWARE_VERSION, `$2` = build_root
+    - Create/extract the source tree
    - Print path to kernel directory to stdout
    - Exit with 0 on success, non-zero on failure
 3. Update `runner.sh` case statement with your source type
@@ -322,27 +354,27 @@ If you want to contribute a new kernel source to Harper Foundry:
 #!/bin/bash
 set -e
 
-KERNEL_VERSION="${1:-6.11.8}"
+SOFTWARE_VERSION="${1:-6.11.8}"
 BUILD_ROOT="${2:-.}"
 
 mkdir -p "$BUILD_ROOT"
 cd "$BUILD_ROOT"
 
-# Your kernel fetch logic here
+# Your source fetch logic here
 # (Download, clone, mirror, etc.)
 
-echo "[INFO] Kernel source ready: $BUILD_ROOT/linux" >&2
+echo "[INFO] Source tree ready: $BUILD_ROOT/linux" >&2
 echo "$BUILD_ROOT/linux"
 ```
 
 ## Adding to Tinyconfig Build
 
-See [scripts/compile_scripts/README.md](../compile_scripts/README.md) for how tinyconfig.sh integrates the kernel source plugin system.
+See [scripts/compile_scripts/README.md](../compile_scripts/README.md) for how tinyconfig.sh integrates the source fetcher plugin system.
 
 ## Troubleshooting
 
-### "Unknown KERNEL_SOURCE type"
-Check your params file - KERNEL_SOURCE must be one of: kernel.org, debian, custom, none
+### "Unknown SOFTWARE_SOURCE type"
+Check your params file - SOFTWARE_SOURCE must be one of: kernel.org, debian, custom, none
 
 ### "Plugin not found or not executable"
 Run: `chmod +x /path/to/plugin.sh`

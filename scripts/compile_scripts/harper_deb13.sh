@@ -29,7 +29,7 @@ if [[ -f "/opt/factory/scripts/env_setup.sh" ]]; then
     source /opt/factory/scripts/env_setup.sh "$@"
 else
     echo "⚠️  env_setup.sh not found. Using defaults."
-    KERNEL_SOURCE="linux-source"
+    SOFTWARE_SOURCE="linux-source"
     TARGET_ARCH="x86_64"
     FINAL_JOBS=$(nproc)
 fi
@@ -41,11 +41,11 @@ echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
-echo "📥 Fetching Kernel Source: $KERNEL_SOURCE"
+echo "📥 Fetching Source Tree: $SOFTWARE_SOURCE"
 
-# Use kernel source plugin runner to handle various source types
-source "${PLUGIN_DIR}/kernelsources/runner.sh"
-fetch_kernel_source "$KERNEL_SOURCE" "${KERNEL_VERSION:-latest}" "$CONTAINER_BUILD_ROOT" >/dev/null
+# Use source fetcher plugin runner to handle various source types
+source "${PLUGIN_DIR}/source_fetcher/runner.sh"
+fetch_software_source "$SOFTWARE_SOURCE" "${SOFTWARE_VERSION:-latest}" "$CONTAINER_BUILD_ROOT" >/dev/null
 KERNEL_DIR=$(find "$CONTAINER_BUILD_ROOT" -maxdepth 1 -type d -name "linux-*" | head -n1)
 if [[ -z "$KERNEL_DIR" ]]; then
     echo "❌ ERROR: Failed to fetch or locate kernel source"; exit 1;

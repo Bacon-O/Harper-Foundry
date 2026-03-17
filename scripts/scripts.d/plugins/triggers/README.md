@@ -70,11 +70,11 @@ export -f trigger_init trigger_handler
 
 trigger_handler() {
     LATEST_VERSION=$(curl -s https://www.kernel.org/releases.json | jq -r '.[0].version')
-    CURRENT_VERSION=$(grep "^KERNEL_VERSION=" params/foundry_template.params)
+    CURRENT_VERSION=$(grep "^SOFTWARE_VERSION=" params/foundry_template.params)
     
     if [[ "$LATEST_VERSION" != "$CURRENT_VERSION" ]]; then
         echo "New kernel $LATEST_VERSION released - triggering build"
-        sed -i "s/^KERNEL_VERSION=.*/KERNEL_VERSION=$LATEST_VERSION/" params/foundry_template.params
+        sed -i "s/^SOFTWARE_VERSION=.*/SOFTWARE_VERSION=$LATEST_VERSION/" params/foundry_template.params
         ./start_build.sh
     fi
 }

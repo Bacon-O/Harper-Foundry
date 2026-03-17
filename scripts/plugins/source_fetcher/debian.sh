@@ -20,7 +20,7 @@ set -e
 #   - 'deb-src' lines in /etc/apt/sources.list or sources.list.d/
 #
 # Args:
-#   $1 - KERNEL_VERSION (e.g., "latest", "lts", "6.11.8")
+#   $1 - SOFTWARE_VERSION (e.g., "latest", "lts", "6.11.8")
 #   $2 - BUILD_ROOT directory (where to download/extract)
 #
 # Returns:

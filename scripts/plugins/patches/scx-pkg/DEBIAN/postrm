@@ -1,0 +1,30 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    purge)
+        # 1. Remove the configuration file
+        if [ -f /etc/default/scx ]; then
+            rm -f /etc/default/scx
+        fi
+
+        # 2. Clean up systemd state and symlinks
+        if [ -x "/usr/bin/deb-systemd-helper" ]; then
+            deb-systemd-helper purge scx.service >/dev/null 2>&1 || true
+            deb-systemd-helper unmask scx.service >/dev/null 2>&1 || true
+        fi
+        
+        echo "scx-scheds-harper: Configuration and service state purged."
+        ;;
+
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # No action needed for these stages; keep config files
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

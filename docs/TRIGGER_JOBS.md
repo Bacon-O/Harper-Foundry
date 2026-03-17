@@ -28,7 +28,7 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
 │  (scripts/plugins/triggers/runner.sh)                       │
 │                                                             │
 │  - Loads appropriate trigger plugin                         │
-│  - Exports: DETECTED_KERNEL_VERSION, DETECTED_BUILD_REASON  │
+│  - Exports: DETECTED_SOFTWARE_VERSION, DETECTED_BUILD_REASON│
 │  - Returns: 0=build needed, 1=no action                     │
 └────────────────────┬────────────────────────────────────────┘
                      │
@@ -36,12 +36,12 @@ The trigger job system uses a **plugin-based architecture** to monitor upstream 
                      ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  STEP 2: Trigger Detection Plugin                           │
-│  (scripts/plugins/triggers/<distro>_kernel.sh)          │
+│  (scripts/plugins/triggers/<distro>_kernel.sh)              │
 │                                                             │
 │  1. Query Debian backports source index for latest version  │
 │  2. Load last successfully built version                    │
 │  3. Compare versions                                        │
-│  4. Export DETECTED_KERNEL_VERSION if new                   │
+│  4. Export DETECTED_SOFTWARE_VERSION if new                 │
 │  5. Return: 0 if build needed, 1 if not                     │
 └────────────────────┬────────────────────────────────────────┘
                      │
@@ -120,11 +120,11 @@ fedora_kernel_trigger() {
     latest_version=$(curl -s "$FEDORA_KOJI_API" | ...)
     
     # 2. Load last built version
-    source "$VERSION_TRACKING_FILE" 2>/dev/null || KERNEL_VERSION="unknown"
+    source "$VERSION_TRACKING_FILE" 2>/dev/null || SOFTWARE_VERSION="unknown"
     
     # 3. Compare and decide
-    if [[ "$latest_version" != "$KERNEL_VERSION" ] || [ "$force_build" = "true" ]]; then
-        export DETECTED_KERNEL_VERSION="$latest_version"
+    if [[ "$latest_version" != "$SOFTWARE_VERSION" ] || [ "$force_build" = "true" ]]; then
+        export DETECTED_SOFTWARE_VERSION="$latest_version"
         export DETECTED_BUILD_REASON="new_version"
         return 0  # Build needed
     fi
@@ -134,10 +134,10 @@ fedora_kernel_trigger() {
 
 # REQUIRED: Success callback
 fedora_kernel_build_successful() {
-    log_ok "Updating tracking for Fedora kernel $DETECTED_KERNEL_VERSION"
+    log_ok "Updating tracking for Fedora kernel $DETECTED_SOFTWARE_VERSION"
     
     cat > "$VERSION_TRACKING_FILE" << EOF
-KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+SOFTWARE_VERSION=$DETECTED_SOFTWARE_VERSION
 LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
 BUILD_STATUS=success
 EOF
@@ -161,7 +161,7 @@ source ./scripts/plugins/triggers/runner.sh
 check_if_build_is_needed fedora_kernel
 
 if [[ $? -eq 0 ]]; then
-    echo "Build needed: $DETECTED_KERNEL_VERSION"
+    echo "Build needed: $DETECTED_SOFTWARE_VERSION"
 fi
 ```
 
@@ -177,7 +177,7 @@ fi
 ## Version Tracking File Format
 
 ```bash
-KERNEL_VERSION=6.11.8              # Latest compiled version
+SOFTWARE_VERSION=6.11.8              # Latest compiled version
 LAST_BUILD_DATE=2026-02-15         # UTC date of last successful build
 BUILD_STATUS=success               # success | failed | in_progress
 

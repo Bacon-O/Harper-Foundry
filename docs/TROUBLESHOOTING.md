@@ -39,14 +39,14 @@ ls -lh /path/to/HOST_OUTPUT_DIR/
 ```
 
 **Causes:**
-- Invalid `KERNEL_SOURCE` in `params/foundry_template.params`
+- Invalid `SOFTWARE_SOURCE` in `params/foundry_template.params`
 - Network issues preventing package download
 - Debian repository not accessible
 
 **Solutions:**
-1. Check your `KERNEL_SOURCE` value:
+1. Check your `SOFTWARE_SOURCE` value:
    ```bash
-   grep KERNEL_SOURCE params/foundry_template.params
+   grep SOFTWARE_SOURCE params/foundry_template.params
    ```
 
 2. Verify the package exists:

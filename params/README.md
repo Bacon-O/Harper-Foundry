@@ -215,7 +215,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 # Override for testing
 HOST_OUTPUT_DIR="/tmp/test-builds"
 QA_MODE="RELAXED"
-KERNEL_VERSION="6.12.8"  # Pin to specific version
+SOFTWARE_VERSION="6.12.8"  # Pin to specific version
 EOF
 
 ./start_build.sh -p params/my_test.params
@@ -232,8 +232,8 @@ EOF
 
 ### Kernel Definition
 - `TARGET_ARCH` - Architecture (x86_64, aarch64, etc.)
-- `KERNEL_SOURCE` - Where to get kernel (kernel.org, debian, etc.)
-- `KERNEL_VERSION` - Version or alias (latest, lts, 6.12.8)
+- `SOFTWARE_SOURCE` - Where to get kernel (kernel.org, debian, etc.)
+- `SOFTWARE_VERSION` - Version or alias (latest, lts, 6.12.8)
 - `DEBIAN_PACKAGE_NAME` - Output .deb package name
 
 ### Build Strategy
@@ -267,4 +267,4 @@ not for production systems. The Harper kernel is experimental and not suitable f
 
 - [Main README](../README.md) - Harper Foundry overview
 - [CONTRIBUTING](../CONTRIBUTING.md) - Development guidelines
-- [Kernel Sources Plugin](../scripts/plugins/kernelsources/README.md) - Source strategies
+- [Source Fetcher Plugin](../scripts/plugins/source_fetcher/README.md) - Source strategies

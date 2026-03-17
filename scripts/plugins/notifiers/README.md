@@ -142,7 +142,7 @@ email_notifier_check() {
     source "$version_file"
     
     # Example: Send email
-    echo "Build status for $profile: $BUILD_STATUS (kernel $KERNEL_VERSION)" | \
+    echo "Build status for $profile: $BUILD_STATUS (kernel $SOFTWARE_VERSION)" | \
       mail -s "Harper Build Notification" admin@example.com
     
     return 0  # or 1, 2, 3 for WARNING, CRITICAL, UNKNOWN
@@ -189,7 +189,7 @@ prometheus_check() {
     cat << EOF
 # HELP harper_build_status Build status (0=failed, 1=success)
 # TYPE harper_build_status gauge
-harper_build_status{profile="$profile",version="$KERNEL_VERSION"} $([ "$BUILD_STATUS" = "success" ] && echo 1 || echo 0)
+harper_build_status{profile="$profile",version="$SOFTWARE_VERSION"} $([ "$BUILD_STATUS" = "success" ] && echo 1 || echo 0)
 EOF
     
     return 0
@@ -216,10 +216,10 @@ slack_check() {
     # 1 = Success
     # 0 = Failed
     if [[ "$BUILD_STATUS" = "failed" ]]; then
-        message="🚨 Harper Build FAILED for kernel $KERNEL_VERSION"
+        message="🚨 Harper Build FAILED for kernel $SOFTWARE_VERSION"
         color="danger"
     else
-        message="✅ Harper build successful (kernel $KERNEL_VERSION)"
+        message="✅ Harper build successful (kernel $SOFTWARE_VERSION)"
     fi
     
     curl -X POST -H 'Content-type: application/json' \
@@ -247,7 +247,7 @@ To add a custom notifier plugin without modifying project files:
        
        # Send notification to your service
        curl -X POST https://my-service.com/builds \
-           -d "kernel=$KERNEL_VERSION&status=$BUILD_STATUS"
+           -d "kernel=$SOFTWARE_VERSION&status=$BUILD_STATUS"
        
        # Return CheckMK exit code: 0=OK, 1=WARNING, 2=CRITICAL, 3=UNKNOWN
        return 0

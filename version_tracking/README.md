@@ -7,7 +7,7 @@ This directory tracks the last successfully compiled kernel versions for each bu
 - **`harper_deb13_latest_kernel.txt`** - Last successful kernel version compiled with harper_deb13.
   - Format: 
     ```
-    KERNEL_VERSION=6.18.12-1~bpo13+1
+    SOFTWARE_VERSION=6.18.12-1~bpo13+1
     LAST_BUILD_DATE=2026-02-15
     BUILD_STATUS=success
     ```

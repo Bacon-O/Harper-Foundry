@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QA test plugins:
   - `filesexists.sh` - File presence validation
   - `linuxconfig.sh` - Kernel config validation
-  - `debpackage.sh` - Package integrity checks
+  - `kernedebpkg.sh` - Package integrity checks
   - `qemuboot.sh` - Boot testing (optional)
 
 ---

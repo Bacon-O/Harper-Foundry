@@ -38,7 +38,7 @@
 #   • QA_MODE: Set to ENFORCED for stricter testing
 #   • BYPASS_QA: Ensure QA runs (set to false)
 #   • ENABLE_QEMU_TESTS: Enable/disable QEMU boot tests
-#   • KERNEL_VERSION: Pin to specific version for reproducible tests
+#   • SOFTWARE_VERSION: Pin to specific version for reproducible tests
 # ==============================================================================
 
 # --- Output Directory Override ---
@@ -52,7 +52,7 @@ BYPASS_QA="false"
 
 # --- Optional: Version Pinning for Reproducible Tests ---
 # Uncomment to pin to a specific kernel version instead of "latest"
-# KERNEL_VERSION="6.12.8"
+# SOFTWARE_VERSION="6.12.8"
 
 # --- Optional: QEMU Testing ---
 # Uncomment to enable QEMU boot tests in CI

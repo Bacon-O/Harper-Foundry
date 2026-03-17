@@ -273,7 +273,7 @@ Harper-Foundry/
 ├── scripts/          # Build and utility scripts
 │   ├── compile_scripts/  # Official build script variants
 │   ├── plugins/      # Extensible plugins
-│   │   ├── kernelsources/
+│   │   ├── source_fetcher/
 │   │   ├── notifiers/
 │   │   ├── patches/
 │   │   ├── qatests/  # Quality assurance tests
@@ -303,7 +303,7 @@ Harper-Foundry/
 - `params/params.d/` - Your custom build configurations
 - `scripts/scripts.d/` - Your custom compile scripts and utilities
   - `compile_scripts/` - Custom build variants
-  - `plugins/` - Custom plugin implementations (kernelsources, notifiers, qatests, etc.)
+   - `plugins/` - Custom plugin implementations (source_fetcher, notifiers, qatests, etc.)
 
 ## Questions or Issues?
 

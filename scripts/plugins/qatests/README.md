@@ -7,7 +7,7 @@ This directory contains the Quality Assurance (QA) test framework for the Harper
 ```
 qatests/
 ├── tests/           # Individual QA test scripts
-│   ├── debpackage.sh
+│   ├── kernedebpkg.sh
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
@@ -27,10 +27,11 @@ scripts.d/plugins/qatests/      # Your custom tests (gitignored)
 
 Standalone test scripts that validate specific aspects of the build:
 
-- **`debpackage.sh`**: Validates Debian package integrity
+- **`kernedebpkg.sh`**: Validates Debian package integrity
 - **`filesexists.sh`**: Checks that required build artifacts exist
 - **`linuxconfig.sh`**: Validates kernel configuration options
 - **`qemuboot.sh`**: Tests kernel boot in QEMU (if enabled)
+- **`debpkg.sh`**: Runs `lintian` against every `.deb` in the build output; fails on errors, warns on warnings
 
 Individual tests are referenced in the `QA_TESTS` array in params files.
 
@@ -140,7 +141,7 @@ BYPASS_QA="true"
    # Full test suite
    filesexists.sh
    linuxconfig.sh
-   debpackage.sh
+   kernedebpkg.sh
    qemuboot.sh
    ```
    - Each line references a test script from `TEST_FUNCTIONS_DIR`

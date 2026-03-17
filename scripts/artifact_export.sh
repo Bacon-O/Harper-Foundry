@@ -5,11 +5,6 @@ set -e
 source "$(dirname "$0")/env_setup.sh" "$@"
 
 
-### Place holder for future export functionality. This will likely involve:
-# - Packaging build artifacts into a tarball or zip file
-# - Optionally uploading to a remote server or cloud storage
-# - Generating checksums for integrity verification
-# - Providing a summary report of the exported artifacts 
 ###
 # ARTIFACT_DELIVERY="false"
 # ARTIFACT_COMPRESSION="" # Options: "tar.gz", "zip", or "" for none
@@ -20,7 +15,7 @@ source "$(dirname "$0")/env_setup.sh" "$@"
 # ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 # LOCAL_DELIVERY_PATH="${BUILD_OUTPUT_DIR}/build_${TIMESTAMP}/artifacts"
 
-echo "🚀 Export functionality is not yet implemented. Stay tuned for updates!"
+echo "🚀 Artifact export starting..."
 
 # Validation check for remote delivery configuration (if enabled)
 if [[ "${ARTIFACT_DELIVERY:-false}" == "true" ]]; then

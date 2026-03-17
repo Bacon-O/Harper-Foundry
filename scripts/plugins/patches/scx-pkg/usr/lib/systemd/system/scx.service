@@ -1,0 +1,23 @@
+[Unit]
+Description=Sched-ext Scheduler Loader
+After=network.target
+# Ensure we don't restart in an infinite loop if the kernel doesn't support SCX
+ConditionPathExists=/sys/kernel/btf/vmlinux
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/scx
+# The actual execution
+ExecStart=/usr/bin/sh -c 'exec /usr/bin/${SCX_SCHEDULER} ${SCX_FLAGS}'
+
+# Aggressive but safe restart logic
+Restart=always
+RestartSec=2s
+StartLimitIntervalSec=0
+
+# Security Hardening (Optional but recommended for SCX)
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_BPF CAP_NET_ADMIN
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

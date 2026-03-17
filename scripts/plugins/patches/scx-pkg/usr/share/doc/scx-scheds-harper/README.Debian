@@ -1,0 +1,12 @@
+scx-scheds-harper for Debian
+----------------------------
+
+To use these schedulers:
+1. Ensure your kernel supports sched_ext (check /sys/kernel/btf/vmlinux).
+2. Edit /etc/default/scx to select your scheduler (default: scx_rustland).
+3. Run 'systemctl start scx' to activate.
+
+You can verify the active scheduler by running:
+    cat /sys/kernel/sched_ext/root/ops_name
+
+ -- Harper <https://github.com/Bacon-O/scx-scheds-harper>

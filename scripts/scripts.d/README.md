@@ -31,13 +31,13 @@ scripts/scripts.d/compile_scripts/
 
 Custom plugin implementations following the same structure as official plugins.
 
-#### `kernelsources/`
+#### `source_fetcher/`
 
-Custom kernel source fetchers for alternative architectures or custom repositories.
+Custom source fetchers for alternative architectures or custom repositories.
 
 ```bash
-scripts/scripts.d/plugins/kernelsources/
-├── custom_arm64.sh     # Custom ARM64 kernel source
+scripts/scripts.d/plugins/source_fetcher/
+├── custom_arm64.sh     # Custom ARM64 source fetcher
 ├── gitlab_private.sh   # Private GitLab kernel repository
 └── README.md
 ```
@@ -110,7 +110,7 @@ Most Harper Foundry systems use smart lookup for custom scripts:
 2. Fall back to `scripts/*` (official implementations) if custom not found
 
 This means:
-- **Custom overrides official:** If you create `scripts.d/plugins/kernelsources/custom.sh`, it takes precedence
+- **Custom overrides official:** If you create `scripts.d/plugins/source_fetcher/custom.sh`, it takes precedence
 - **Mix and match:** Use custom scripts where you need them, official elsewhere
 - **No broken references:** If a custom script is deleted, it gracefully falls back to official
 
@@ -131,21 +131,21 @@ nano scripts/scripts.d/compile_scripts/myconfig.sh
 
 ### 2. Create Your Custom Plugin
 
-Example: Adding a custom kernel source:
+Example: Adding a custom source fetcher:
 
 ```bash
 # Create the file
-cat > scripts/scripts.d/plugins/kernelsources/mykernel.sh << 'EOF'
+cat > scripts/scripts.d/plugins/source_fetcher/mykernel.sh << 'EOF'
 #!/bin/bash
-# Custom kernel source fetcher
-KERNEL_VERSION="6.10-custom"
+# Custom source fetcher
+SOFTWARE_VERSION="6.10-custom"
 fetch_kernel() {
-    echo "Fetching custom kernel $KERNEL_VERSION..."
+    echo "Fetching custom source tree for $SOFTWARE_VERSION..."
     # Your custom fetch logic here
 }
 EOF
 
-chmod +x scripts/scripts.d/plugins/kernelsources/mykernel.sh
+chmod +x scripts/scripts.d/plugins/source_fetcher/mykernel.sh
 ```
 
 Then configure it in `params/your.params`:
@@ -172,12 +172,12 @@ These files are **gitignored** - they won't be tracked by git. This means:
 
 ```bash
 # Current official location
-scripts/plugins/kernelsources/debian.sh
+scripts/plugins/source_fetcher/debian.sh
 
 # Create custom override
-cat > scripts/scripts.d/plugins/kernelsources/debian.sh << 'EOF'
+cat > scripts/scripts.d/plugins/source_fetcher/debian.sh << 'EOF'
 #!/bin/bash
-# My custom Debian kernel fetch logic
+# My custom Debian source fetch logic
 # This will be used instead of the official version
 EOF
 ```
@@ -189,7 +189,7 @@ You can use both in `ENV_EXTENSIONS`:
 ```bash
 # params/hybrid.params
 ENV_EXTENSIONS=(
-    "kernelsources/mykernel.sh"   # Custom (checked first)
+    "source_fetcher/mykernel.sh"   # Custom (checked first)
     "notifiers/slack.sh"           # Custom (checked first)
     "patches/security.patch"       # Official fallback if custom not found
 )
