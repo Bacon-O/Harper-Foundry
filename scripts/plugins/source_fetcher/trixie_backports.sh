@@ -98,6 +98,8 @@ fi
 
 # Pull kernel source from trixie-backports repository
 # The -t flag targets the backports suite specifically
+echo "Getting kernel source: "
+echo "   apt-get source -t trixie-backports \"linux${VERSION_CONSTRAINT}\""
 if ! apt-get source -t trixie-backports "linux${VERSION_CONSTRAINT}" 1>&2; then
     echo "[ERROR] Failed to fetch kernel source from trixie-backports" >&2
     echo "[ERROR] Hint: Ensure deb-src for trixie-backports is configured" >&2
