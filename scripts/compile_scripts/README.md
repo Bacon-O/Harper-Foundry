@@ -1,10 +1,10 @@
-# Compile Scripts - Build Script Variants
+# Build Script Variants
 
-This directory contains different build scripts variants optimized for different purposes. Think of them as different recipes for smelting the kernel, each tuned for specific goals.
+This directory contains different - build script variants optimized for different purposes. Think of them as different recipes for smelting the kernel, each tuned for specific goals.
 
-## 🎯 Available Builds
+## 🎯 Compile Scripts
 
-### `harper_deb13.sh` - Harper (Debian 13)
+### `harper_deb13.sh` - Harper Kernel Based on Debian 13 Backports Kernel
 **Purpose:** Complete Harper kernel builds for enthusiasts and hobbyists  
 **Build Time:** 30-60+ minutes (depending on hardware)  
 **Artifacts:** Full .deb packages, headers, bzImage  
@@ -60,10 +60,7 @@ FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
 ./start_build.sh --params-file params/tinyconfig.params
 
 # Or specify exec directly:
-./start_build.sh --exec compile_scripts/tinyconfig.sh
-
-# Or via make:
-make test  # Uses tinyconfig by default
+./start_build.sh --exec compile_scripts/harper_deb13.sh
 ```
 
 **What Gets Tested:**
@@ -98,9 +95,9 @@ make test  # Uses tinyconfig by default
 
 ---
 
-## 🔧 Creating Build
+## 🔧 Creating New Compile Script
 
-To add a new compile script
+To add a new compile script:
 
 1. **Create the script:**
    ```bash
@@ -140,7 +137,7 @@ To add a new compile script
 
 ## 📝 Script Requirements
 
-All comppile scripts must:
+All compile scripts scripts must:
 
 1. **Source environment:**
    ```bash

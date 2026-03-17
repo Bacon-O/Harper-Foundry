@@ -29,7 +29,7 @@ FOUNDRY_GID=""
 FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
 
 # --- Foundry Image Configuration ---
-DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
+DOCKERFILE_PATH="docker/trixie-clang-mtrixie-clang-multiarch.dockerfileultiarch"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # ==============================================================================
@@ -44,15 +44,15 @@ RELEASE_TAG="harper-test"
 TARGET_ARCH="x86_64"
 CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
 
-# --- Kernel Source Strategy (Plugin-based) ---
+# --- Source Fetch Strategy (Plugin-based) ---
 # Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
-KERNEL_SOURCE="kernel.org"
+SOFTWARE_SOURCE="kernel.org"
 # Use latest LTS kernel by default (stable, long-term support)
-KERNEL_VERSION="lts"
+SOFTWARE_VERSION="lts"
 # Other options:
-#   KERNEL_VERSION="latest"  # Latest stable release
-#   KERNEL_VERSION="rc"      # Latest mainline/RC
-#   KERNEL_VERSION="6.11.8"  # Specific version
+#   SOFTWARE_VERSION="latest"  # Latest stable release
+#   SOFTWARE_VERSION="rc"      # Latest mainline/RC
+#   SOFTWARE_VERSION="6.11.8"  # Specific version
 
 DEB_HOST_ARCH="amd64"
 HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"

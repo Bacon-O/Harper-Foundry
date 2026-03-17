@@ -1,0 +1,82 @@
+name: sched-ext SCX Trigger
+
+on:
+  # schedule:
+  #  - cron: '0 */3 * * *'
+
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  YML__API_TOKEN: ${{ secrets.GITHUB_API }}
+  YML__GITHUB_URL: ${{ github.api_url }}
+  YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+  YML__WORKSPACE_PATH: ${{ github.workspace }}
+  YML__PARAMS_FILE: params/linux_sched-ext_scx.params
+  YML__KERNEL_TITLE: sched-ext SCX
+  YML__KERNEL_TRIGGER_LABEL: linux_sched_ext_scx
+  YML__KERNEL_TRACKING_FILE: version_tracking/linux_sched-ext_scx_latest.txt
+
+jobs:
+  monitor_and_queue:
+    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
+    name: Check Version and Dispatch Build
+    outputs:
+      build_needed: ${{ steps.check.outputs.build_needed }}
+      detected_software_version: ${{ steps.check.outputs.detected_software_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check sched-ext release
+        env:
+          FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
+        id: check
+        run: |
+          cd "$YML__WORKSPACE_PATH"
+          source ./scripts/plugins/triggers/runner.sh
+          FORCE_OPT=""
+
+          if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
+            echo "Forcing build"
+            FORCE_OPT="--force"
+          else
+            echo "No build forced - normal operation"
+          fi
+
+          echo "build_needed=false" >> $GITHUB_OUTPUT
+          echo "detected_software_version=" >> $GITHUB_OUTPUT
+
+          build_return_code=0
+          check_if_build_is_needed "$YML__KERNEL_TRIGGER_LABEL" $FORCE_OPT || build_return_code=$?
+          echo "check_if_build_is_needed returned code: $build_return_code"
+
+          if [[ "$build_return_code" -eq 0 ]]; then
+            echo "build_needed=true" >> $GITHUB_OUTPUT
+            echo "detected_software_version=${DETECTED_SOFTWARE_VERSION:-}" >> $GITHUB_OUTPUT
+            echo "New sched-ext/scx release detected"
+          elif [[ "$build_return_code" -eq 1 ]]; then
+            echo "No update needed"
+          else
+            echo "Error checking for sched-ext/scx update"
+            exit 1
+          fi
+
+  dispatch_build:
+    runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
+    name: Dispatch Build Workflow
+    needs: monitor_and_queue
+    if: ${{ needs.monitor_and_queue.outputs.build_needed == 'true' }}
+    steps:
+      - name: Trigger linux_sched-ext-scx-build workflow
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: token $YML__API_TOKEN" \
+            -H "Content-Type: application/json" \
+            "$YML__GITHUB_URL/repos/${{ github.repository }}/actions/workflows/linux_sched-ext-scx-build.yml/dispatches" \
+            -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"force_build\":\"${{ github.event.inputs.force_build }}\"}}"

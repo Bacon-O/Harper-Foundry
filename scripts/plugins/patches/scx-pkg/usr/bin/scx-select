@@ -1,0 +1,43 @@
+#!/bin/bash
+# scx-select: Manage Harper-Foundry SCX schedulers
+
+SCHED_DIR="/usr/bin"
+CONF="/etc/default/scx"
+
+show_help() {
+    echo "Usage: scx-select [COMMAND] [SCHEDULER]"
+    echo ""
+    echo "Commands:"
+    echo "  list               List all installed scx_ schedulers"
+    echo "  now <name>         Stop service and run scheduler in foreground (Temporary)"
+    echo "  default <name>     Set scheduler as the system boot default (Persistent)"
+    echo "  -h, --help         Show this help message"
+}
+
+case "$1" in
+    "list")
+        find "$SCHED_DIR" -maxdepth 1 -name 'scx_*' -print0 2>/dev/null | xargs -0 -n1 basename
+        ;;
+    "now")
+        [[ -z "$2" ]] && { show_help; exit 1; }
+        sudo systemctl stop scx
+        echo "⚡ Running $2... (Ctrl+C to stop)"
+        sudo "$SCHED_DIR/$2"
+        ;;
+    "default")
+        [[ -z "$2" ]] && { show_help; exit 1; }
+        if [[ -f "$SCHED_DIR/$2" ]]; then
+            sudo sed -i "s/^SCX_SCHEDULER=.*/SCX_SCHEDULER=$2/" "$CONF"
+            sudo systemctl restart scx
+            echo "✅ $2 set as system default and service restarted."
+        else
+            echo "❌ Error: $2 not found in $SCHED_DIR"
+        fi
+        ;;
+    "-h"|"--help")
+        show_help
+        ;;
+    *)
+        show_help
+        ;;
+esac

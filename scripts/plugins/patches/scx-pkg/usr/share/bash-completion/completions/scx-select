@@ -1,0 +1,24 @@
+# shellcheck disable=SC2148
+_scx_select_completions() {
+    local cur prev opts scheds
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    opts="list now default --help"
+
+    case "${prev}" in
+        "now"|"default")
+            # Suggest scx_ binaries, but filter out the management tool itself
+            scheds=$(compgen -c -- "scx_" | grep -v "scx-select" | sort -u)
+            mapfile -t COMPREPLY < <(compgen -W "${scheds}" -- "${cur}")
+            return 0
+            ;;
+        *)
+            mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}")
+            return 0
+            ;;
+    esac
+}
+
+complete -F _scx_select_completions scx-select

@@ -16,7 +16,7 @@ on:
         default: false
 
 env:
-  YML__API_TOKEN: ${{ secrets.GITHUB_API }} }}
+  YML__API_TOKEN: ${{ secrets.GITHUB_API }}
   YML__GITHUB_URL: ${{ github.api_url }} 
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
@@ -31,7 +31,7 @@ jobs:
     name: Check Version
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
-      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
+      detected_software_version: ${{ steps.check.outputs.detected_software_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -117,7 +117,7 @@ jobs:
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          # TODO script this
+
           # Check if version tracking file was updated by build_successful callback
           if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"

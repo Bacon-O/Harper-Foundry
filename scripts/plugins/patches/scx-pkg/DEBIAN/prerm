@@ -1,0 +1,35 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove)
+        # 1. Stop the service so the kernel releases the BPF hooks
+        if [ -d /run/systemd/system ]; then
+            systemctl stop scx.service >/dev/null 2>&1 || true
+        fi
+        
+        # 2. Disable the service so it doesn't leave a broken symlink
+        if [ -x "/usr/bin/deb-systemd-helper" ]; then
+            deb-systemd-helper disable scx.service >/dev/null 2>&1 || true
+        else
+            systemctl disable scx.service >/dev/null 2>&1 || true
+        fi
+        ;;
+
+    upgrade)
+        # Just stop it so we can swap the binary; postinst will restart it
+        if [ -d /run/systemd/system ]; then
+            systemctl stop scx.service >/dev/null 2>&1 || true
+        fi
+        ;;
+
+    failed-upgrade|deconfigure)
+        ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed `ci-build.sh` symlink; update any custom references
   - Updated `FOUNDRY_EXEC` in `foundry_template.params`
 
+- **README structure** - Added compile scripts section and comparison table
 
 ### Fixed
 - **Critical bug**: Removed duplicate `CROSS_COMPILE` variable definition in `foundry_template.params`
@@ -78,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - QA test plugins:
   - `filesexists.sh` - File presence validation
   - `linuxconfig.sh` - Kernel config validation
-  - `debpackage.sh` - Package integrity checks
+  - `kernedebpkg.sh` - Package integrity checks
   - `qemuboot.sh` - Boot testing (optional)
 
 ---

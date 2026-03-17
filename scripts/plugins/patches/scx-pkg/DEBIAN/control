@@ -1,0 +1,17 @@
+Package: scx-scheds-harper
+Version: 1.0.0
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Bacon-O <128566458+Bacon-O@users.noreply.github.com>
+Depends: libc6 (>= 2.34), libelf1, libzstd1, libcap2
+Conflicts: scx, scx-scheds
+Provides: scx, scx-scheds
+Replaces: scx, scx-scheds
+Homepage: https://github.com/Bacon-O/scx-scheds-harper
+Description: Optimized sched_ext schedulers (Generic x86-64)
+ A collection of sched_ext schedulers built for high performance 
+ and broad x86-64 compatibility. Compiled using the mold linker 
+ for reduced overhead. Compatible with any Linux kernel 
+ supporting the sched_ext (SCX)
+ 

@@ -73,8 +73,6 @@ scripts/
 # Explicit
 ./start_build.sh --params-file params/foundry_template.params
 
-# Via make
-make build
 ```
 
 **Outputs:**
@@ -124,9 +122,6 @@ amd64v3/x86_64v3 Haswell/Zen and newer (2013+).
 # Using dedicated params file
 ./start_build.sh --params-file params/tinyconfig.params
 
-# Via make (recommended)
-make test
-
 # Explicit
 ./start_build.sh --exec compile_scripts/tinyconfig.sh
 ```
@@ -164,7 +159,6 @@ make test
 # After (much faster!)
 - name: Test Build
   run: ./start_build.sh --params-file params/tinyconfig.params
-  # Or: make test
 ```
 
 **Release builds (tagged versions):**
@@ -180,18 +174,6 @@ make test
 ```bash
 # Old way (30-60+ minutes)
 ./start_build.sh --test-run
-
-# New way (2-5 minutes!)
-make test
-```
-
-**Full testing before PR:**
-```bash
-# Quick sanity check
-make test
-
-# Full build validation
-make build
 ```
 
 ## Benefits
@@ -224,7 +206,7 @@ make build
 | Metric | Full Build | Tinyconfig |
 |--------|-----------|------------|
 | Build Time | 30-60+ min | 2-5 min |
-| Disk Space | ~2-3 GB | ~100-200 MB |
+| Disk Space | ~3-10 GB | ~100-200 MB |
 | CPU Usage | 100% sustained | 100% for 2-5 min |
 | Artifacts | 4-6 .deb files | 1 bzImage |
 | Use Case | Enthusiast/Hobbyist ⚠️ | Testing |
@@ -308,37 +290,6 @@ Updated files:
 - If you referenced `ci-build.sh`, update to `scripts/compile_scripts/harper_deb13.sh`
 - All documented commands in this guide already use the new path
 
-## Recommendations
-
-### For All Users
-```bash
-# Use tinyconfig for quick validation
-make test
-
-# Use harper_deb13. for complete builds (experimental)
-make build
-```
-
-### For CI/CD
-```bash
-# PR validation (fast)
-make test
-
-# Release builds (complete)
-make build
-```
-
-### For Development
-```bash
-# Quick sanity check
-make test
-
-# Before committing
-make validate
-
-# Final verification
-make build
-```
 
 ---
 

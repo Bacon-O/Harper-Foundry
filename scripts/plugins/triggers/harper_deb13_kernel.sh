@@ -92,13 +92,12 @@ get_latest_published_backports_source_version() {
 #   --force   Skip version comparison and always indicate build is needed
 #
 # Exports:
-#   DETECTED_KERNEL_VERSION - Published backports version (e.g., "6.18.12-1~bpo13+1")
+#   DETECTED_SOFTWARE_VERSION - Published backports version (e.g., "6.18.12-1~bpo13+1")
 #   DETECTED_BUILD_REASON   - Why build is needed ("new_version" or "forced")
 #
 # Returns:
 #   0 - Build IS needed (new version detected or forced)
-#   1 - Error occurred (e.g., network issue, parsing error)
-#   2 - Build NOT needed (version already built)
+#   1 - Build NOT needed (version already built)
 #
 # ==============================================================================
 harper_deb13_kernel_trigger() {
@@ -146,7 +145,7 @@ harper_deb13_kernel_trigger() {
         log_info "Initializing version tracking..."
         mkdir -p "$(dirname "$VERSION_TRACKING_FILE")"
         cat > "$VERSION_TRACKING_FILE" << 'EOF'
-KERNEL_VERSION=6.11.8
+SOFTWARE_VERSION=6.11.8
 LAST_BUILD_DATE=$(date +%Y-%m-%d_%R:%S_%Z)
 BUILD_STATUS=initialized
 SCHED_PRIORITY=1
@@ -182,7 +181,7 @@ EOF
     source "$VERSION_TRACKING_FILE"
     
     local last_compiled_version
-    last_compiled_version=$(normalize_tracked_version "${KERNEL_VERSION:-unknown}")
+    last_compiled_version=$(normalize_tracked_version "${SOFTWARE_VERSION:-unknown}")
     local last_build_date="${LAST_BUILD_DATE:-unknown}"
     local build_status="${BUILD_STATUS:-unknown}"
     # currenlty now used
@@ -239,15 +238,15 @@ EOF
         log_info "Returning exit code 0 to indicate build is needed"
         
         # Export detected version for use by caller (e.g., in build_successful callback)
-        export DETECTED_KERNEL_VERSION="$latest_published_source_version"
-        export DETECTED_KERNEL_SOURCE_VERSION="$latest_published_source_version"
+        export DETECTED_SOFTWARE_VERSION="$latest_published_source_version"
+        export DETECTED_software_source_VERSION="$latest_published_source_version"
         export DETECTED_BUILD_REASON="$build_reason"
         
         return 0  # 0 = build needed
     else
         log_ok "No action needed. Latest version already built."
-        log_info "Returning exit code 2 to indicate no build needed"
-        return 2  # 2 = no build needed
+        log_info "Returning exit code 1 to indicate no build needed"
+        return 1  # non-zero = no build needed
     fi
 }
 
@@ -258,7 +257,7 @@ EOF
 # Updates version tracking file with the newly built kernel version
 #
 # Arguments:
-#   None (uses exported DETECTED_KERNEL_VERSION from trigger function)
+#   None (uses exported DETECTED_SOFTWARE_VERSION from trigger function)
 #
 # Returns:
 #   0 - Tracking file updated successfully
@@ -268,22 +267,22 @@ EOF
 harper_deb13_kernel_build_successful() {
     log_info "=== Build Success Callback ==="
     
-    if [[ -z "${DETECTED_KERNEL_VERSION:-}" ]]; then
-        log_error "DETECTED_KERNEL_VERSION not set. Did you run the trigger check first?"
+    if [[ -z "${DETECTED_SOFTWARE_VERSION:-}" ]]; then
+        log_error "DETECTED_SOFTWARE_VERSION not set. Did you run the trigger check first?"
         return 1
     fi
     
-    log_ok "Updating version tracking for kernel $DETECTED_KERNEL_VERSION"
+    log_ok "Updating version tracking for kernel $DETECTED_SOFTWARE_VERSION"
     
     # Update version tracking file
     cat > "$VERSION_TRACKING_FILE" << EOF
-KERNEL_VERSION=$DETECTED_KERNEL_VERSION
+SOFTWARE_VERSION=$DETECTED_SOFTWARE_VERSION
 LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
 BUILD_STATUS=success
 EOF
     
     log_ok "Version tracking updated: $VERSION_TRACKING_FILE"
-    log_ok "Next trigger check will compare against version $DETECTED_KERNEL_VERSION"
+    log_ok "Next trigger check will compare against version $DETECTED_SOFTWARE_VERSION"
     
     return 0
 }
@@ -305,14 +304,14 @@ harper_deb13_kernel_build_failed() {
     local error_info="${1:-unknown}"
     
     log_info "=== Build Failure Callback ==="
-    log_error "Build failed for kernel ${DETECTED_KERNEL_VERSION:-unknown}: $error_info"
+    log_error "Build failed for kernel ${DETECTED_SOFTWARE_VERSION:-unknown}: $error_info"
     
     # Optionally update tracking file to record failure
     # This prevents retrying the same failed version repeatedly
     # Uncomment if you want to skip failed versions:
     #
     cat > "$VERSION_TRACKING_FILE" << EOF
-KERNEL_VERSION=${DETECTED_KERNEL_VERSION:-unknown}
+SOFTWARE_VERSION=${DETECTED_SOFTWARE_VERSION:-unknown}
 LAST_BUILD_DATE=$(date -u +%Y-%m-%d)
 BUILD_STATUS=failed
 BUILD_ERROR=$error_info

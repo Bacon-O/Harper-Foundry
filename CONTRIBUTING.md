@@ -72,9 +72,6 @@ Before contributing, ensure you have:
    # Run a quick test build (2-5 minutes)
    ./start_build.sh --params-file params/tinyconfig.params
    
-   # Or use make
-   make test
-   
    # Validate params
    ./scripts/validate_params.sh
    ```
@@ -105,10 +102,6 @@ The repository includes a pre-commit hook that runs shellcheck on all shell scri
   
   # macOS
   brew install shellcheck
-  ```
-- Run manual checks:
-  ```bash
-  make lint
   ```
 
 The hook automatically excludes `*.params` files since they are configuration files, not executable scripts.
@@ -280,7 +273,7 @@ Harper-Foundry/
 ├── scripts/          # Build and utility scripts
 │   ├── compile_scripts/  # Official build script variants
 │   ├── plugins/      # Extensible plugins
-│   │   ├── kernelsources/
+│   │   ├── source_fetcher/
 │   │   ├── notifiers/
 │   │   ├── patches/
 │   │   ├── qatests/  # Quality assurance tests
@@ -310,7 +303,7 @@ Harper-Foundry/
 - `params/params.d/` - Your custom build configurations
 - `scripts/scripts.d/` - Your custom compile scripts and utilities
   - `compile_scripts/` - Custom build variants
-  - `plugins/` - Custom plugin implementations (kernelsources, notifiers, qatests, etc.)
+   - `plugins/` - Custom plugin implementations (source_fetcher, notifiers, qatests, etc.)
 
 ## Questions or Issues?
 

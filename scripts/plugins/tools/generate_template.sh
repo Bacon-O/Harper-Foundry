@@ -92,17 +92,17 @@ KERNEL_CFLAGS=""
 CROSS_COMPILE_PREFIX=""
 DEBIAN_PACKAGE_NAME=""
 
-# --- Kernel Source Strategy (Plugin-based) ---
-# The kernel source plugin system maps KERNEL_SOURCE to specific fetching methods.
+# --- Source Fetch Strategy (Plugin-based) ---
+# The source fetcher plugin system maps SOFTWARE_SOURCE to specific fetching methods.
 # Supported values:
 #   - "kernel.org"  : Official vanilla upstream sources (fast, no Debian patches)
 #   - "debian"      : Debian apt-get source (includes Debian customizations)
 #   - "debian/trixie-backports" : Debian Trixie Backports (newer kernels with Debian patches)
 #   - "custom"      : Skip auto-fetch; implement your own logic in ci-build
 #   - "none"        : Skip auto-fetch; implement your own logic in ci-build
-# See: scripts/plugins/kernelsources/README.md
-KERNEL_SOURCE=""
-# KERNEL_VERSION supports semantic aliases (source-aware interpretation):
+# See: scripts/plugins/source_fetcher/README.md
+SOFTWARE_SOURCE=""
+# SOFTWARE_VERSION supports semantic aliases (source-aware interpretation):
 #   - "" (empty) or omitted: Uses source defaults (kernel.org → 6.11.8, debian → latest, etc.)
 #   - "latest": Latest stable/available from source
 #   - "stable": Latest stable (same as latest for most sources)
@@ -110,11 +110,11 @@ KERNEL_SOURCE=""
 #   - "rc": Release candidates if available
 #   - Specific version: "6.11.8", "6.10.5", etc. (pins to exact version when available)
 # Examples:
-#   KERNEL_VERSION=""                  # Uses source defaults
-#   KERNEL_VERSION="latest"            # Always get newest available
-#   KERNEL_VERSION="lts"               # Get LTS variant
-#   KERNEL_VERSION="6.11.8"            # Pin to specific version
-KERNEL_VERSION=""
+#   SOFTWARE_VERSION=""                  # Uses source defaults
+#   SOFTWARE_VERSION="latest"            # Always get newest available
+#   SOFTWARE_VERSION="lts"               # Get LTS variant
+#   SOFTWARE_VERSION="6.11.8"            # Pin to specific version
+SOFTWARE_VERSION=""
 
 DEB_HOST_ARCH=""
 HOST_QEMU_STATIC=""
@@ -145,8 +145,8 @@ PARALLEL_JOBS=""
 BASE_CONFIG=""
 TUNING_CONFIG=""
 
-# Note: KERNEL_VERSION is used by kernel source plugins to determine which kernel
-# version to fetch. It's optional - see KERNEL_VERSION documentation above.
+# Note: SOFTWARE_VERSION is used by source fetcher plugins to determine which kernel
+# version to fetch. It's optional - see SOFTWARE_VERSION documentation above.
 
 # --- Scheduler Patch ---
 

@@ -41,7 +41,7 @@ Both methods let you:
 # This file only contains the values you want to override
 HOST_OUTPUT_DIR="/tmp/custom-build"
 QA_MODE="ENFORCED"
-KERNEL_VERSION="6.12.8"
+SOFTWARE_VERSION="6.12.8"
 ```
 
 ## Method 2: `PRODUCTION_CONFIG` Environment Variable
@@ -246,7 +246,7 @@ jobs:
           source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
           HOST_OUTPUT_DIR="/path/to/output/${{ inputs.environment }}"
           QA_MODE="ENFORCED"
-          KERNEL_VERSION="6.12.8"  # Pin for reproducibility
+          SOFTWARE_VERSION="6.12.8"  # Pin for reproducibility
           EOF
           
           ./scripts/launch.sh --params-file params/_env_override.params
@@ -261,13 +261,13 @@ Instead of one `_test_overrides.params`, you can create multiple override files:
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 HOST_OUTPUT_DIR="/path/to/output/preprod"
 QA_MODE="ENFORCED"
-KERNEL_VERSION="latest"
+SOFTWARE_VERSION="latest"
 
 # params/_staging.params  
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"
 HOST_OUTPUT_DIR="/path/to/output/staging"
 QA_MODE="RELAXED"
-KERNEL_VERSION="6.12.8"  # Pinned for stability
+SOFTWARE_VERSION="6.12.8"  # Pinned for stability
 
 # params/_qa.params
 source "$(dirname "${BASH_SOURCE[0]}")/harper_deb13.params"

@@ -47,7 +47,15 @@ RUN apt-get update && apt-get install -y \
     quilt \
     python3-dacite \
     wget \
-    numactl
+    libseccomp-dev \
+    protobuf-compiler \
+    libcap-dev \
+    libpcap-dev \
+    binutils-dev \
+    mold
+    
+    
+RUN apt-get install -y cargo/trixie-backports rustc/trixie-backports
     
 # 3. Install x86_64 Target Libraries (the "Satisfiers")
 # These prevent the "cannot find -lelf" and "wrong format" errors

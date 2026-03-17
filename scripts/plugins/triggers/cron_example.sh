@@ -93,7 +93,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # If BUILD_NEEDED=0, we execute the build here and use plugin CALLBACKS for tracking
 #
 # Callback Flow:
-#   1. check_if_build_is_needed <plugin>  → plugin exports DETECTED_KERNEL_VERSION
+#   1. check_if_build_is_needed <plugin>  → plugin exports DETECTED_SOFTWARE_VERSION
 #   2. Run your build (start_build.sh, script, queue, etc.)
 #   3. build_successful <plugin>          → runner.sh routes to plugin's success callback
 #      OR
@@ -104,7 +104,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 
 # OPTION A: Build directly with Docker
 # if [[ $BUILD_NEEDED -eq 0 ]]; then
-#     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
+#     log_to_file "Build needed for kernel version: ${DETECTED_SOFTWARE_VERSION}"
 #     log_to_file "Executing build with tinyconfig for testing..."
     
 #     # Set build environment variables
@@ -133,7 +133,7 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 
 # OPTION B: Use a dedicated build execution script
 # if [[ $BUILD_NEEDED -eq 0 ]]; then
-#     log_to_file "Build needed for kernel version: ${DETECTED_KERNEL_VERSION}"
+#     log_to_file "Build needed for kernel version: ${DETECTED_SOFTWARE_VERSION}"
 #     
 #     if "$REPO_ROOT/scripts/execute_triggered_build.sh" 2>&1 | tee -a "$LOGFILE"; then
 #         # Plugin callback handles all version tracking
@@ -147,8 +147,8 @@ log_to_file "Check completed with exit code: $BUILD_NEEDED (0=build needed, non-
 # OPTION C: Queue the build for later execution
 if [[ $BUILD_NEEDED -eq 0 ]]; then
     # Queue includes the detected version (exported by check function)
-    echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_KERNEL_VERSION}" >> "$REPO_ROOT/build_queue.txt"
-    log_to_file "Build queued for kernel version ${DETECTED_KERNEL_VERSION}"
+    echo "build:harper_deb13_kernel:$(date +%s):${DETECTED_SOFTWARE_VERSION}" >> "$REPO_ROOT/build_queue.txt"
+    log_to_file "Build queued for kernel version ${DETECTED_SOFTWARE_VERSION}"
     
     # Note: When processing queue, call build_successful/build_failed callbacks
     build_failed harper_deb13_kernel > >(tee -a "$LOGFILE") 2>&1

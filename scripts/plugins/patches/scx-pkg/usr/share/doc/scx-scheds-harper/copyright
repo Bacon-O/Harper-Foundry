@@ -1,0 +1,11 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: scx-scheds
+Source: https://github.com/sched-ext/scx
+
+Files: *
+Copyright: 2024-2026 sched-ext contributors
+License: GPL-2.0
+
+Files: debian/*
+Copyright: 2026 Harper <https://github.com/Bacon-O/scx-scheds-harper>
+License: GPL-2.0

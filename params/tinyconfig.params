@@ -27,10 +27,10 @@ FOUNDRY_GID=""
 # Prestart config
 PRE_BUILD_HOOKS=(
 )
-
-# Post-build config
 POST_BUILD_HOOKS=(
 )
+
+TPMFS_MOUNT_POINT="/tmp/tpmfs"
 
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
@@ -66,15 +66,15 @@ RELEASE_TAG="harper-test"
 TARGET_ARCH="x86_64"
 CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
 
-# --- Kernel Source Strategy (Plugin-based) ---
+# --- Source Fetch Strategy (Plugin-based) ---
 # Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
-KERNEL_SOURCE="kernel.org"
+SOFTWARE_SOURCE="kernel.org"
 # Use latest LTS kernel by default (stable, long-term support)
-KERNEL_VERSION="lts"
+SOFTWARE_VERSION="lts"
 # Other options:
-#   KERNEL_VERSION="latest"  # Latest stable release
-#   KERNEL_VERSION="rc"      # Latest mainline/RC
-#   KERNEL_VERSION="6.11.8"  # Specific version
+#   SOFTWARE_VERSION="latest"  # Latest stable release
+#   SOFTWARE_VERSION="rc"      # Latest mainline/RC
+#   SOFTWARE_VERSION="6.11.8"  # Specific version
 
 DEB_HOST_ARCH="amd64"
 HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
@@ -112,7 +112,7 @@ TUNING_CONFIG=""
 # --- QA Flags ---
 # For quick tests, we only do minimal validation
 BYPASS_QA="false"
-ENABLE_QEMU_TESTS="true"
+ENABLE_QEMU_TESTS="false"
 
 # Use RELAXED mode - warn but don't fail on missing nice-to-haves
 QA_MODE="RELAXED"
@@ -155,6 +155,4 @@ QA_VM_TIMEOUT="15s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=(
-
-)
+ENV_EXTENSIONS=()

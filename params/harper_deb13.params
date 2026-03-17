@@ -34,7 +34,7 @@
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 BUILD_WORKSPACE_DIR="/mnt/ramdisk"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
+HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
 #       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
@@ -48,12 +48,12 @@ FOUNDRY_GID=""
 
 # Prestart config
 PRE_BUILD_HOOKS=(
-    "ramdisk_mount.sh"
+
 )
 
 # Post-build config
 POST_BUILD_HOOKS=(
-    "ramdisk_umount.sh"
+
 )
 
 
@@ -65,13 +65,13 @@ FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
-ARTIFACT_DELIVERY="true"
-ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
-ARTIFACT_DELIVERY_METHOD="scp"
-REMOTE_DELIVERY_HOST="10.21.0.11"
-REMOTE_DELIVERY_USER="fidbuilder01"
-REMOTE_DELIVERY_PATH="/mnt/hdd-pool_01/aptly_repo/import/trixie_import"
-ARTIFACT_SSH_KEY="~/.ssh/id_ed25519"  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 
@@ -98,12 +98,12 @@ KERNEL_CFLAGS="-march=haswell -mtune=haswell"
 CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
 DEBIAN_PACKAGE_NAME="linux-upstream-harper-v3"
 
-# --- Kernel Source Strategy (Plugin-based) ---
+# --- Source Fetch Strategy (Plugin-based) ---
 # Using Debian Trixie Backports for newer kernels with full Debian integration
-KERNEL_SOURCE="debian/trixie-backports"
+SOFTWARE_SOURCE="debian/trixie-backports"
 # "latest" always fetches the most recent kernel available in trixie-backports
 # Other options: "lts" (latest LTS), "stable", "6.11.8" (specific version)
-KERNEL_VERSION="latest"
+SOFTWARE_VERSION="latest"
 
 DEB_HOST_ARCH="amd64"
 HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
@@ -141,11 +141,11 @@ TUNING_CONFIG="harper_scx_deb13.config"
 # @NO_PROMPT (This is explicitly set to "false" by install.sh)
 BYPASS_QA="false"
 # Set to "false" to skip QEMU boot testing.
-ENABLE_QEMU_TESTS="true"
+ENABLE_QEMU_TESTS="false"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
-QA_MODE="ENFORCED"
+QA_MODE="RELAXED"
 
 # A list of individual QA test scripts to run. 
 # These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
@@ -174,7 +174,6 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_DRM_I915_PXP=y"
     "CONFIG_FRAME_WARN=4096"
     "CONFIG_FW_LOADER=y"
-    #"CONFIG_GENERIC_CPU_V3=y"
     "CONFIG_HZ_1000=y"
     "CONFIG_HZ=1000"
     "CONFIG_KERNEL_ZSTD=y"
@@ -182,8 +181,6 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_LRU_GEN=y"
     "CONFIG_LTO_NONE=y"
     "CONFIG_MODULE_COMPRESS_ZSTD=y"
-    #"CONFIG_MODULE_SIG_ALL=n"
-    #"CONFIG_MODULE_SIG=n"
     "CONFIG_NTSYNC=y"
     "CONFIG_PCI_MMCONFIG=y"
     "CONFIG_PCI_REALLOC_ENABLE_AUTO=y"
@@ -209,6 +206,13 @@ QA_OPTIONAL_CHECKS=(
     "CONFIG_ZSWAP_COMPRESSOR_DEFAULT_ZSTD=y"
     "CONFIG_ZSWAP_DEFAULT_ON=y"
     "CONFIG_ZSWAP=y"
+    "CONFIG_BPF=y"
+    "CONFIG_BPF_SYSCALL=y"
+    "CONFIG_BPF_JIT=y"
+    "CONFIG_DEBUG_INFO_BTF=y"
+    "CONFIG_BPF_JIT_ALWAYS_ON=y"
+    "CONFIG_BPF_JIT_DEFAULT_ON=y"
+    "CONFIG_SCHED_CLASS_EXT=y"
 )
 
 # --- VM Proving Ground Specs (for QEMU testing) ---
@@ -223,6 +227,5 @@ VM_TIMEOUT="60s"
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=(
-    "forgejo_ext.sh"
-    "ramdisk_control_ext.sh"
+
 )

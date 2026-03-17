@@ -1,5 +1,5 @@
 # Harper Foundry Base QA Test Suite
 filesexists.sh
 linuxconfig.sh
-debpackage.sh
+kernedebpkg.sh
 qemuboot.sh

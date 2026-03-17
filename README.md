@@ -136,8 +136,8 @@ If it does not exist yet, run `./install.sh` to generate it from `params/foundry
 | `HOST_OUTPUT_DIR` | Where build artifacts are stored | `/path/to/output/dir` |
 | `USE_PARAM_SCOPED_DIRS` | Scope default paths per params name | `true` |
 | `TARGET_ARCH` | Target CPU architecture | `x86_64`, `aarch64` |
-| `KERNEL_SOURCE` | Kernel source plugin to use | `kernel.org`, `debian`, `debian/trixie-backports` |
-| `KERNEL_VERSION` | Kernel version or alias | `"latest"`, `"lts"`, `"6.11.8"`, empty for default |
+| `SOFTWARE_SOURCE` | Source fetcher to use | `kernel.org`, `debian`, `debian/trixie-backports` |
+| `SOFTWARE_VERSION` | Kernel version or alias | `"latest"`, `"lts"`, `"6.11.8"`, empty for default |
 | `BASE_CONFIG` | Base kernel config | `defconfig`, `tinyconfig` |
 | `TUNING_CONFIG` | Additional config overlay | `harper_deb13_tune.config` |
 | `BYPASS_QA` | Skip quality assurance | `true`, `false` |
@@ -323,7 +323,7 @@ All QA tests are organized under `scripts/plugins/qatests/`:
 ```
 qatests/
 ├── tests/          # Individual QA test scripts
-│   ├── debpackage.sh
+│   ├── kernedebpkg.sh
 │   ├── filesexists.sh
 │   ├── linuxconfig.sh
 │   └── qemuboot.sh
@@ -337,7 +337,7 @@ qatests/
 Located in `scripts/plugins/qatests/tests/`:
 - `filesexists.sh` - Verifies required files are present
 - `linuxconfig.sh` - Validates kernel configuration
-- `debpackage.sh` - Checks Debian package integrity
+- `kernedebpkg.sh` - Checks Debian package integrity
 - `qemuboot.sh` - Tests kernel bootability (optional)
 
 ### Test Packages
@@ -407,7 +407,7 @@ scripts/
 ├── compile_scripts/            ← Official build script variants
 │   └── (harper_deb13.sh, tinyconfig.sh)
 ├── plugins/                    ← Official plugin types
-│   ├── kernelsources/
+│   ├── source_fetcher/
 │   ├── notifiers/
 │   ├── patches/
 │   ├── qatests/
@@ -417,7 +417,7 @@ scripts/
 └── scripts.d/                  ← Your custom scripts (gitignored)
     ├── compile_scripts/        ← Your custom build variants
     └── plugins/                ← Your custom plugins (same structure as official)
-        ├── kernelsources/
+        ├── source_fetcher/
         ├── notifiers/
         ├── patches/
         ├── qatests/
@@ -437,7 +437,7 @@ scripts/
 | Plugin | Purpose | Custom Location | Documentation |
 |--------|---------|-----------------|----------------|
 | **compile_scripts** | Build variants (full, tinyconfig, etc.) | `scripts/scripts.d/compile_scripts/` | [Compile Scripts](scripts/compile_scripts/README.md) |
-| **kernelsources** | Fetch kernel from different sources | `scripts/scripts.d/plugins/kernelsources/` | [Kernel Sources](scripts/plugins/kernelsources/README.md) |
+| **source_fetcher** | Fetch source code from different upstreams | `scripts/scripts.d/plugins/source_fetcher/` | [Source Fetchers](scripts/plugins/source_fetcher/README.md) |
 | **notifiers** | Integration with monitoring/alerting systems | `scripts/scripts.d/plugins/notifiers/` | [Notifiers](scripts/plugins/notifiers/README.md) |
 | **patches** | Apply custom kernel patches | `scripts/scripts.d/plugins/patches/` | [Patches](scripts/plugins/patches/README.md) |
 | **qatests** | Add quality assurance tests | `scripts/scripts.d/plugins/qatests/` | [QA Tests](scripts/plugins/qatests/README.md) |
@@ -459,21 +459,21 @@ chmod +x scripts/scripts.d/compile_scripts/minimal.sh
 ./start_build.sh --exec minimal.sh
 ```
 
-**Quick Example - Custom Kernel Source:**
+**Quick Example - Custom Source Fetcher:**
 ```bash
-# Create your custom kernel source plugin
-cat > scripts/scripts.d/plugins/kernelsources/my_source.sh << 'EOF'
+# Create your custom source fetcher plugin
+cat > scripts/scripts.d/plugins/source_fetcher/my_source.sh << 'EOF'
 #!/bin/bash
-# My custom kernel source logic
+# My custom source fetch logic
 fetch_kernel() {
     # Your implementation here
 }
 EOF
-chmod +x scripts/scripts.d/plugins/kernelsources/my_source.sh
+chmod +x scripts/scripts.d/plugins/source_fetcher/my_source.sh
 
 # Use it in params
-KERNEL_SOURCE="my_source"
-ENV_EXTENSIONS=("kernelsources/my_source.sh")
+SOFTWARE_SOURCE="my_source"
+ENV_EXTENSIONS=("source_fetcher/my_source.sh")
 ```
 
 ### Safe Customization Pattern (`.d/` Directories)
@@ -503,7 +503,7 @@ git pull
 
 - **Build Configurations:** `params/params.d/my_build.params`
 - **Compile Scripts:** `scripts/scripts.d/compile_scripts/myconfig.sh`
-- **Kernel Sources:** `scripts/scripts.d/plugins/kernelsources/my_source.sh`
+- **Source Fetchers:** `scripts/scripts.d/plugins/source_fetcher/my_source.sh`
 - **QA Tests:** `scripts/scripts.d/plugins/qatests/my_test/`
 - **Patches:** `scripts/scripts.d/plugins/patches/my.patch`
 - **Notifiers:** `scripts/scripts.d/plugins/notifiers/my_notifier.sh`

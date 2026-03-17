@@ -20,7 +20,7 @@ The trigger system monitors upstream sources and automatically initiates builds 
 
 1. **`{plugin}_trigger()`** - Detection function
    - Checks if new version available
-   - Exports: `DETECTED_KERNEL_VERSION`, `DETECTED_BUILD_REASON`
+   - Exports: `DETECTED_SOFTWARE_VERSION`, `DETECTED_BUILD_REASON`
    - Returns: 0=build needed, 1=no action
 
 2. **`{plugin}_build_successful()`** - Success callback
@@ -35,7 +35,11 @@ The trigger system monitors upstream sources and automatically initiates builds 
 - `harper_deb13_kernel.sh` - Debian Trixie Backports kernel releases
     - Monitors: Debian backports published source index
   - Tracks: Version in `version_tracking/harper_deb13_latest_kernel.txt`
-  - Exports: `DETECTED_KERNEL_VERSION` for use in callbacks
+  - Exports: `DETECTED_SOFTWARE_VERSION` for use in callbacks
+- `linux_sched_ext_scx.sh` - sched-ext/scx GitHub release tags
+    - Monitors: `sched-ext/scx` latest upstream release tag
+    - Tracks: Version in `version_tracking/linux_sched-ext_scx_latest.txt`
+    - Exports: `DETECTED_SOFTWARE_VERSION` for use in callbacks
 
 ## Usage
 
@@ -52,7 +56,7 @@ source ./scripts/plugins/triggers/runner.sh
 check_if_build_is_needed harper_deb13_kernel
 
 if [[$? -eq 0 ]]; then
-    echo "Build needed for kernel version: $DETECTED_KERNEL_VERSION"
+    echo "Build needed for kernel version: $DETECTED_SOFTWARE_VERSION"
     
     # Execute your build here
     if ./start_build.sh --params-file params/harper_deb13.params; then
@@ -322,5 +326,5 @@ bash: ./scripts/plugins/triggers/my_plugin.sh: Permission denied
 ## Related Documentation
 
 - [Trigger Jobs Guide](../../docs/TRIGGER_JOBS.md) - Comprehensive setup and customization
-- [Kernel Plugins Guide](../kernelsources/README.md) - Similar plugin architecture for kernel sources
+- [Source Fetcher Guide](../source_fetcher/README.md) - Similar plugin architecture for source acquisition
 - [GitHub Actions Monitoring Workflow](.github/workflows/monitor-deb13-kernel.yml)

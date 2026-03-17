@@ -1,0 +1,4 @@
+# The name of the scheduler to start at boot
+SCX_SCHEDULER=scx_rustland
+# Any flags you want to pass (e.g., -k for scx_rustland)
+SCX_FLAGS=""

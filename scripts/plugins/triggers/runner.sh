@@ -12,6 +12,7 @@
 #
 # Supported Trigger Types:
 #   - harper_deb13_kernel    : Debian Trixie Backports kernel releases
+#   - linux_sched_ext_scx    : sched-ext/scx upstream release tags
 #   - (add more as needed)
 #
 # ==============================================================================
@@ -93,25 +94,6 @@ check_if_build_is_needed() {
     fi
 }
 
-_load_trigger_plugin() {
-    local trigger_type="${1:-}"
-
-    if [[ -z "$trigger_type" ]]; then
-        log_error "No trigger type specified"
-        return 1
-    fi
-
-    local plugin_file="$PLUGINS_DIR/${trigger_type}.sh"
-    if [[ ! -f "$plugin_file" ]]; then
-        log_error "Trigger plugin not found: $trigger_type"
-        log_error "Expected: $plugin_file"
-        return 1
-    fi
-
-    # shellcheck disable=SC1090
-    source "$plugin_file"
-}
-
 # ==============================================================================
 # FUNCTION: build_successful
 # ==============================================================================
@@ -135,10 +117,6 @@ build_successful() {
         return 1
     fi
     
-    if ! _load_trigger_plugin "$trigger_type"; then
-        return 1
-    fi
-
     local callback_func="${trigger_type}_build_successful"
     
     if declare -f "$callback_func" > /dev/null; then
@@ -174,10 +152,6 @@ build_failed() {
         return 1
     fi
     
-    if ! _load_trigger_plugin "$trigger_type"; then
-        return 1
-    fi
-
     local callback_func="${trigger_type}_build_failed"
     
     if declare -f "$callback_func" > /dev/null; then

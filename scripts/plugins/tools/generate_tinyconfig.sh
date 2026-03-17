@@ -37,9 +37,11 @@ POST_BUILD_HOOKS=(
     "sleep.sh"
 )
 
+TPMFS_MOUNT_POINT="/tmp/tpmfs"
+
 # --- Foundry Execution ---
 # Using the tinyconfig quick test build script
-FOUNDRY_EXEC="compile_scripts/tinyconfig.sh"
+
 
 # --- Foundry artifact export configuration ---
 # If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
@@ -56,7 +58,7 @@ LOCAL_DELIVERY_PATH=""
 
 
 # --- Foundry Image Configuration ---
-DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
+DOCKERFILE_PATH="docker/trixie-clang-mtrixie-clang-multiarch.dockerfileultiarch"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
 
 # ==============================================================================
@@ -71,15 +73,15 @@ RELEASE_TAG="harper-test"
 TARGET_ARCH="x86_64"
 CROSS_COMPILE_PREFIX="x86_64-linux-gnu-"
 
-# --- Kernel Source Strategy (Plugin-based) ---
+# --- Source Fetch Strategy (Plugin-based) ---
 # Using vanilla kernel.org for fast tinyconfig builds (no Debian patches)
-KERNEL_SOURCE="kernel.org"
+SOFTWARE_SOURCE="kernel.org"
 # Use latest LTS kernel by default (stable, long-term support)
-KERNEL_VERSION="lts"
+SOFTWARE_VERSION="lts"
 # Other options:
-#   KERNEL_VERSION="latest"  # Latest stable release
-#   KERNEL_VERSION="rc"      # Latest mainline/RC
-#   KERNEL_VERSION="6.11.8"  # Specific version
+#   SOFTWARE_VERSION="latest"  # Latest stable release
+#   SOFTWARE_VERSION="rc"      # Latest mainline/RC
+#   SOFTWARE_VERSION="6.11.8"  # Specific version
 
 DEB_HOST_ARCH="amd64"
 HOST_QEMU_STATIC="/usr/bin/qemu-x86_64-static"
@@ -196,29 +198,29 @@ echo "⚡ Fast build mode: Minimal kernel for pipeline testing"
 echo "🧵 Parallelism: Using $FINAL_JOBS threads."
 echo ""
 
-# 2️⃣ Load Kernel Source Plugin System
-# This allows flexible kernel source handling (kernel.org, debian, custom, etc.)
-if [[ -f "/opt/factory/scripts/plugins/kernelsources/runner.sh" ]]; then
-    source /opt/factory/scripts/plugins/kernelsources/runner.sh
+# 2️⃣ Load Source Fetcher Plugin System
+# This allows flexible source handling (kernel.org, debian, custom, etc.)
+if [[ -f "/opt/factory/scripts/plugins/source_fetcher/runner.sh" ]]; then
+    source /opt/factory/scripts/plugins/source_fetcher/runner.sh
 else
-    echo "⚠️  WARNING: kernel source plugin system not found"
-    echo "⚠️  This build requires KERNEL_SOURCE and KERNEL_VERSION to be set via params"
+    echo "⚠️  WARNING: source fetcher plugin system not found"
+    echo "⚠️  This build requires SOFTWARE_SOURCE and SOFTWARE_VERSION to be set via params"
 fi
 
-# 3️⃣ Fetch Kernel Source
-# The plugin system handles mapping KERNEL_SOURCE parameter to appropriate fetching method
+# 3️⃣ Fetch Source Tree
+# The plugin system handles mapping SOFTWARE_SOURCE to the appropriate fetch method
 mkdir -p "$CONTAINER_BUILD_ROOT"
 cd "$CONTAINER_BUILD_ROOT"
 
-echo "📥 Fetching kernel source via plugin: KERNEL_SOURCE=$KERNEL_SOURCE"
-fetch_kernel_source "$KERNEL_SOURCE" "$KERNEL_VERSION" "$CONTAINER_BUILD_ROOT" >/dev/null
+echo "📥 Fetching source tree via plugin: SOFTWARE_SOURCE=$SOFTWARE_SOURCE"
+fetch_software_source "$SOFTWARE_SOURCE" "$SOFTWARE_VERSION" "$CONTAINER_BUILD_ROOT" >/dev/null
 KERNEL_DIR=$(find "$CONTAINER_BUILD_ROOT" -maxdepth 1 -type d -name "linux-*" | head -n1)
 if [[ -z "$KERNEL_DIR" ]]; then
     echo "❌ ERROR: Failed to fetch kernel via plugin"
     exit 1
 fi
 
-echo "📦 Kernel source ready: $KERNEL_DIR"
+echo "📦 Source tree ready: $KERNEL_DIR"
 cd "$KERNEL_DIR" || { echo "❌ ERROR: Failed to enter kernel directory"; exit 1; }
 
 # 4️⃣ Initialize Minimal Config
@@ -335,7 +337,7 @@ echo "📂 Artifacts in: $CONTAINER_OUTPUT_DIR"
 echo ""
 echo "What was tested:"
 echo "  ✅ Foundry environment setup"
-echo "  ✅ Kernel source fetching"
+echo "  ✅ Source tree fetching"
 echo "  ✅ Build toolchain"
 echo "  ✅ Compilation process"
 echo "  ✅ Artifact collection"

@@ -1,0 +1,7 @@
+scx-scheds-harper (1.0.0) unstable; urgency=low
+
+  * Initial release.
+  * Optimized with mold linker and generic x86-64 target.
+  * Added systemd service for automated scheduler loading.
+
+ -- Harper <https://github.com/Bacon-O/scx-scheds-harper>  Sun, 15 Mar 2026 20:45:00 -0500
