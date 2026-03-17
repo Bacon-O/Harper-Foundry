@@ -17,7 +17,7 @@ env:
   YML__FORGEJO_URL: ${{ github.api_url }}
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  YML__PARAMS_FILE: params/harper_deb13.params
+  YML__PARAMS_FILE: params/params.d/int_harper_deb13.params
   YML__KERNEL_TITLE: Harper
   YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
   YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt

@@ -1,0 +1,190 @@
+# ==============================================================================
+# HARPER FOUNDRY: BLUEPRINT CONFIGURATION - TEMPLATE
+# ==============================================================================
+# ⚠️  THIS IS A TEMPLATE! DO NOT USE DIRECTLY!
+#
+# This file intentionally has INCOMPLETE/INVALID configuration to prevent
+# accidental use. Copy and customize this file to create your own build config.
+#
+# Example:
+#   cp params/foundry_template.params params/my_custom_build.params
+#   # Edit params/my_custom_build.params with your settings
+#   ./start_build.sh -p params/my_custom_build.params
+#
+# ==============================================================================
+
+# ==============================================================================
+# CORE FOUNDRY SETUP (Hard Requirements)
+# These parameters are essential for the build system to function.
+# Incorrect values will likely prevent the build from starting or completing.
+# ==============================================================================
+
+# --- Pathing & Identity ---
+# BUILD_WORKSPACE_DIR: Where kernel compilation occurs (can be on fast storage)
+#                      Mounted as /build inside the container
+# HOST_OUTPUT_DIR:     Where build artifacts are stored (each build creates build_<timestamp>)
+# USE_PARAM_SCOPED_DIRS: When true, repo-relative defaults are scoped per params name
+# 
+# Note: REPO_ROOT is auto-detected - no configuration needed
+#
+# ⚠️  REQUIRED: Set these to your actual paths!
+BUILD_WORKSPACE_DIR="/mnt/ramdisk"
+HOST_OUTPUT_DIR="/mnt/build-data/dist/output"
+
+# When true, repo-relative defaults based on params file name
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
+# When false aboslute outpaths are respected 
+#       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/
+USE_PARAM_SCOPED_DIRS="true"
+
+# Leave empty ("") to auto-detect the current host user's UID/GID for file ownership.
+FOUNDRY_UID=""
+FOUNDRY_GID=""
+
+# --- Foundry Execution ---
+# The script within the container that Docker will execute.
+FOUNDRY_EXEC="compile_scripts/linux_sched-ext.sh"
+
+# Prestart config
+PRE_BUILD_HOOKS=(
+    "ramdisk_mount.sh"
+)
+
+# Post-build config
+POST_BUILD_HOOKS=(
+    "ramdisk_umount.sh"
+)
+
+
+# --- Foundry artifact export configuration ---
+# If ARTIFCAT_DELIVERY is true, the built artifacts will be securely copied to a remote server.
+# Right now SFTP and RSYNC are supported as delivery methods.
+# Both require previous configuration
+ARTIFACT_DELIVERY="false"
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+LOCAL_DELIVERY_PATH=""
+
+# --- Foundry Image Configuration ---
+# ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
+DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
+CONTAINER_IMAGE_NAME="debian-harper-worker"
+
+# ==============================================================================
+# TARGET KERNEL DEFINITION
+# These parameters define the specific kernel to be built.
+# ==============================================================================
+
+# --- Versioning & Tagging ---
+BUILD_ARCH_TAG="x86_64"
+RELEASE_TAG="sched_ext"
+
+# --- Target Specifications ---
+# ⚠️  REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
+TARGET_ARCH="x86-64"
+
+KERNEL_CFLAGS="CHANGE_ME"
+CROSS_COMPILE_PREFIX=""
+DEBIAN_PACKAGE_NAME=""
+
+# --- Source Fetch Strategy (Plugin-based) ---
+# The source fetcher plugin system maps SOFTWARE_SOURCE to specific fetching methods.
+# Supported values:
+#   - "kernel.org"  : Official vanilla upstream sources (fast, no Debian patches)
+#   - "debian"      : Debian apt-get source (includes Debian customizations)
+#   - "debian/trixie-backports" : Debian Trixie Backports (newer kernels with Debian patches)
+#   - "sched-ext/scx" : GitHub release tags from the sched-ext/scx repository
+#   - "custom"      : Skip auto-fetch; implement your own logic in ci-build
+#   - "none"        : Skip auto-fetch; implement your own logic in ci-build
+# See: scripts/plugins/source_fetcher/README.md
+SOFTWARE_SOURCE="sched-ext/scx"
+# SOFTWARE_VERSION supports semantic aliases (source-aware interpretation):
+#   - "" (empty) or omitted: Uses source defaults (kernel.org → 6.11.8, debian → latest, etc.)
+#   - "latest": Latest stable/available from source
+#   - "stable": Latest stable (same as latest for most sources)
+#   - "lts": Latest LTS/release variant if available from source
+#   - "rc": Release candidates if available
+#   - Specific version: "6.11.8", "6.10.5", etc. (pins to exact version when available)
+# Examples:
+#   SOFTWARE_VERSION=""                  # Uses source defaults
+#   SOFTWARE_VERSION="latest"            # Always get newest available
+#   SOFTWARE_VERSION="lts"               # Get LTS variant
+#   SOFTWARE_VERSION="6.11.8"            # Pin to specific version
+SOFTWARE_VERSION="latest"
+
+DEB_HOST_ARCH=""
+HOST_QEMU_STATIC="/dev/null" # todo fix if host does not have qemu static binary for target arch (eg: aarch64 builds on x86_64 hosts)
+
+# Will clean up build workspace dir (where compiling happens)
+# during the cleanup phase in case of failed builds
+CLEAN_BUILD_WORKSPACE_DIR="true"
+
+BUILD_DEB_BUILD_ARCH="amd64"
+BUILD_DEB_TARGET_ARCH="amd64"
+BUILD_CC="clang --target=x86_64-linux-gnu"
+BUILD_HOSTLD="x86_64-linux-gnu-ld"
+BUILD_HOSTCFLAGS="-I/usr/include/x86_64-linux-gnu"
+BUILD_HOSTLDFLAGS="-L/usr/lib/x86_64-linux-gnu"
+BUILD_LLVM="1"
+
+# ==============================================================================
+# BUILD STRATEGY & FEATURES
+# These parameters control the build process and specific kernel features.
+# ==============================================================================
+
+# --- Performance & Parallelism ---
+# Number of CPU cores for the build. Leave empty ("") to use nproc-1 (min 1).
+PARALLEL_JOBS="ALL"
+
+# --- Build Strategy ---
+# BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
+BASE_CONFIG="emptyconfig.config" #CHANGE ME
+TUNING_CONFIG=""
+
+# Note: SOFTWARE_VERSION is used by source fetcher plugins to determine which kernel
+# version to fetch. It's optional - see SOFTWARE_VERSION documentation above.
+
+# --- Scheduler Patch ---
+
+# ==============================================================================
+# QUALITY ASSURANCE (QA) & TESTING
+# These parameters control post-build validation and testing.
+# ==============================================================================
+
+# --- QA Flags ---
+BYPASS_QA="true"
+ENABLE_QEMU_TESTS="false"
+QA_MODE="RELAXED"
+
+QA_TESTS=(
+)
+
+QA_TEST_PACKAGE=(
+)
+
+# --- Chemical Audit: Critical (Must Pass) ---
+QA_CRITICAL_CHECKS=( 
+)
+
+# --- Chemical Audit: Optional (Warn Only) ---
+QA_OPTIONAL_CHECKS=(
+)
+
+# --- VM Proving Ground Specs (for QEMU testing) ---
+QA_VM_MEMORY="1G"
+QA_VM_CORES="4"
+QA_VM_TIMEOUT="30s"
+
+# ==============================================================================
+# ENVIRONMENT CUSTOMIZATION
+# ==============================================================================
+
+# --- Environment Extensions ---
+# Optionally specify which environment extensions to load (in order).
+# Leave empty to load none: ENV_EXTENSIONS=()
+ENV_EXTENSIONS=()
+# ==============================================================================
