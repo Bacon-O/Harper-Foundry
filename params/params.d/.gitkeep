@@ -1,7 +1,2 @@
 # This directory is for user-customized parameter files.
 # Place your custom params files here to avoid git conflicts during updates.
-#
-# Example:
-#   cp ../harper_deb13.params ./harper_deb13_custom.params
-#   # Edit harper_deb13_custom.params as needed
-#   # Then run: ./start_build.sh -p params/harper_deb13.params -o params/params.d/harper_deb13_custom.params
