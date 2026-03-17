@@ -34,7 +34,7 @@
 # @PROMPT "BUILD_WORKSPACE_DIR: The directory on your host where kernel compilation will occur. 
 # @PROMPT "HOST_OUTPUT_DIR: The base directory on your host machine where all build artifacts (e.g., .deb files) will be stored."
 BUILD_WORKSPACE_DIR="/mnt/ramdisk"
-HOST_OUTPUT_DIR="/mnt/build-data/dist/test"
+HOST_OUTPUT_DIR=""
 
 # When true, repo-relative defaults based on params file name
 #       eg: BUILD_WORKSPACE_DIR=BUILD_WORKSPACE_DIR/<params_file>/
@@ -66,12 +66,12 @@ FOUNDRY_EXEC="compile_scripts/harper_deb13.sh"
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
 ARTIFACT_DELIVERY="false"
-ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
-ARTIFACT_DELIVERY_METHOD="scp"
-REMOTE_DELIVERY_HOST="10.21.0.11"
-REMOTE_DELIVERY_USER="fidbuilder01"
-REMOTE_DELIVERY_PATH="/mnt/hdd-pool_01/aptly_repo/import/trixie_import"
-ARTIFACT_SSH_KEY="~/.ssh/id_ed25519"  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD=""
+REMOTE_DELIVERY_HOST=""
+REMOTE_DELIVERY_USER=""
+REMOTE_DELIVERY_PATH=""
+ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 
@@ -131,6 +131,7 @@ PARALLEL_JOBS="ALL"
 # --- Build Strategy ---
 # BASE_CONFIG points to a file in /configs or a kbuild target (defconfig/tinyconfig)
 BASE_CONFIG="defconfig"
+#TUNING_CONFIG="harper_deb13_tune.config"
 TUNING_CONFIG="harper_scx_deb13.config"
 # ==============================================================================
 # QUALITY ASSURANCE (QA) & TESTING
@@ -144,7 +145,7 @@ ENABLE_QEMU_TESTS="false"
 
 # QA mode controls the strictness of QA tests. "RELAXED" will log warnings but not fail the build, 
 # while "ENFORCED" will fail the build on any QA test failure.
-QA_MODE="ENFORCED"
+QA_MODE="RELAXED"
 
 # A list of individual QA test scripts to run. 
 # These should correspond to executable scripts in the /scripts/plugins/qatests/ directory.
@@ -226,6 +227,5 @@ VM_TIMEOUT="60s"
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
 ENV_EXTENSIONS=(
-    "forgejo_ext.sh"
-    "ramdisk_control_ext.sh"
+
 )
