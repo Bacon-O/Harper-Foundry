@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="v0.4-Beta"
+VERSION="v0.5-Beta"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Harper Foundry - Build Orchestrator ($VERSION)"

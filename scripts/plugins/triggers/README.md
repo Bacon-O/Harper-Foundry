@@ -36,6 +36,10 @@ The trigger system monitors upstream sources and automatically initiates builds 
     - Monitors: Debian backports published source index
   - Tracks: Version in `version_tracking/harper_deb13_latest_kernel.txt`
   - Exports: `DETECTED_SOFTWARE_VERSION` for use in callbacks
+- `linux_sched_ext_scx.sh` - sched-ext/scx GitHub release tags
+    - Monitors: `sched-ext/scx` latest upstream release tag
+    - Tracks: Version in `version_tracking/linux_sched-ext_scx_latest.txt`
+    - Exports: `DETECTED_SOFTWARE_VERSION` for use in callbacks
 
 ## Usage
 

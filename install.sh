@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="v0.4-Beta"
+VERSION="v0.5-Beta"
 
 # Determine the repository root, assuming install.sh is in the root directory
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

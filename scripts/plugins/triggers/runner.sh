@@ -12,6 +12,7 @@
 #
 # Supported Trigger Types:
 #   - harper_deb13_kernel    : Debian Trixie Backports kernel releases
+#   - linux_sched_ext_scx    : sched-ext/scx upstream release tags
 #   - (add more as needed)
 #
 # ==============================================================================
