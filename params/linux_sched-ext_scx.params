@@ -1,7 +1,7 @@
 # ==============================================================================
 # HARPER FOUNDRY: BLUEPRINT CONFIGURATION - TEMPLATE
 # ==============================================================================
-# ⚠️  THIS IS A TEMPLATE! DO NOT USE DIRECTLY!
+#     THIS IS A TEMPLATE! DO NOT USE DIRECTLY!
 #
 # This file intentionally has INCOMPLETE/INVALID configuration to prevent
 # accidental use. Copy and customize this file to create your own build config.
@@ -27,7 +27,7 @@
 # 
 # Note: REPO_ROOT is auto-detected - no configuration needed
 #
-# ⚠️  REQUIRED: Set these to your actual paths!
+#     REQUIRED: Set these to your actual paths!
 BUILD_WORKSPACE_DIR=""
 HOST_OUTPUT_DIR=""
 
@@ -67,7 +67,7 @@ ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 # --- Foundry Image Configuration ---
-# ⚠️  REQUIRED: Path to a local Dockerfile or a Registry image
+#     REQUIRED: Path to a local Dockerfile or a Registry image
 DOCKERFILE_PATH="docker/trixie-clang-multiarch.dockerfile"
 CONTAINER_IMAGE_NAME="debian-harper-worker"
 
@@ -81,7 +81,7 @@ BUILD_ARCH_TAG="x86_64"
 RELEASE_TAG="sched_ext"
 
 # --- Target Specifications ---
-# ⚠️  REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
+#     REQUIRED: Set the target architecture (x86_64, aarch64, etc.)
 TARGET_ARCH="x86-64"
 
 KERNEL_CFLAGS="CHANGE_ME"
@@ -183,5 +183,7 @@ QA_VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+    
+)
 # ==============================================================================
