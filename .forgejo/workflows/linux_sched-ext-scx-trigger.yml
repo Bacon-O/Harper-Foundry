@@ -1,30 +1,26 @@
-name: Monitor Debian Trixie Kernel Releases
+name: sched-ext SCX Trigger
 
-# Trigger on schedule
-# m h * * *
-# CDT to UTC, CDT + 5
 on:
   # schedule:
   #  - cron: '0 */3 * * *'
-  
-  # Allow manual trigger
+
   workflow_dispatch:
     inputs:
       force_build:
         description: 'Force build'
         type: boolean
         required: false
-        default: 'false'
+        default: false
 
 env:
   YML__API_TOKEN: ${{ secrets.FORGEJO_API_WRITE_TOKEN }}
   YML__FORGEJO_URL: ${{ github.api_url }} 
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  YML__PARAMS_FILE: params/params.d/int_harper_deb13.params
-  YML__SOFTWARE_TITLE: Harper
-  YML__SOFTWARE_TRIGGER_LABEL: harper_deb13_kernel
-  YML__SOFTWARE_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+  YML__PARAMS_FILE: params/params.d/int_linux_sched-ext_scx.params
+  YML__SOFTWARE_TITLE: sched-ext SCX
+  YML__SOFTWARE_TRIGGER_LABEL: linux_sched_ext_scx
+  YML__SOFTWARE_TRACKING_FILE: version_tracking/linux_sched-ext_scx_latest.txt
   # web UI vars - Are here for reference
   # vars.RUNNER_BUILDER_LABEL 
   # vars.RUNNER_TRIGGER_LABEL
@@ -32,17 +28,17 @@ env:
   YML__FORGEJO_RUNNER_TRIGGER: ${{ vars.RUNNER_TRIGGER_LABEL }}
 
 jobs:
-  monitor_and_power:
+  monitor_and_queue:
     runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
-    name: Check Version and Power On Builder
+    name: Check Version and Dispatch Build
     outputs:
       build_needed: ${{ steps.check.outputs.build_needed }}
-      detected_kernel_version: ${{ steps.check.outputs.detected_kernel_version }}
+      detected_software_version: ${{ steps.check.outputs.detected_software_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check Kernel & Power On
+      - name: Check sched-ext release
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
         id: check
@@ -50,45 +46,42 @@ jobs:
           cd "$YML__WORKSPACE_PATH"
           source ./scripts/plugins/triggers/runner.sh
           FORCE_OPT=""
-          
+
           if [[ "$FORCE_BUILD_INPUT" = "true" ]]; then
             echo "Forcing build"
             FORCE_OPT="--force"
           else
             echo "No build forced - normal operation"
           fi
-          
-          echo "Checking if new $YML__SOFTWARE_TITLE kernel release is available..."
-          # Default outputs so downstream job gating is deterministic.
+
           echo "build_needed=false" >> $GITHUB_OUTPUT
-          echo "detected_kernel_version=" >> $GITHUB_OUTPUT
+          echo "detected_software_version=" >> $GITHUB_OUTPUT
 
           build_return_code=0
-          check_if_build_is_needed $YML__SOFTWARE_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
+          check_if_build_is_needed "$YML__SOFTWARE_TRIGGER_LABEL" $FORCE_OPT || build_return_code=$?
           echo "check_if_build_is_needed returned code: $build_return_code"
-          
+
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "build_needed=true" >> $GITHUB_OUTPUT
-            echo "detected_kernel_version=${DETECTED_KERNEL_VERSION:-}" >> $GITHUB_OUTPUT
-            echo "🚀 New kernel found. Waking $YML__FORGEJO_RUNNER_BUILDER..."
-            /scripts/alice_power.sh on
-          elif [[ "$build_return_code" -eq 2 ]]; then
-            echo "ℹ️ No update needed."
+            echo "detected_software_version=${DETECTED_SOFTWARE_VERSION:-}" >> $GITHUB_OUTPUT
+            echo "New sched-ext/scx release detected"
+          elif [[ "$build_return_code" -eq 1 ]]; then
+            echo "No update needed"
           else
-            echo "❌ Error checking for kernel update. See logs for details."
-            exit 1 
+            echo "Error checking for sched-ext/scx update"
+            exit 1
           fi
-  
+
   dispatch_build:
     runs-on: ${{ vars.RUNNER_TRIGGER_LABEL }}
     name: Dispatch Build Workflow
-    needs: monitor_and_power
-    if: ${{ needs.monitor_and_power.outputs.build_needed == 'true' }}
+    needs: monitor_and_queue
+    if: ${{ needs.monitor_and_queue.outputs.build_needed == 'true' }}
     steps:
-      - name: Trigger harper-deb13-build workflow
+      - name: Trigger linux_sched-ext-scx-build workflow
         run: |
           curl -fsS -X POST \
             -H "Authorization: token $YML__API_TOKEN" \
             -H "Content-Type: application/json" \
-            "$YML__FORGEJO_URL/repos/${{ github.repository }}/actions/workflows/harper-deb13-build.yml/dispatches" \
+            "$YML__FORGEJO_URL/repos/${{ github.repository }}/actions/workflows/linux_sched-ext-scx-build.yml/dispatches" \
             -d "{\"ref\":\"${{ github.ref_name }}\",\"inputs\":{\"force_build\":\"${{ github.event.inputs.force_build }}\"}}"

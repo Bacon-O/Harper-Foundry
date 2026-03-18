@@ -1,7 +1,4 @@
-name: Harper Debian 13 Kernel Build
-
-# Dispatched by harper-deb13-trigger.yml when a new kernel version is detected.
-# Runs entirely on the builder runner — never on the trigger runner.
+name: sched-ext SCX Build
 
 on:
   workflow_dispatch:
@@ -10,17 +7,17 @@ on:
         description: 'Force build'
         type: boolean
         required: false
-        default: 'false'
+        default: false
 
 env:
   YML__API_TOKEN: ${{ secrets.FORGEJO_API_READ_TOKEN }}
   YML__FORGEJO_URL: ${{ github.api_url }}
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
-  YML__PARAMS_FILE: params/params.d/int_harper_deb13.params
-  YML__SOFTWARE_TITLE: Harper
-  YML__SOFTWARE_TRIGGER_LABEL: harper_deb13_kernel
-  YML__SOFTWARE_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+  YML__PARAMS_FILE: params/params.d/int_linux_sched-ext_scx.params
+  YML__SOFTWARE_TITLE: sched-ext SCX
+  YML__SOFTWARE_TRIGGER_LABEL: linux_sched_ext_scx
+  YML__SOFTWARE_TRACKING_FILE: version_tracking/linux_sched-ext_scx_latest.txt
   # web UI vars - here for reference
   # vars.RUNNER_BUILDER_LABEL
   # vars.RUNNER_TRIGGER_LABEL
@@ -29,8 +26,8 @@ env:
 
 jobs:
   compile_on_builder:
-    runs-on: ${{ vars.RUNNER_BUILDER_LABEL }}
-    name: Build Kernel
+    runs-on: self-hosted
+    name: Build sched-ext SCX
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,7 +36,7 @@ jobs:
         run: |
           ./scripts/validate.sh --params-file "$YML__PARAMS_FILE"
 
-      - name: Build Kernel
+      - name: Build with start_build.sh
         env:
           FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
         run: |
@@ -52,50 +49,44 @@ jobs:
             FORCE_OPT="--force"
           fi
 
-          # Re-check in case a build already ran between trigger dispatch and now (dual-trigger guard)
           build_return_code=0
-          check_if_build_is_needed $YML__SOFTWARE_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
+          check_if_build_is_needed "$YML__SOFTWARE_TRIGGER_LABEL" $FORCE_OPT || build_return_code=$?
 
           if [[ "$build_return_code" -eq 0 ]]; then
-            echo "Starting build"
+            echo "Starting sched-ext/scx build"
             if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
-              echo "✅ Build completed successfully"
-              build_successful $YML__SOFTWARE_TRIGGER_LABEL
-              echo "build_status=success" >> $GITHUB_OUTPUT
+              echo "Build completed successfully"
+              build_successful "$YML__SOFTWARE_TRIGGER_LABEL"
             else
-              echo "❌ Build failed"
-              build_failed $YML__SOFTWARE_TRIGGER_LABEL "ci_build_failed"
-              echo "build_status=failure" >> $GITHUB_OUTPUT
+              echo "Build failed"
+              build_failed "$YML__SOFTWARE_TRIGGER_LABEL" "ci_build_failed"
             fi
-          elif [[ "$build_return_code" -eq 2 ]]; then
-            echo "ℹ️ No update needed at build stage; skipping build"
-            echo "build_status=skipped" >> $GITHUB_OUTPUT
           else
-            echo "❌ Error re-checking build need in compile stage (code: $build_return_code)"
-            echo "build_status=failure" >> $GITHUB_OUTPUT
+            echo "Build skipped. Version already built or no action needed."
           fi
 
       - name: Commit updated version tracking (if changed)
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          if git diff --quiet $YML__SOFTWARE_TRACKING_FILE; then
-            echo "ℹ️  No version changes to commit"
+
+          if git diff --quiet "$YML__SOFTWARE_TRACKING_FILE"; then
+            echo "No version changes to commit"
           else
-            echo "✅ Version tracking updated - committing changes"
-            git config --local user.email "$YML__FORGEJO_RUNNER_BUILDER@localhost.com"
-            git config --local user.name "$YML__FORGEJO_RUNNER_BUILDER"
-            git add $YML__SOFTWARE_TRACKING_FILE
-            git commit -m "Update tracked kernel version [skip ci]"
-            git push || echo "⚠️  Could not push (may be read-only)"
+            echo "Version tracking updated - committing changes"
+            git config --local user.email "github-runner@localhost.com"
+            git config --local user.name "github-runner"
+            git add "$YML__SOFTWARE_TRACKING_FILE"
+            git commit -m "Update tracked sched-ext/scx version [skip ci]"
+            git push || echo "Could not push (may be read-only)"
           fi
 
       - name: Notify on failure
-        if: ${{ failure() || needs.compile_on_builder.outputs.build_status == 'failure' }}
+        if: failure()
         run: |
-          echo "❌ Kernel build failed"
+          echo "sched-ext/scx build failed"
           exit 1
-
+   
       # - name: Check Queue then Power Off Builder
       #   if: always()
       #   run: |

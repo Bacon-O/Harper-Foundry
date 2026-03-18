@@ -18,9 +18,9 @@ env:
   YML__FORCE_BUILD_INPUT: ${{ github.event.inputs.force_build }}
   YML__WORKSPACE_PATH: ${{ github.workspace }}
   YML__PARAMS_FILE: params/params.d/int_harper_deb13.params
-  YML__KERNEL_TITLE: Harper
-  YML__KERNEL_TRIGGER_LABEL: harper_deb13_kernel
-  YML__KERNEL_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
+  YML__SOFTWARE_TITLE: Harper
+  YML__SOFTWARE_TRIGGER_LABEL: harper_deb13_kernel
+  YML__SOFTWARE_TRACKING_FILE: version_tracking/harper_deb13_latest_kernel.txt
   # web UI vars - here for reference
   # vars.RUNNER_BUILDER_LABEL
   # vars.RUNNER_TRIGGER_LABEL
@@ -54,17 +54,17 @@ jobs:
 
           # Re-check in case a build already ran between trigger dispatch and now (dual-trigger guard)
           build_return_code=0
-          check_if_build_is_needed $YML__KERNEL_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
+          check_if_build_is_needed $YML__SOFTWARE_TRIGGER_LABEL $FORCE_OPT || build_return_code=$?
 
           if [[ "$build_return_code" -eq 0 ]]; then
             echo "Starting build"
             if ./start_build.sh --params-file "$YML__PARAMS_FILE" 2>&1 | tee -a /tmp/build.log; then
               echo "✅ Build completed successfully"
-              build_successful $YML__KERNEL_TRIGGER_LABEL
+              build_successful $YML__SOFTWARE_TRIGGER_LABEL
               echo "build_status=success" >> $GITHUB_OUTPUT
             else
               echo "❌ Build failed"
-              build_failed $YML__KERNEL_TRIGGER_LABEL "ci_build_failed"
+              build_failed $YML__SOFTWARE_TRIGGER_LABEL "ci_build_failed"
               echo "build_status=failure" >> $GITHUB_OUTPUT
             fi
           elif [[ "$build_return_code" -eq 2 ]]; then
@@ -79,13 +79,13 @@ jobs:
         if: success()
         run: |
           cd "$YML__WORKSPACE_PATH"
-          if git diff --quiet $YML__KERNEL_TRACKING_FILE; then
+          if git diff --quiet $YML__SOFTWARE_TRACKING_FILE; then
             echo "ℹ️  No version changes to commit"
           else
             echo "✅ Version tracking updated - committing changes"
             git config --local user.email "$YML__FORGEJO_RUNNER_BUILDER@localhost.com"
             git config --local user.name "$YML__FORGEJO_RUNNER_BUILDER"
-            git add $YML__KERNEL_TRACKING_FILE
+            git add $YML__SOFTWARE_TRACKING_FILE
             git commit -m "Update tracked kernel version [skip ci]"
             git push || echo "⚠️  Could not push (may be read-only)"
           fi
