@@ -186,5 +186,8 @@ QA_VM_TIMEOUT="30s"
 # --- Environment Extensions ---
 # Optionally specify which environment extensions to load (in order).
 # Leave empty to load none: ENV_EXTENSIONS=()
-ENV_EXTENSIONS=()
+ENV_EXTENSIONS=(
+    "forgejo_ext.sh"
+    "ramdisk_control_ext.sh"
+)
 # ==============================================================================
