@@ -61,12 +61,12 @@ POST_BUILD_HOOKS=(
 # Right now SFTP and RSYNC are supported as delivery methods.
 # Both require previous configuration
 ARTIFACT_DELIVERY="false"
-ARTIFACT_COMPRESSION=""  # Options: "tar.gz", "zip", or "" for none
-ARTIFACT_DELIVERY_METHOD=""
-REMOTE_DELIVERY_HOST=""
-REMOTE_DELIVERY_USER=""
-REMOTE_DELIVERY_PATH=""
-ARTIFACT_SSH_KEY=""  # Optional: Path to SSH key for authentication (if needed)
+ARTIFACT_COMPRESSION="tar.gz"  # Options: "tar.gz", "zip", or "" for none
+ARTIFACT_DELIVERY_METHOD="scp"
+REMOTE_DELIVERY_HOST="10.21.0.11"
+REMOTE_DELIVERY_USER="fidbuilder01"
+REMOTE_DELIVERY_PATH="/mnt/hdd-pool_01/aptly_repo/import/trixie_import"
+ARTIFACT_SSH_KEY="~/.ssh/id_ed25519"  # Optional: Path to SSH key for authentication (if needed)
 LOCAL_DELIVERY_PATH=""
 
 # --- Foundry Image Configuration ---
